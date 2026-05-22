@@ -15,9 +15,8 @@
     
     <style>
         :root {
-            --primary: #8a63cf;
-            --bg-soft: #f4f7f6; /* Branco suave que não agride a vista */
-            --glass: rgba(255, 255, 255, 0.8);
+            --primary-green: #25d366;
+            --bg-soft: #f4f7f6;
             --text-color: #2d3436;
         }
 
@@ -34,138 +33,77 @@
             padding-bottom: 50px;
             user-select: none;
             overflow-x: hidden;
+            padding-top: 60px;
         }
 
         /* Menu */
         .menu-btn {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            font-size: 24px;
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            padding: 10px;
-            border-radius: 12px;
-            cursor: pointer;
-            z-index: 20000;
+            position: fixed; top: 15px; right: 15px; font-size: 24px;
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000;
             border: 1px solid rgba(0,0,0,0.1);
-            color: var(--text-color);
         }
 
         .side-menu {
-            position: fixed;
-            top: 0;
-            right: -300px;
-            width: 280px;
-            height: 100%;
-            background: #ffffff;
-            padding: 60px 20px;
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 19999;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+            background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         }
-
         .side-menu.active { right: 0; }
         .side-menu a {
-            display: block;
-            text-decoration: none;
-            color: var(--text-color);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            background: #f0f0f0;
-            font-weight: 600;
+            display: block; text-decoration: none; color: var(--text-color);
+            padding: 15px; margin-bottom: 15px; border-radius: 12px;
+            background: #f0f0f0; font-weight: 600;
         }
 
-        .aviso-click {
-            font-size: 10px;
-            color: #d63031;
-            font-weight: 900;
-            margin: 25px 0 15px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Caixa de Destaque */
+        /* Caixa de Destaque com animação */
         .led-box {
-            position: relative;
-            width: 92%;
-            max-width: 380px;
-            height: 180px;
-            padding: 3px;
-            background: #fff;
-            border-radius: 25px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            margin-bottom: 25px;
+            position: relative; width: 92%; max-width: 380px; height: 180px;
+            border-radius: 25px; overflow: hidden; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+            margin-bottom: 25px; border: 4px solid var(--primary-green);
+            animation: pulse 2s infinite;
         }
 
-        .linktree-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            border-radius: 22px;
-            overflow: hidden;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
 
+        .linktree-container { position: relative; width: 100%; height: 100%; display: block; }
         .linktree-container img { width: 100%; height: 100%; object-fit: cover; }
 
         .btn-overlay {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            padding: 12px 25px;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 14px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            background: var(--primary-green); color: white;
+            padding: 12px 20px; border-radius: 50px; font-weight: 800;
+            font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex; align-items: center; gap: 8px;
         }
 
         /* Vídeo */
         .video-container {
-            width: 92%;
-            max-width: 380px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            position: relative;
-            background: #000;
-            margin-bottom: 25px;
+            width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative;
+            background: #000; margin-bottom: 25px;
         }
-
         .video-container video { width: 100%; display: block; }
 
         .mute-btn {
-            position: absolute;
-            top: 15px; left: 15px; z-index: 15;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%; width: 40px; height: 40px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
+            position: absolute; top: 15px; left: 15px; z-index: 15;
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer;
         }
 
         /* Anúncios */
         .ad-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        
         .ad-card {
-            width: 92%;
-            max-width: 380px;
-            background: #fff;
-            border-radius: 20px;
-            padding: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            overflow: hidden;
+            width: 92%; max-width: 380px; background: #fff; border-radius: 20px;
+            padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden;
         }
-
         .ad-card img { width: 100%; border-radius: 15px; display: block; }
 
-        footer { margin-top: 50px; color: #aaa; font-size: 10px; letter-spacing: 1px; }
-
+        footer { margin-top: 50px; color: #ccc; font-size: 10px; }
     </style>
 </head>
 <body oncontextmenu="return false;"> 
@@ -174,17 +112,17 @@
     
     <div class="side-menu" id="sideMenu">
         <div class="close-x" onclick="toggleMenu()" style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;">❌ FECHAR</div>
-        <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank">🛍️ Loja Acessórios</a>
         <a href="https://wa.me/5521977231625" target="_blank">🟢 Suporte WhatsApp</a>
     </div>
 
-    <div class="aviso-click">Acesse o conteúdo oficial abaixo</div>
-    
     <div class="led-box">
         <a href="https://linktr.ee/Bronxs7" target="_blank" class="linktree-container">
             <img src="https://i.postimg.cc/nV2t5Cz1/1769082090576-(1).jpg" alt="Grupos">
-            <div class="btn-overlay">ENTRAR NOS GRUPOS</div>
+            <div class="btn-overlay">
+                <span>WhatsApp</span>
+                <span>ENTRAR</span>
+            </div>
         </a>
     </div>
 
@@ -216,23 +154,17 @@
         </div>
     </div>
 
-    <footer>© 2026 ELLIXGR.GITHUB.IO/X23WZP/</footer>
+    <footer>© 2026</footer>
 
     <script>
         document.onkeydown = function(e) {
             if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67))) return false;
         };
-
-        function toggleMenu() {
-            document.getElementById('sideMenu').classList.toggle('active');
-        }
-
+        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
-
         function toggleMute(event) {
-            event.preventDefault();
-            event.stopPropagation();
+            event.preventDefault(); event.stopPropagation();
             video.muted = !video.muted;
             muteIcon.innerText = video.muted ? "🔇" : "🔊";
         }
