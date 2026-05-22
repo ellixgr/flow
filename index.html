@@ -15,19 +15,18 @@
     
     <style>
         :root {
-            --primary: #b78cff;
-            --led-blue: #00d2ff;
-            --dark-bg: #0f111a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --primary: #8a63cf;
+            --bg-soft: #f4f7f6; /* Branco suave que não agride a vista */
+            --glass: rgba(255, 255, 255, 0.8);
+            --text-color: #2d3436;
         }
 
         * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
         
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
-            background: var(--dark-bg);
-            background-image: radial-gradient(circle at 50% 50%, #1a1e2e 0%, #0f111a 100%);
-            color: white;
+            background-color: var(--bg-soft);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -37,7 +36,7 @@
             overflow-x: hidden;
         }
 
-        /* Menu Futurista */
+        /* Menu */
         .menu-btn {
             position: fixed;
             top: 15px;
@@ -49,8 +48,8 @@
             border-radius: 12px;
             cursor: pointer;
             z-index: 20000;
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: var(--text-color);
         }
 
         .side-menu {
@@ -59,64 +58,50 @@
             right: -300px;
             width: 280px;
             height: 100%;
-            background: rgba(15, 17, 26, 0.95);
-            backdrop-filter: blur(20px);
+            background: #ffffff;
             padding: 60px 20px;
             transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 19999;
-            border-left: 1px solid var(--led-blue);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         }
 
         .side-menu.active { right: 0; }
         .side-menu a {
             display: block;
             text-decoration: none;
-            color: #eee;
+            color: var(--text-color);
             padding: 15px;
             margin-bottom: 15px;
             border-radius: 12px;
-            background: var(--glass);
+            background: #f0f0f0;
             font-weight: 600;
-            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .aviso-click {
             font-size: 10px;
-            color: #ff4444;
+            color: #d63031;
             font-weight: 900;
             margin: 25px 0 15px 0;
             text-transform: uppercase;
             letter-spacing: 1px;
-            animation: blink 1s infinite;
         }
-        @keyframes blink { 50% { opacity: 0.5; } }
 
+        /* Caixa de Destaque */
         .led-box {
             position: relative;
             width: 92%;
             max-width: 380px;
             height: 180px;
             padding: 3px;
-            background: #000;
+            background: #fff;
             border-radius: 25px;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 0 30px rgba(0, 210, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             margin-bottom: 25px;
         }
-
-        .led-box::before {
-            content: '';
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            background-image: conic-gradient(transparent, transparent, transparent, var(--led-blue));
-            animation: rotateLed 3s linear infinite;
-        }
-
-        @keyframes rotateLed { 0% {transform: rotate(0deg);} 100% {transform: rotate(360deg);} }
 
         .linktree-container {
             position: relative;
@@ -124,87 +109,62 @@
             height: 100%;
             border-radius: 22px;
             overflow: hidden;
-            z-index: 10;
-            background: #000;
         }
 
-        .linktree-container img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .linktree-container img { width: 100%; height: 100%; object-fit: cover; }
 
         .btn-overlay {
             position: absolute;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 210, 255, 0.2);
-            backdrop-filter: blur(10px);
-            color: white;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
             padding: 12px 25px;
             border-radius: 50px;
-            border: 2px solid var(--led-blue);
             font-weight: 800;
             font-size: 14px;
-            box-shadow: 0 0 20px var(--led-blue);
-            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* Vídeo Container */
+        /* Vídeo */
         .video-container {
             width: 92%;
             max-width: 380px;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             position: relative;
-            border: 1px solid rgba(255,255,255,0.1);
             background: #000;
             margin-bottom: 25px;
         }
 
-        .video-container video { width: 100%; display: block; cursor: pointer; }
+        .video-container video { width: 100%; display: block; }
 
         .mute-btn {
             position: absolute;
             top: 15px; left: 15px; z-index: 15;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 50%; width: 40px; height: 40px;
             display: flex; align-items: center; justify-content: center;
-            border: 1px solid rgba(255,255,255,0.2);
             cursor: pointer;
         }
 
-        .tiktok-icon {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 35px;
-            height: 35px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 50%;
-            padding: 7px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            pointer-events: none;
-            z-index: 10;
-        }
-
+        /* Anúncios */
         .ad-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         
         .ad-card {
             width: 92%;
             max-width: 380px;
-            background: var(--glass);
+            background: #fff;
             border-radius: 20px;
             padding: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             overflow: hidden;
         }
 
         .ad-card img { width: 100%; border-radius: 15px; display: block; }
-        .ad-card:hover { border-color: var(--led-blue); }
 
-        footer { margin-top: 50px; color: #444; font-size: 10px; letter-spacing: 1px; }
+        footer { margin-top: 50px; color: #aaa; font-size: 10px; letter-spacing: 1px; }
 
     </style>
 </head>
@@ -213,10 +173,10 @@
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
     
     <div class="side-menu" id="sideMenu">
-        <div class="close-x" onclick="toggleMenu()" style="cursor:pointer; font-size: 20px; margin-bottom: 20px;">❌ FECHAR</div>
+        <div class="close-x" onclick="toggleMenu()" style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;">❌ FECHAR</div>
         <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank">🛍️ Loja Acessórios</a>
-        <a href="https://wa.me/5521977231625" target="_blank" style="color: #25d366;">🟢 Suporte WhatsApp</a>
+        <a href="https://wa.me/5521977231625" target="_blank">🟢 Suporte WhatsApp</a>
     </div>
 
     <div class="aviso-click">Acesse o conteúdo oficial abaixo</div>
@@ -233,9 +193,6 @@
         <video id="meuVideo" autoplay loop playsinline muted onclick="window.open('https://vt.tiktok.com/ZSHnLCePm/', '_blank')">
             <source src="https://files.catbox.moe/oe3ize.mp4" type="video/mp4">
         </video>
-        <div class="tiktok-icon">
-            <svg viewBox="0 0 448 512" width="22" height="22" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>
-        </div>
     </div>
 
     <div class="ad-wrapper">
