@@ -32,6 +32,7 @@
             min-height: 100vh;
             padding-bottom: 50px;
             user-select: none;
+            -webkit-user-select: none;
             overflow-x: hidden;
             padding-top: 60px;
         }
@@ -87,7 +88,7 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative;
             background: #000; margin-bottom: 25px;
         }
-        .video-container video { width: 100%; display: block; }
+        .video-container video { width: 100%; height: auto; display: block; }
 
         .mute-btn {
             position: absolute; top: 15px; left: 15px; z-index: 15;
@@ -108,24 +109,24 @@
             width: 92%; max-width: 380px; background: #fff; border-radius: 20px;
             padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden;
         }
-        .ad-card img { width: 100%; border-radius: 15px; display: block; }
+        .ad-card img { width: 100%; height: auto; border-radius: 15px; display: block; }
 
         footer { margin-top: 50px; color: #ccc; font-size: 10px; }
     </style>
 </head>
 <body oncontextmenu="return false;"> 
 
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
     
     <div class="side-menu" id="sideMenu">
-        <div class="close-x" onclick="toggleMenu()" style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;">❌ FECHAR</div>
+        <div class="close-x" onclick="toggleMenu(event)" style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;">❌ FECHAR</div>
         <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
-        <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank">🛍️ Loja Acessórios</a>
-        <a href="https://wa.me/5521977231625" target="_blank">🟢 Suporte WhatsApp</a>
+        <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
+        <a href="https://wa.me/5521977231625" target="_blank" rel="noopener">🟢 Suporte WhatsApp</a>
     </div>
 
     <div class="led-box">
-        <a href="https://linktr.ee/Bronxs7" target="_blank" class="linktree-container">
+        <a href="https://linktr.ee/Bronxs7" target="_blank" rel="noopener" class="linktree-container">
             <img src="https://i.postimg.cc/nV2t5Cz1/1769082090576-(1).jpg" alt="Grupos">
             <div class="btn-overlay">
                 <span>WhatsApp</span>
@@ -153,13 +154,13 @@
         </div>
 
         <div class="ad-card">
-            <a href="https://soupopular.net/ref/bagau" target="_blank">
+            <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">
                 <img src="https://i.postimg.cc/5NfKzGcs/1776294105136.png" alt="Sou Popular">
             </a>
         </div>
 
         <div class="ad-card">
-            <a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank">
+            <a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener">
                 <img src="https://i.postimg.cc/Zq5D7YPv/1779464391514-(1).jpg" alt="Anúncio TikTok">
             </a>
         </div>
@@ -169,13 +170,34 @@
 
     <script>
         document.onkeydown = function(e) {
-            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67))) return false;
+            if (
+                e.keyCode == 123 || 
+                e.key === 'F12' ||
+                (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67 || e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+                (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode == 85))
+            ) {
+                return false;
+            }
         };
-        function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        function toggleMenu(event) { 
+            if (event) {
+                event.stopPropagation();
+            }
+            document.getElementById('sideMenu').classList.toggle('active'); 
+        }
+
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) {
-            event.preventDefault(); event.stopPropagation();
+            if (event) {
+                event.preventDefault(); 
+                event.stopPropagation();
+            }
             video.muted = !video.muted;
             muteIcon.innerText = video.muted ? "🔇" : "🔊";
         }
