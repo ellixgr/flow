@@ -7,8 +7,7 @@
     <script>if (top !== self) top.location = self.location;</script>
     <style>
         :root {--blue: #00d2ff;}
-        * {box-sizing: border-box; margin: 0; padding: 0;}
-        
+        * {box-sizing: border-box; margin: 0; padding: 0;}      
         body {
             font-family: sans-serif; 
             background: #0f111a; 
@@ -19,17 +18,12 @@
             padding: 20px; 
             user-select: none;
         }
-        
-        /* Modal +18 */
         #verify {position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: flex; justify-content: center; align-items: center; z-index: 100000; padding: 20px;}
         .verify-card {background: #1a1d29; padding: 30px; border-radius: 20px; text-align: center; max-width: 320px; border: 1px solid #333; box-shadow: 0 0 40px rgba(0, 210, 255, 0.2);}
         .verify-card h2 {color: #ff4444; margin-bottom: 15px; font-size: 24px;}
         .verify-card p {color: #ccc; margin-bottom: 25px; font-weight: 600; line-height: 1.4;}
         .btn-green {background: #25d366; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-weight: 800; cursor: pointer; width: 100%; font-size: 16px; text-transform: uppercase;}
-        
-        /* Conteúdo principal */
-        #content {display: none; width: 100%; max-width: 400px; flex-direction: column; align-items: center;}
-        
+        #content {display: none; width: 100%; max-width: 400px; flex-direction: column; align-items: center;}       
         /* Banners Clicáveis */
         .banner-link {
             width: 100%; 
@@ -47,12 +41,10 @@
 
         /* Container de Ads Externos */
         .ad-container {width: 100%; margin-bottom: 25px; display: flex; justify-content: center;}
-
         footer {margin-top: auto; padding: 30px 0; color: #444; font-size: 10px; text-align: center;}
     </style>
 </head>
 <body oncontextmenu="return false;">
-
     <div id="verify">
         <div class="verify-card">
             <h2>AVISO! 🔞</h2>
@@ -60,24 +52,19 @@
             <button class="btn-green" onclick="acceptVerify()">SIM, SOU MAIOR DE 18</button>
         </div>
     </div>
-
-    <main id="content">
-        
+    <main id="content">      
         <a href="https://t.me/UmCliqueBot?start=7711945457" target="_blank" class="banner-link">
             <img src="https://i.postimg.cc/HLwNGCXP/1776292577111.png" alt="Telegram">
         </a>
-
         <div class="ad-container">
             <div style="width: 100%;">
                 <script async="async" data-cfasync="false" src="https://pl28627138.profitablecpmratenetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js"></script>
                 <div id="container-1fd37c2a1d9d1e19537dc1d7d97cdc9b"></div>
             </div>
         </div>
-
         <a href="https://s.shopee.com.br/1qY81MkQcA" target="_blank" class="banner-link">
             <img src="https://i.postimg.cc/PfyPXpdC/i802ubr-11134207-7r98o-ly835zkvwov906.jpg" alt="Shopee">
         </a>
-
         <div class="ad-container">
             <script type="text/javascript">
                 atOptions = {'key':'3e1fe799cb19b129dba9470a4e2f2556','format':'iframe','height':250,'width':300,'params':{}};
@@ -87,14 +74,11 @@
 
         <footer>© 2026 ellixgr.github.io/x23wzp/ads</footer>
     </main>
-
     <script>
         function acceptVerify() {
             document.getElementById('verify').style.display = 'none';
             document.getElementById('content').style.display = 'flex';
         }
-
-        // Anti-inspeção
         window.addEventListener('keydown', function(e) {
             if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74))) {
                 e.preventDefault();
