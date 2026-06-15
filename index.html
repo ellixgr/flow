@@ -1,4 +1,3 @@
-<!-- MEU NOME NAO É BOCHECHA, FDP -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -93,15 +92,66 @@
         }
         .ad-card img { width: 100%; height: auto; border-radius: 15px; display: block; }
         footer { margin-top: 50px; color: #ccc; font-size: 10px; }
+
+        /* =========================================================
+           ESTILOS DO ANÚNCIO EM TELA CHEIA (POPUPS INTERSTITIAL)
+           ========================================================= */
+        .fullscreen-ad-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.96); z-index: 999999;
+            display: none; align-items: center; justify-content: center;
+            flex-direction: column; padding: 20px;
+        }
+        .fullscreen-ad-overlay.show { display: flex; }
+        .ad-top-bar {
+            width: 100%; max-width: 340px; display: flex;
+            justify-content: space-between; align-items: center;
+            margin-bottom: 12px; color: white; font-family: sans-serif;
+        }
+        .ad-timer {
+            background: rgba(255, 255, 255, 0.2); padding: 5px 12px;
+            border-radius: 20px; font-size: 13px; font-weight: bold;
+        }
+        .ad-close-btn {
+            background: #ff4757; color: white; border: none;
+            width: 34px; height: 34px; border-radius: 50%;
+            font-weight: bold; font-size: 16px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0.3; pointer-events: none; transition: opacity 0.3s;
+        }
+        .ad-close-btn.clickable { opacity: 1; pointer-events: auto; }
+        .fullscreen-ad-body {
+            width: 100%; max-width: 340px; height: 280px;
+            background: #1a1d29; border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center; padding: 10px;
+            border: 1px solid #333; overflow: hidden; position: relative;
+        }
+        .popup-ad-slot { width: 100%; display: flex; justify-content: center; }
+
+        /* Força qualquer elemento extra injetado nativamente a sumir e fixa a altura */
+        .fullscreen-ad-body #container-1fd37c2a1d9d1e19537dc1d7d97cdc9b {
+            max-height: 260px !important;
+            overflow: hidden !important;
+        }
     </style>
 </head>
 <body> 
+
+    <div id="popupAd" class="fullscreen-ad-overlay">
+        <div class="ad-top-bar">
+            <div id="adTimer" class="ad-timer">Aguarde 6s...</div>
+            <button id="adCloseBtn" class="ad-close-btn" onclick="closeFullscreenAd()">✕</button>
+        </div>
+        <div class="fullscreen-ad-body" id="adContainerBody">
+        </div>
+    </div>
+
     <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
     <div class="side-menu" id="sideMenu">
         <div class="close-x" onclick="toggleMenu(event)" style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;">❌ FECHAR</div>
         <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
-        <a href="https://wa.me/5521977231625" target="_blank" rel="noopener">🟢 Suporte WhatsApp</a>
     </div>
     <div class="led-box">
         <a href="https://linktr.ee/Bronxs7" target="_blank" rel="noopener" class="linktree-container">
@@ -169,6 +219,88 @@
             }
             video.muted = !video.muted;
             muteIcon.innerText = video.muted ? "🔇" : "🔊";
+        }
+
+        /* =========================================================
+           LÓGICA ANTIDÚPLICAS E DE CORTE NATIVO DE MULTI-IMAGENS
+           ========================================================= */
+        window.addEventListener('DOMContentLoaded', () => {
+            const showPopupChance = Math.floor(Math.random() * 100);
+            
+            if (showPopupChance < 60) {
+                const adContainer = document.getElementById('adContainerBody');
+                const selectAdChance = Math.random();
+
+                if (selectAdChance < 0.5) {
+                    // OPÇÃO A: Script Nativo (Será forçado a exibir apenas 1 item do feed)
+                    adContainer.innerHTML = `
+                        <div class="popup-ad-slot">
+                            <div style="width: 100%;">
+                                <div id="container-1fd37c2a1d9d1e19537dc1d7d97cdc9b"></div>
+                            </div>
+                        </div>
+                    `;
+                    let script = document.createElement('script');
+                    script.async = true;
+                    script.setAttribute('data-cfasync', 'false');
+                    script.src = "https://pl28627138.profitablecpmratenetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js";
+                    document.body.appendChild(script);
+
+                    // Observador inteligente: Monitora quando as imagens carregam e apaga o resto imediatamente
+                    const observer = new MutationObserver(() => {
+                        const nativeBox = document.getElementById('container-1fd37c2a1d9d1e19537dc1d7d97cdc9b');
+                        if (nativeBox) {
+                            // Encontra os blocos internos de anúncio gerados pela Adsterra
+                            const items = nativeBox.querySelectorAll('a, [style*="background"], iframe, img');
+                            if (items.length > 1) {
+                                // Deixa apenas o primeiro anúncio do feed e remove o restante empilhado
+                                for (let i = 1; i < items.length; i++) {
+                                    if(items[i] && items[i].parentNode === nativeBox) {
+                                        items[i].remove();
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    observer.observe(adContainer, { childList: true, subtree: true });
+                    
+                } else {
+                    // OPÇÃO B: Banner Clássico Iframe Estrito (300x250)
+                    window.atOptions = {'key':'3e1fe799cb19b129dba9470a4e2f2556','format':'iframe','height':250,'width':300,'params':{}};
+                    adContainer.innerHTML = `
+                        <div class="popup-ad-slot">
+                            <div id="iframeAdPlace"></div>
+                        </div>
+                    `;
+                    let script = document.createElement('script');
+                    script.type = "text/javascript";
+                    script.src = "https://www.highperformanceformat.com/3e1fe799cb19b129dba9470a4e2f2556/invoke.js";
+                    document.getElementById('iframeAdPlace').appendChild(script);
+                }
+
+                // Iniciar o fluxo visual do popup
+                const adOverlay = document.getElementById('popupAd');
+                const adTimer = document.getElementById('adTimer');
+                const adCloseBtn = document.getElementById('adCloseBtn');
+                
+                adOverlay.classList.add('show');
+                
+                let timeLeft = 6;
+                const countdown = setInterval(() => {
+                    timeLeft--;
+                    adTimer.innerText = `Aguarde ${timeLeft}s...`;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        adTimer.innerText = "Anúncio Pronto";
+                        adCloseBtn.classList.add('clickable');
+                    }
+                }, 1000);
+            }
+        });
+
+        function closeFullscreenAd() {
+            document.getElementById('popupAd').classList.remove('show');
         }
     </script>
 </body>
