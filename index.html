@@ -6,7 +6,7 @@
     <title>Grupos Whatsapp💬</title>
     <meta property="og:type" content="website">
     <meta property="og:title" content="Grupos whatsapp💬">
-    <meta property="og:description" content="Acesse nossos grupos aqui.">
+    <meta property="og:description" content="Contém anuncios🔞">
     <meta property="og:image" content="https://i.postimg.cc/nV2t5Cz1/1769082090576-(1).jpg">
     <meta name="robots" content="noindex, nofollow">
     <script>if (top !== self) {top.location = self.location;}</script>
@@ -93,9 +93,6 @@
         .ad-card img { width: 100%; height: auto; border-radius: 15px; display: block; }
         footer { margin-top: 50px; color: #ccc; font-size: 10px; }
 
-        /* =========================================================
-           ESTILOS DO ANÚNCIO EM TELA CHEIA (POPUPS INTERSTITIAL)
-           ========================================================= */
         .fullscreen-ad-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.96); z-index: 999999;
@@ -129,13 +126,11 @@
         }
         .popup-ad-slot { width: 100%; display: flex; justify-content: center; }
 
-        /* Força qualquer elemento extra injetado nativamente a sumir e fixa a altura */
         .fullscreen-ad-body #container-1fd37c2a1d9d1e19537dc1d7d97cdc9b {
             max-height: 260px !important;
             overflow: hidden !important;
         }
 
-        /* AJUSTE DO TEXTO ESCURO: Força qualquer legenda ou texto gerado pelo script a ficar branco */
         .fullscreen-ad-body * {
             color: #ffffff !important;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8) !important;
@@ -227,9 +222,6 @@
             muteIcon.innerText = video.muted ? "🔇" : "🔊";
         }
 
-        /* =========================================================
-           LÓGICA ANTIDÚPLICAS E DE CORTE NATIVO DE MULTI-IMAGENS
-           ========================================================= */
         window.addEventListener('DOMContentLoaded', () => {
             const showPopupChance = Math.floor(Math.random() * 100);
             
@@ -238,7 +230,6 @@
                 const selectAdChance = Math.random();
 
                 if (selectAdChance < 0.5) {
-                    // OPÇÃO A: Script Nativo (Será forçado a exibir apenas 1 item do feed)
                     adContainer.innerHTML = `
                         <div class="popup-ad-slot">
                             <div style="width: 100%;">
@@ -252,14 +243,11 @@
                     script.src = "https://pl28627138.profitablecpmratenetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js";
                     document.body.appendChild(script);
 
-                    // Observador inteligente: Monitora quando as imagens carregam e apaga o resto imediatamente
                     const observer = new MutationObserver(() => {
                         const nativeBox = document.getElementById('container-1fd37c2a1d9d1e19537dc1d7d97cdc9b');
                         if (nativeBox) {
-                            // Encontra os blocos internos de anúncio gerados pela Adsterra
                             const items = nativeBox.querySelectorAll('a, [style*="background"], iframe, img');
                             if (items.length > 1) {
-                                // Deixa apenas o primeiro anúncio do feed e remove o restante empilhado
                                 for (let i = 1; i < items.length; i++) {
                                     if(items[i] && items[i].parentNode === nativeBox) {
                                         items[i].remove();
@@ -268,10 +256,8 @@
                             }
                         }
                     });
-                    observer.observe(adContainer, { childList: true, subtree: true });
-                    
+                    observer.observe(adContainer, { childList: true, subtree: true });                   
                 } else {
-                    // OPÇÃO B: Banner Clássico Iframe Estrito (300x250)
                     window.atOptions = {'key':'3e1fe799cb19b129dba9470a4e2f2556','format':'iframe','height':250,'width':300,'params':{}};
                     adContainer.innerHTML = `
                         <div class="popup-ad-slot">
@@ -283,19 +269,14 @@
                     script.src = "https://www.highperformanceformat.com/3e1fe799cb19b129dba9470a4e2f2556/invoke.js";
                     document.getElementById('iframeAdPlace').appendChild(script);
                 }
-
-                // Iniciar o fluxo visual do popup
                 const adOverlay = document.getElementById('popupAd');
                 const adTimer = document.getElementById('adTimer');
-                const adCloseBtn = document.getElementById('adCloseBtn');
-                
-                adOverlay.classList.add('show');
-                
+                const adCloseBtn = document.getElementById('adCloseBtn');             
+                adOverlay.classList.add('show');              
                 let timeLeft = 6;
                 const countdown = setInterval(() => {
                     timeLeft--;
-                    adTimer.innerText = `Aguarde ${timeLeft}s...`;
-                    
+                    adTimer.innerText = `Aguarde ${timeLeft}s...`;              
                     if (timeLeft <= 0) {
                         clearInterval(countdown);
                         adTimer.innerText = "Anúncio Pronto";
@@ -304,7 +285,6 @@
                 }, 1000);
             }
         });
-
         function closeFullscreenAd() {
             document.getElementById('popupAd').classList.remove('show');
         }
