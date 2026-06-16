@@ -4,15 +4,40 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Lista de Grupos</title>
-    <style>
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: #f4f7f6; padding: 20px; display: flex; flex-direction: column; align-items: center; margin: 0; min-height: 100vh; }
-        h1 { color: #128c7e; margin-bottom: 25px; font-weight: 800; }
-        .lista-container { width: 100%; max-width: 400px; }
-        .item { display: flex; align-items: center; background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 15px; border: 1px solid #eee; text-decoration: none; color: #2d3436; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
-        .item:active { transform: scale(0.98); }
-        img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; flex-shrink: 0; }
-        .nome { font-weight: bold; font-size: 16px; }
-    </style>
+<style>
+    body { 
+        font-family: 'Segoe UI', Roboto, sans-serif; 
+        margin: 0; min-height: 100vh; padding: 20px;
+        display: flex; flex-direction: column; align-items: center;
+        background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+        background-attachment: fixed;
+        color: white;
+    }
+
+    body::before {
+        content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: url('https://www.transparenttextures.com/patterns/stardust.png');
+        animation: stars 20s linear infinite; pointer-events: none; opacity: 0.5;
+    }
+    @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+
+    h1 { color: #00d4ff; margin-bottom: 25px; font-weight: 800; text-shadow: 0 0 10px #00d4ff; }
+    .lista-container { width: 100%; max-width: 400px; }
+    .item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 15px; margin-bottom: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; }
+    img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; flex-shrink: 0; }
+    .nome { font-weight: bold; font-size: 16px; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+    .modal-box { 
+        background: #1b2735; 
+        color: #ffffff;      
+        padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: justify; 
+        border: 2px solid #00d4ff; 
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); 
+    }
+    .close-btn { display: block; margin-top: 20px; padding: 12px; background: #00d4ff; color: #000; border-radius: 10px; cursor: pointer; font-weight: bold; text-align: center; }
+</style>
+
 </head>
 <body>
     <h1>Grupos Disponíveis</h1>
@@ -57,7 +82,32 @@
             <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Master">
             <div class="nome">T D H 🤡</div>
         </a>
+</div>
 
+    <footer style="margin-top: 30px; text-align: center; color: #777; font-size: 13px; padding-bottom: 20px;">
+        <span onclick="document.getElementById('modal-priv').style.display='flex'" style="cursor: pointer; text-decoration: underline; color: #128c7e;">Privacidade</span> | 
+        <span onclick="document.getElementById('modal-term').style.display='flex'" style="cursor: pointer; text-decoration: underline; color: #128c7e;">Termos de Uso</span>
+        <div style="margin-top: 10px;">&copy; 2026 Todos os direitos reservados.</div>
+    </footer>
+    <style>
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: justify; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .modal-box p { color: #000 !important; font-weight: 500; }
+        .close-btn { display: block; margin-top: 20px; padding: 10px; background: #128c7e; color: #fff; border-radius: 10px; cursor: pointer; font-weight: bold; text-align: center; }
+    </style>
+
+    <div id="modal-priv" class="modal-overlay" onclick="this.style.display='none'">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <p><b>Privacidade:</b> Comprometemo-nos a proteger a sua privacidade e a garantir a segurança dos seus dados pessoais. Todas as informações coletadas durante a sua navegação são tratadas com sigilo absoluto, sendo utilizadas exclusivamente para otimizar a sua experiência e não são, sob hipótese alguma, compartilhadas, vendidas ou cedidas a terceiros para fins comerciais.</p>
+            <span class="close-btn" onclick="document.getElementById('modal-priv').style.display='none'">FECHAR</span>
+        </div>
+    </div>
+
+    <div id="modal-term" class="modal-overlay" onclick="this.style.display='none'">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista de grupos, você concorda que o acesso é realizado por sua livre e espontânea vontade. Não nos responsabilizamos pelo conteúdo, mensagens, arquivos ou interações que ocorram dentro dos grupos de terceiros. A responsabilidade pelo uso, comportamento e aderência às diretrizes de cada comunidade é de sua inteira responsabilidade.</p>
+            <span class="close-btn" onclick="document.getElementById('modal-term').style.display='none'">ACEITO</span>
+        </div>
     </div>
 </body>
 </html>
