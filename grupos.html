@@ -4,133 +4,152 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Lista de Grupos</title>
-<style>
-    body { 
-        font-family: 'Segoe UI', Roboto, sans-serif; 
-        margin: 0; min-height: 100vh; padding: 20px;
-        display: flex; flex-direction: column; align-items: center;
-        background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
-        background-attachment: fixed;
-        color: white;
-    }
+    <style>
+        /* Animação das estrelas */
+        @keyframes moveStars { from { background-position: 0 0; } to { background-position: 10000px 5000px; } }
+        
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; min-height: 100vh; padding: 20px; 
+            display: flex; flex-direction: column; align-items: center; 
+            /* Fundo aplicado aqui */
+            background: url('https://files.catbox.moe/8mzhlm.gif') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        /* Fundo de estrelas */
+        body::before {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+            animation: moveStars 200s linear infinite; pointer-events: none; opacity: 0.5;
+        }
 
-    body::before {
-        content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: url('https://www.transparenttextures.com/patterns/stardust.png');
-        animation: stars 20s linear infinite; pointer-events: none; opacity: 0.5;
-    }
-    @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-    h1 { color: #00d4ff; margin-bottom: 25px; font-weight: 800; text-shadow: 0 0 10px #00d4ff; }
-    .lista-container { width: 100%; max-width: 400px; }
-    .item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); padding: 15px; margin-bottom: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); text-decoration: none; color: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: 0.2s; }
-    img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; flex-shrink: 0; }
-    .nome { font-weight: bold; font-size: 16px; }
+        h1 { color: #00d4ff; margin-bottom: 25px; font-weight: 800; text-shadow: 0 0 10px #00d4ff; }
+        .lista-container { width: 100%; max-width: 400px; position: relative; z-index: 1; }
+        
+        .slider-container { width: 100%; max-width: 400px; overflow: hidden; margin-bottom: 20px; position: relative; touch-action: pan-y; }
+        .slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; width: 100%; will-change: transform; }
+        .slider-wrapper a { min-width: 100%; display: block; }
+        .slider-wrapper img { width: 100%; display: block; }
 
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
-    .modal-box { 
-        background: #1b2735; 
-        color: #ffffff;      
-        padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: justify; 
-        border: 2px solid #00d4ff; 
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.5); 
-    }
-    .close-btn { display: block; margin-top: 20px; padding: 12px; background: #00d4ff; color: #000; border-radius: 10px; cursor: pointer; font-weight: bold; text-align: center; }
-</style>
+        .indicators { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
+        .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: #00d4ff; }
 
+        .item { 
+            display: flex; align-items: center; background: rgba(255, 255, 255, 0.1); 
+            padding: 15px; margin-bottom: 15px; border-radius: 15px; 
+            border: 1px solid rgba(255,255,255,0.2); text-decoration: none; color: #fff; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: all 0.3s ease; 
+        }
+        .item:hover { transform: scale(1.02); background: rgba(255, 255, 255, 0.15); }
+        .item:active { transform: scale(0.95); }
+        .item img { width: 55px; height: 55px; border-radius: 50%; object-fit: cover; margin-right: 15px; }
+
+        footer { margin-top: 30px; text-align: center; color: #777; font-size: 13px; margin-bottom: 20px; z-index: 1; }
+        footer a { color: #777; text-decoration: underline; cursor: pointer; transition: 0.3s; }
+        footer a:hover { color: #00d4ff; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+        .modal-box { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; color: #000; text-align: justify; animation: fadeIn 0.3s; }
+        .close-btn { display: block; margin-top: 20px; padding: 12px; background: #128c7e; color: #fff; border-radius: 10px; cursor: pointer; text-align: center; font-weight: bold; }
+    </style>
 </head>
 <body>
-    <h1>Grupos Disponíveis</h1>
-    <div class="lista-container" id="lista-grupos">
-        <a href="https://gruposwhats.app/group/1012245?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kwcgsx.jpg" alt="FLOW💬">
-            <div class="nome">FLOW💬</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1006416?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Grifinoria🔥💛🚩">
-            <div class="nome">Grifinoria🔥💛🚩</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1104591?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/owjfk8.png" alt="FLOW INSANO💬🔥">
-            <div class="nome">FLOW INSANO💬🔥</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1049506?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Geral">
-            <div class="nome">AMIZADES 2026</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1021095?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Elite">
-            <div class="nome">☆•°```𝐄𝐋𝐋𝐈𝐗𝐙✦×</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1103469?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação VIP">
-            <div class="nome">☆×𝐑Ｅ𝙱𝗘 𝙻 𝔻ᴇ 𝐒☆×</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1012244?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Rápida">
-            <div class="nome">❦✰𝗧𝗥𝗢𝗣𝗔 10𝗞✰☙</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1006351?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Top">
-            <div class="nome">𝐆𝖗𝖎𝖋𝖎𝖓𝖔𝖗𝖎𝖆🔥💛🚩</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1021097?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Premium">
-            <div class="nome"> ⏤͟͟͞͞𝐋𝚯𝐒 ͢𝐀𝐍𝐆𝚵𝐋𝚵𝐒𖥨🔥💛🚩</div>
-        </a>
-        <a href="https://gruposwhats.app/group/1008529?ref=social" class="item" target="_blank" rel="noopener">
-            <img src="https://files.catbox.moe/kkx8w4.png" alt="Divulgação Master">
-            <div class="nome">T D H 🤡</div>
-        </a>
-</div>
 
-    <footer style="margin-top: 30px; text-align: center; color: #777; font-size: 13px; padding-bottom: 20px;">
-        <span onclick="document.getElementById('modal-priv').style.display='flex'" style="cursor: pointer; text-decoration: underline; color: #128c7e;">Privacidade</span> | 
-        <span onclick="document.getElementById('modal-term').style.display='flex'" style="cursor: pointer; text-decoration: underline; color: #128c7e;">Termos de Uso</span>
-        <div style="margin-top: 10px;">&copy; 2026 Todos os direitos reservados.</div>
+    <h1>Grupos Disponíveis</h1>
+
+    <div class="lista-container" id="lista-grupos">
+        <a href="https://gruposwhats.app/group/1012245?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kwcgsx.jpg"><div class="nome">FLOW💬</div></a>
+        <a href="https://gruposwhats.app/group/1006416?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">Grifinoria🔥💛🚩</div></a>
+        <a href="https://gruposwhats.app/group/1104591?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/owjfk8.png"><div class="nome">FLOW INSANO💬🔥</div></a>
+        <a href="https://gruposwhats.app/group/1049506?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">AMIZADES 2026</div></a>
+        <a href="https://gruposwhats.app/group/1021095?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">☆•°𝐄𝐋𝐋𝐈𝐗𝐙✦×</div></a>
+        <a href="https://gruposwhats.app/group/1103469?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">☆×𝐑𝐄𝙱𝗘 𝙻 𝔻ᴇ 𝐒☆×</div></a>
+        <a href="https://gruposwhats.app/group/1012244?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">❦✰𝗧𝗥𝗢𝗣𝗔 10𝗞✰☙</div></a>
+        <a href="https://gruposwhats.app/group/1006351?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">𝐆𝖗𝖎𝖋𝖎𝖓𝖔𝖗𝖎𝖆🔥💛🚩</div></a>
+        <a href="https://gruposwhats.app/group/1021097?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">⏤͟͟͞͞𝐋𝚯𝐒 𝐀𝐍𝐆𝚵𝐋𝚵𝐒𖥨🔥💛🚩</div></a>
+        <a href="https://gruposwhats.app/group/1008529?ref=social" class="item" target="_blank"><img src="https://files.catbox.moe/kkx8w4.png"><div class="nome">T D H 🤡</div></a>
+    </div>
+
+    <footer>
+        © 2026 X23WZP. Todos os direitos reservados.<br>
+        <a onclick="showModal('termos')">Termos de Uso</a> | <a onclick="showModal('privacidade')">Privacidade</a>
     </footer>
 
     <script>
         const lista = document.getElementById('lista-grupos');
-        const anuncio = document.createElement('a');
-        anuncio.href = "https://linktr.ee/Bronxs7#collection-79b8678f-ea68-425d-aaf3-0efca8db473b";
-        anuncio.target = "_blank";
-        anuncio.rel = "noopener";
-        // Estilo para deixar o anúncio quadradão e a imagem grande
-        anuncio.style.display = "block";
-        anuncio.style.marginBottom = "15px";
-        anuncio.innerHTML = `<img src="https://files.catbox.moe/jdxy62.png" style="width: 100%; height: auto; border-radius: 15px; display: block;" alt="Anúncio">`;
+        const items = Array.from(lista.getElementsByClassName('item'));
+        const anuncios = [
+            { href: "https://linktr.ee/Bronxs7#collection-075165d3-9ad4-4e4f-a85c-a7025c497b8d", src: "https://files.catbox.moe/ay2h2r.png" },
+            { href: "https://linktr.ee/Bronxs7#collection-af6e29ac-6166-4990-8641-f9b5daaf6de6", src: "https://files.catbox.moe/xvq0ei.png" },
+            { href: "https://linktr.ee/Bronxs7#collection-79b8678f-ea68-425d-aaf3-0efca8db473b", src: "https://files.catbox.moe/jdxy62.png" }
+        ];
+
+        const container = document.createElement('div');
+        container.className = "slider-container";
+        const wrapper = document.createElement('div');
+        wrapper.className = "slider-wrapper";
+        const indicators = document.createElement('div');
+        indicators.className = "indicators";
         
-        const itens = Array.from(lista.children);
-        const posicaoAleatoria = Math.floor(Math.random() * (itens.length + 1));
-        
-        if (posicaoAleatoria === itens.length) {
-            lista.appendChild(anuncio);
-        } else {
-            lista.insertBefore(anuncio, itens[posicaoAleatoria]);
+        anuncios.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = "dot" + (i === 0 ? " active" : "");
+            indicators.appendChild(dot);
+        });
+
+        anuncios.forEach(anuncio => {
+            const a = document.createElement('a');
+            a.href = anuncio.href;
+            a.target = "_blank";
+            a.innerHTML = `<img src="${anuncio.src}">`;
+            wrapper.appendChild(a);
+        });
+
+        container.appendChild(wrapper);
+        container.appendChild(indicators);
+        const randomIndex = Math.floor(Math.random() * (items.length + 1));
+        if (randomIndex === items.length) lista.appendChild(container);
+        else lista.insertBefore(container, items[randomIndex]);
+
+        let index = 0, startX = 0;
+        function updateSlide() {
+            wrapper.style.transform = `translateX(-${index * 100}%)`;
+            document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === index));
         }
+
+        setInterval(() => {
+            index = (index + 1) % anuncios.length;
+            updateSlide();
+        }, 5000);
+
+        container.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+        container.addEventListener('touchend', e => {
+            let diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) {
+                index = diff > 0 ? Math.min(index + 1, anuncios.length - 1) : Math.max(index - 1, 0);
+                updateSlide();
+            }
+        });
+
+        function showModal(id) { document.getElementById('modal-' + id).style.display = 'flex'; }
     </script>
 
-
-    <!-- Estilo do Modal -->
-    <style>
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; }
-        .modal-box { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: justify; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .modal-box p { color: #000 !important; font-weight: 500; }
-        .close-btn { display: block; margin-top: 20px; padding: 10px; background: #128c7e; color: #fff; border-radius: 10px; cursor: pointer; font-weight: bold; text-align: center; }
-    </style>
-
-    <div id="modal-priv" class="modal-overlay" onclick="this.style.display='none'">
+    <div id="modal-privacidade" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Privacidade:</b> Comprometemo-nos a proteger a sua privacidade e a garantir a segurança dos seus dados pessoais. Todas as informações coletadas durante a sua navegação são tratadas com sigilo absoluto, sendo utilizadas exclusivamente para otimizar a sua experiência e não são, sob hipótese alguma, compartilhadas, vendidas ou cedidas a terceiros para fins comerciais.</p>
-            <span class="close-btn" onclick="document.getElementById('modal-priv').style.display='none'">FECHAR</span>
+            <p><b>Privacidade:</b> Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">FECHAR</span>
         </div>
     </div>
 
-    <div id="modal-term" class="modal-overlay" onclick="this.style.display='none'">
+    <div id="modal-termos" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista de grupos, você concorda que o acesso é realizado por sua livre e espontânea vontade. Não nos responsabilizamos pelo conteúdo, mensagens, arquivos ou interações que ocorram dentro dos grupos de terceiros. A responsabilidade pelo uso, comportamento e aderência às diretrizes de cada comunidade é de sua inteira responsabilidade.</p>
-            <span class="close-btn" onclick="document.getElementById('modal-term').style.display='none'">ACEITO</span>
+            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>
+            <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">ACEITO</span>
         </div>
     </div>
 </body>
