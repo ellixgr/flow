@@ -14,51 +14,32 @@
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
     <style>
-        :root { --primary-green: #25d366; --bg-soft: #090a0f; --text-color: #ffffff; }
+        :root { --primary-green: #25d366; --bg-soft: #f4f7f6; --text-color: #2d3436; }
         * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
-        
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%); 
-            color: var(--text-color); 
-            display: flex; flex-direction: column; align-items: center; 
-            min-height: 100vh; padding-bottom: 30px; user-select: none; 
-            overflow-x: hidden; padding-top: 60px; background-attachment: fixed;
-        }
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1;
-        }
-        @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
-
-        h1 { color: #00d4ff; margin-bottom: 20px; font-weight: 800; font-size: 24px; text-shadow: 0 0 10px #00d4ff; }
-        
-        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 1px solid rgba(255,255,255,0.2); color: white; }
-        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #1b2735; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-soft); color: var(--text-color); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 30px; user-select: none; overflow-x: hidden; padding-top: 60px; }
+        h1 { color: #128c7e; margin-bottom: 20px; font-weight: 800; font-size: 24px; }
+        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 1px solid rgba(0,0,0,0.1); }
+        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .side-menu.active { right: 0; }
-        .side-menu a { display: block; text-decoration: none; color: white; padding: 15px; margin-bottom: 15px; border-radius: 12px; background: rgba(255,255,255,0.1); font-weight: 600; }
+        .side-menu a { display: block; text-decoration: none; color: var(--text-color); padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #f0f0f0; font-weight: 600; }
         
+        /* Botão agora é um link */
         .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); animation: pulse 2s infinite; font-weight: 800; font-size: 20px; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         
-        .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; background: #000; margin-bottom: 25px; }
+        .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; background: #000; margin-bottom: 25px; }
         .video-container video { width: 100%; height: auto; display: block; }
-        .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(0, 0, 0, 0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .tiktok-icon { position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); z-index: 10; }
-        
         .ad-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-        .ad-card { width: 92%; max-width: 380px; background: rgba(255,255,255,0.05); border-radius: 20px; padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .ad-card { width: 92%; max-width: 380px; background: #fff; border-radius: 20px; padding: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
         .ad-card img { width: 100%; height: auto; border-radius: 15px; display: block; }
-        
-        footer { margin-top: 40px; color: #ccc; font-size: 11px; text-align: center; line-height: 1.8; }
-        footer a { color: #00d4ff; text-decoration: underline; cursor: pointer; margin: 0 5px; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 999999; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: #1b2735; color: white; padding: 25px; border-radius: 20px; max-width: 400px; max-height: 80vh; overflow-y: auto; width: 100%; border: 1px solid #00d4ff; }
-        .modal-content h2 { color: #00d4ff; margin-bottom: 20px; text-align: center; }
-        
-        .fullscreen-ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.98); z-index: 999998; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+        footer { margin-top: 40px; color: #555; font-size: 11px; text-align: center; line-height: 1.8; }
+        footer a { color: #128c7e; text-decoration: underline; cursor: pointer; margin: 0 5px; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; max-width: 400px; max-height: 80vh; overflow-y: auto; width: 100%; }
+        .modal-content h2 { color: #128c7e; margin-bottom: 20px; text-align: center; }
+        .fullscreen-ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.96); z-index: 999998; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
         .fullscreen-ad-overlay.show { display: flex; }
         .ad-top-bar { width: 100%; max-width: 340px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: white; font-family: sans-serif; }
         .ad-timer { background: rgba(255, 255, 255, 0.2); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
@@ -67,6 +48,10 @@
         .fullscreen-ad-body { width: 100%; max-width: 340px; height: 280px; background: #1a1d29; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; padding: 10px; border: 1px solid #333; overflow: hidden; position: relative; }
         .popup-ad-slot { width: 100%; display: flex; justify-content: center; }
     </style>
+   
+   <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="3b341544-2d43-4f95-85b1-e6a3d69f4e58";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script> 
+     
+       
 </head>
 <body> 
     <div id="popupAd" class="fullscreen-ad-overlay">
@@ -80,7 +65,9 @@
         <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     </div>
-    <h1>Grupos Whatsapp</h1>  
+
+    <h1>Grupos Whatsapp</h1>
+    
     <a href="grupos.html" class="btn-lista-grupos">VER GRUPOS 💬</a>
 
     <div class="video-container">
@@ -106,7 +93,7 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="modalTitle">Título</h2>
             <div id="modalBody"></div>
-            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:#00d4ff; color:black; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">FECHAR</button>
+            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:#128c7e; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">FECHAR</button>
         </div>
     </div>
 
@@ -118,6 +105,7 @@
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
         
+        // Modal simples para Termos/Privacidade (já que removemos a função abrirLista)
         function showModal(type) {
             const modal = document.getElementById('modal');
             const title = document.getElementById('modalTitle');
