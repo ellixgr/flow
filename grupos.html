@@ -41,7 +41,7 @@
 </head>
 <body>
     <h1>Grupos Disponíveis</h1>
-    <div class="lista-container">
+    <div class="lista-container" id="lista-grupos">
         <a href="https://gruposwhats.app/group/1012245?ref=social" class="item" target="_blank" rel="noopener">
             <img src="https://files.catbox.moe/kwcgsx.jpg" alt="FLOW💬">
             <div class="nome">FLOW💬</div>
@@ -89,6 +89,30 @@
         <span onclick="document.getElementById('modal-term').style.display='flex'" style="cursor: pointer; text-decoration: underline; color: #128c7e;">Termos de Uso</span>
         <div style="margin-top: 10px;">&copy; 2026 Todos os direitos reservados.</div>
     </footer>
+
+    <script>
+        const lista = document.getElementById('lista-grupos');
+        const anuncio = document.createElement('a');
+        anuncio.href = "https://linktr.ee/Bronxs7#collection-79b8678f-ea68-425d-aaf3-0efca8db473b";
+        anuncio.target = "_blank";
+        anuncio.rel = "noopener";
+        // Estilo para deixar o anúncio quadradão e a imagem grande
+        anuncio.style.display = "block";
+        anuncio.style.marginBottom = "15px";
+        anuncio.innerHTML = `<img src="https://files.catbox.moe/jdxy62.png" style="width: 100%; height: auto; border-radius: 15px; display: block;" alt="Anúncio">`;
+        
+        const itens = Array.from(lista.children);
+        const posicaoAleatoria = Math.floor(Math.random() * (itens.length + 1));
+        
+        if (posicaoAleatoria === itens.length) {
+            lista.appendChild(anuncio);
+        } else {
+            lista.insertBefore(anuncio, itens[posicaoAleatoria]);
+        }
+    </script>
+
+
+    <!-- Estilo do Modal -->
     <style>
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; justify-content: center; align-items: center; }
         .modal-box { background: #fff; padding: 25px; border-radius: 20px; width: 85%; max-width: 400px; text-align: justify; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
