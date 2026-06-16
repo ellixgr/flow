@@ -73,7 +73,7 @@
     </div>
 
     <footer>
-        © 2026 X23WZP. Todos os direitos reservados.<br>
+        © 2020 - 2026 X23WZP. Todos os direitos reservados.<br>
         <a onclick="showModal('termos')">Termos de Uso</a> | <a onclick="showModal('privacidade')">Privacidade</a>
     </footer>
 
@@ -92,7 +92,7 @@
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
-        function showModal(type) { const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao utilizar este site, você concorda que não nos responsabilizamos pelo conteúdo postado em grupos de terceiros. O uso é de sua inteira responsabilidade.</p>"; } else { title.innerText = "Privacidade"; body.innerHTML = "<p>Utilizamos cookies e tecnologias de anúncios para personalizar sua experiência. Ao continuar, você aceita nossa política de dados.</p>"; } modal.style.display = 'flex'; }
+        function showModal(type) { const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; } else { title.innerText = "Privacidade"; body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; } modal.style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
