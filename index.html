@@ -6,7 +6,12 @@
     <title>Lista de Grupos de WhatsApp - Participe de Grupos Ativos</title>
     <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
     <link rel="canonical" href="https://ellixgr.github.io/x23wzp/" />
-    <link rel="preconnect" href="https://www.highperformanceformat.com">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Grupos whatsapp💬">
+    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
+    <meta property="og:image" content="https://i.postimg.cc/nV2t5Cz1/1769082090576-(1).jpg">
+    <meta name="robots" content="index, follow">
+    <script>if (top !== self) {top.location = self.location;}</script>
     <style>
         :root { --primary-green: #25d366; --bg-soft: #f4f7f6; --text-color: #2d3436; }
         * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
@@ -16,7 +21,7 @@
             font-family: 'Segoe UI', Roboto, sans-serif; 
             background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important; 
             background-attachment: fixed !important;
-            color: #fff; 
+            color: #ffffff; 
             display: flex; flex-direction: column; align-items: center; 
             min-height: 100vh; padding-bottom: 30px; user-select: none; 
             overflow-x: hidden; padding-top: 60px;
@@ -37,6 +42,9 @@
         
         .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; position: relative; background: #000; margin-bottom: 25px; }
         .video-container video { width: 100%; height: auto; display: block; }
+        
+        .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tiktok-icon { position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; }
         
         .ad-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; }
         .ad-card { width: 92%; max-width: 380px; background: #fff; border-radius: 20px; padding: 10px; }
@@ -63,9 +71,11 @@
         <a href="grupos.html" class="btn-lista-grupos">VER GRUPOS 💬</a>
 
         <div class="video-container">
-            <video id="meuVideo" autoplay loop playsinline muted>
+            <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
+            <video id="meuVideo" autoplay loop playsinline muted onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
                 <source src="https://files.catbox.moe/kxapvc.mp4" type="video/mp4">
             </video>
+            <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
         </div>
         
         <div class="ad-wrapper">
@@ -73,14 +83,14 @@
                 <script type="text/javascript">atOptions = {'key':'3e1fe799cb19b129dba9470a4e2f2556','format':'iframe','height':250,'width':300,'params':{}};</script>
                 <script src="https://www.highperformanceformat.com/3e1fe799cb19b129dba9470a4e2f2556/invoke.js" async></script>
             </div>
-            <div class="ad-card"><a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener"><img src="https://i.postimg.cc/5NfKzGcs/1776294105136.png" alt="Sou Popular"></a></div>
-            <div class="ad-card"><a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener"><img src="https://i.postimg.cc/Zq5D7YPv/1779464391514-(1).jpg" alt="Anúncio TikTok"></a></div>
+            <div class="ad-card"><a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener"><img src="https://i.postimg.cc/5NfKzGcs/1776294105136.png" alt="Sou Popular" width="300" height="250"></a></div>
+            <div class="ad-card"><a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener"><img src="https://i.postimg.cc/Zq5D7YPv/1779464391514-(1).jpg" alt="Anúncio TikTok" width="300" height="250"></a></div>
         </div>
     </main>
 
     <footer>
         © 2020 - 2026 X23WZP. Todos os direitos reservados.<br>
-        <a href="javascript:void(0)" onclick="showModal('termos')">Termos de Uso</a> | <a href="javascript:void(0)" onclick="showModal('privacidade')">Privacidade</a>
+        <a href="#termos" onclick="showModal('termos')">Termos de Uso</a> | <a href="#privacidade" onclick="showModal('privacidade')">Privacidade</a>
     </footer>
 
     <div id="modal" class="modal" onclick="closeModal()">
@@ -93,7 +103,15 @@
 
     <script>
         function toggleMenu(event) { if (event) event.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
-        function showModal(type) { const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; } else { title.innerText = "Privacidade"; body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; } modal.style.display = 'flex'; }
+        const video = document.getElementById('meuVideo');
+        const muteIcon = document.getElementById('muteIcon');
+        function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
+        function showModal(type) { 
+            const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); 
+            if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; } 
+            else { title.innerText = "Privacidade"; body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; } 
+            modal.style.display = 'flex'; 
+        }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
