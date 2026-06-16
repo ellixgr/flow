@@ -21,8 +21,11 @@
         .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .side-menu.active { right: 0; }
         .side-menu a { display: block; text-decoration: none; color: var(--text-color); padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #f0f0f0; font-weight: 600; }
-        .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; cursor: pointer; border: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); animation: pulse 2s infinite; font-weight: 800; font-size: 20px; }
+        
+        /* Botão agora é um link */
+        .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); animation: pulse 2s infinite; font-weight: 800; font-size: 20px; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        
         .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; background: #000; margin-bottom: 25px; }
         .video-container video { width: 100%; height: auto; display: block; }
         .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -59,7 +62,8 @@
     </div>
 
     <h1>Grupos Whatsapp</h1>
-    <button class="btn-lista-grupos" onclick="abrirLista()">VER GRUPOS 💬</button>
+    
+    <a href="grupos.html" class="btn-lista-grupos">VER GRUPOS 💬</a>
 
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
@@ -82,7 +86,7 @@
 
     <div id="modal" class="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 id="modalTitle">Lista de Grupos</h2>
+            <h2 id="modalTitle">Título</h2>
             <div id="modalBody"></div>
             <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:#128c7e; color:white; border:none; border-radius:12px; cursor:pointer; font-weight:bold;">FECHAR</button>
         </div>
@@ -96,23 +100,7 @@
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
         
-        function abrirLista() {
-            const modal = document.getElementById('modal');
-            const body = document.getElementById('modalBody');
-            body.innerHTML = "Carregando...";
-            modal.style.display = 'flex';
-            fetch('grupos.json')
-                .then(r => r.json())
-                .then(data => {
-                    body.innerHTML = data.map(g => `
-                        <a href="${g.link}" target="_blank" style="text-decoration:none; color:inherit; display:flex; align-items:center; margin-bottom:15px; padding:12px; background:#fff; border:1px solid #eee; border-radius:15px;">
-                            <img src="${g.imagem}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-right:15px;">
-                            <div style="font-weight:bold; font-size:15px;">${g.nome}</div>
-                        </a>
-                    `).join('');
-                }).catch(() => body.innerHTML = "Erro ao carregar.");
-        }
-
+        // Modal simples para Termos/Privacidade (já que removemos a função abrirLista)
         function showModal(type) {
             const modal = document.getElementById('modal');
             const title = document.getElementById('modalTitle');
