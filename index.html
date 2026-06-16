@@ -105,18 +105,25 @@
         function abrirLista() {
             const modal = document.getElementById('modal');
             document.getElementById('modalTitle').innerText = "Lista de Grupos";
-            document.getElementById('modalBody').innerHTML = "Carregando grupos...";
+            const body = document.getElementById('modalBody');
+            body.innerHTML = "Carregando...";
             modal.style.display = 'flex';
+
             fetch('grupos.json')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('modalBody').innerHTML = data.map(g => 
-                        `<div style="margin-bottom:15px; padding:10px; background:#f4f4f4; border-radius:10px;">
-                            <p><b>${g.nome}</b></p>
-                            <a href="${g.link}" target="_blank" style="color:green;">ENTRAR NO GRUPO</a>
-                        </div>`).join('');
-                }).catch(() => document.getElementById('modalBody').innerHTML = "Erro ao carregar (arquivo grupos.json não encontrado).");
+                    body.innerHTML = data.map(g => `
+                        <div style="display:flex; align-items:center; margin-bottom:15px; padding:10px; background:#f9f9f9; border-radius:12px;">
+                            <img src="${g.imagem}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; margin-right:15px;">
+                            <div>
+                                <div style="font-weight:bold; font-size:15px;">${g.nome}</div>
+                                <a href="${g.link}" target="_blank" style="color:#128c7e; font-size:13px; font-weight:bold; text-decoration:none;">VER GRUPO</a>
+                            </div>
+                        </div>
+                    `).join('');
+                }).catch(() => body.innerHTML = "Erro ao carregar.");
         }
+
 
         function showModal(type) {
             const modal = document.getElementById('modal');
