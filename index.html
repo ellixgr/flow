@@ -17,12 +17,14 @@
         * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
         body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-soft); color: var(--text-color); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding-bottom: 30px; user-select: none; overflow-x: hidden; padding-top: 60px; }
         h1 { color: #128c7e; margin-bottom: 20px; font-weight: 800; font-size: 24px; }
-        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 1px solid rgba(0,0,0,0.1); }
+        
+        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 2px solid #25d366; box-shadow: 0 0 15px rgba(37, 211, 102, 0.8); animation: pulseBtn 1.5s infinite; }
+        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
         .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
         .side-menu.active { right: 0; }
         .side-menu a { display: block; text-decoration: none; color: var(--text-color); padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #f0f0f0; font-weight: 600; }
         
-        /* Botão agora é um link */
         .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: white; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; text-decoration: none; box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3); animation: pulse 2s infinite; font-weight: 800; font-size: 20px; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
         
@@ -38,48 +40,22 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 20px; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; max-width: 400px; max-height: 80vh; overflow-y: auto; width: 100%; }
         .modal-content h2 { color: #128c7e; margin-bottom: 20px; text-align: center; }
-        .fullscreen-ad-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.96); z-index: 999998; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
-        .fullscreen-ad-overlay.show { display: flex; }
-        .ad-top-bar { width: 100%; max-width: 340px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: white; font-family: sans-serif; }
-        .ad-timer { background: rgba(255, 255, 255, 0.2); padding: 5px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
-        .ad-close-btn { background: #ff4757; color: white; border: none; width: 34px; height: 34px; border-radius: 50%; font-weight: bold; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0.3; pointer-events: none; transition: opacity 0.3s; }
-        .ad-close-btn.clickable { opacity: 1; pointer-events: auto; }
-        .fullscreen-ad-body { width: 100%; max-width: 340px; height: 280px; background: #1a1d29; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; padding: 10px; border: 1px solid #333; overflow: hidden; position: relative; }
-        .popup-ad-slot { width: 100%; display: flex; justify-content: center; }
         
-        body { 
-            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important;
-            background-attachment: fixed !important;
-        }
-        body::before {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: url('https://www.transparenttextures.com/patterns/stardust.png');
-            animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1;
-        }
+        body { background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important; background-attachment: fixed !important; }
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1; }
         @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
-
-        
     </style>
-   
-   <script type="text/javascript">window.$crisp=[];window.CRISP_WEBSITE_ID="3b341544-2d43-4f95-85b1-e6a3d69f4e58";(function(){d=document;s=d.createElement("script");s.src="https://client.crisp.chat/l.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script> 
-     
-       
 </head>
 <body> 
-    <div id="popupAd" class="fullscreen-ad-overlay">
-        <div class="ad-top-bar"><div id="adTimer" class="ad-timer">Aguarde 6s...</div><button id="adCloseBtn" class="ad-close-btn" onclick="closeFullscreenAd()">✕</button></div>
-        <div class="fullscreen-ad-body" id="adContainerBody"></div>
-    </div>
-    
     <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
     <div class="side-menu" id="sideMenu">
         <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
+        <a href="https://wa.me/5521988666115?text=Olá,%20quero%20enviar%20meu%20grupo!%20Link%20do%20meu%20grupo:%20" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
         <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     </div>
 
     <h1>Grupos Whatsapp</h1>
-    
     <a href="grupos.html" class="btn-lista-grupos">VER GRUPOS 💬</a>
 
     <div class="video-container">
@@ -116,38 +92,8 @@
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
-
-        function showModal(type) {
-            const modal = document.getElementById('modal');
-            const title = document.getElementById('modalTitle');
-            const body = document.getElementById('modalBody');
-            if(type === 'termos') {
-                title.innerText = "Termos de Uso";
-                body.innerHTML = "<p>Ao utilizar este site, você concorda que não nos responsabilizamos pelo conteúdo postado em grupos de terceiros. O uso é de sua inteira responsabilidade.</p>";
-            } else {
-                title.innerText = "Privacidade";
-                body.innerHTML = "<p>Utilizamos cookies e tecnologias de anúncios para personalizar sua experiência. Ao continuar, você aceita nossa política de dados.</p>";
-            }
-            modal.style.display = 'flex';
-        }
+        function showModal(type) { const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao utilizar este site, você concorda que não nos responsabilizamos pelo conteúdo postado em grupos de terceiros. O uso é de sua inteira responsabilidade.</p>"; } else { title.innerText = "Privacidade"; body.innerHTML = "<p>Utilizamos cookies e tecnologias de anúncios para personalizar sua experiência. Ao continuar, você aceita nossa política de dados.</p>"; } modal.style.display = 'flex'; }
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const showPopupChance = Math.floor(Math.random() * 100);
-            if (showPopupChance < 60) {
-                const adContainer = document.getElementById('adContainerBody');
-                adContainer.innerHTML = `<div class="popup-ad-slot"><div id="container-1fd37c2a1d9d1e19537dc1d7d97cdc9b"></div></div>`;
-                let script = document.createElement('script');
-                script.async = true; script.setAttribute('data-cfasync', 'false');
-                script.src = "https://pl28627138.profitablecpmratenetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js";
-                document.body.appendChild(script);
-                const adOverlay = document.getElementById('popupAd');
-                adOverlay.classList.add('show');
-                let timeLeft = 6;
-                const countdown = setInterval(() => { timeLeft--; document.getElementById('adTimer').innerText = `Aguarde ${timeLeft}s...`; if (timeLeft <= 0) { clearInterval(countdown); document.getElementById('adTimer').innerText = "Anúncio Pronto"; document.getElementById('adCloseBtn').classList.add('clickable'); } }, 1000);
-            }
-        });
-        function closeFullscreenAd() { document.getElementById('popupAd').classList.remove('show'); }
     </script>
 </body>
 </html>
