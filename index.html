@@ -108,12 +108,25 @@
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
         function showModal(type) { 
-            const modal = document.getElementById('modal'); const title = document.getElementById('modalTitle'); const body = document.getElementById('modalBody'); 
-            if(type === 'termos') { title.innerText = "Termos de Uso"; body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; } 
-            else { title.innerText = "Privacidade"; body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; } 
-            modal.style.display = 'flex'; 
-        }
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+    history.pushState(null, null, '#' + type);     
+    const modal = document.getElementById('modal'); 
+    const title = document.getElementById('modalTitle'); 
+    const body = document.getElementById('modalBody');     
+    if(type === 'termos') { 
+        title.innerText = "Termos de Uso"; 
+        body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; 
+    } else { 
+        title.innerText = "Privacidade"; 
+        body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; 
+    } 
+    modal.style.display = 'flex'; 
+}
+
+        function closeModal() { 
+    document.getElementById('modal').style.display = 'none'; 
+    history.pushState('', document.title, window.location.pathname); 
+}
+
     </script>
     
     <script src="https://pl28642215.effectivecpmnetwork.com/b9/7f/04/b97f0402af5fa803ef8d137e4050caf4.js"></script>
