@@ -15,8 +15,6 @@
             color: white;
             animation: fadeIn 1s ease-out;
         }
-        
-        /* Fundo animado (Estrelas movendo) */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
@@ -79,7 +77,6 @@
     </footer>
 
     <script>
-        // Lógica do Slider e Modais mantida exatamente como você tinha
         const lista = document.getElementById('lista-grupos');
         const items = Array.from(lista.getElementsByClassName('item'));
         const anuncios = [
@@ -140,14 +137,14 @@
 
     <div id="modal-privacidade" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Privacidade:</b> Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes.</p>
+            <p><b>Privacidade:</b> Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>
             <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">FECHAR</span>
         </div>
     </div>
 
     <div id="modal-termos" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes.</p>
+            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>
             <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">ACEITO</span>
         </div>
     </div>
