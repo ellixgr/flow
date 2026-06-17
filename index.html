@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -30,6 +29,9 @@
 
         body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1; }
         @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+
+        /* Fix de alinhamento principal */
+        main { width: 100%; display: flex; flex-direction: column; align-items: center; }
 
         h1 { color: #128c7e; margin-bottom: 20px; font-weight: 800; font-size: 24px; }
         
@@ -83,12 +85,11 @@
             <div class="ad-card"><a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener"><img src="https://files.catbox.moe/eognmj.png" alt="Sou Popular" width="300" height="250"></a></div>
             <div class="ad-card"><a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener"><img src="https://files.catbox.moe/d0otxm.png" alt="Anúncio TikTok" width="300" height="250"></a></div>
         </div>
-        </main>
-
+    </main>
 
     <footer>
         © 2020 - 2026 X23WZP. Todos os direitos reservados.<br>
-        <a href="#termos" onclick="showModal('termos')">Termos de Uso</a> | <a href="#privacidade" onclick="showModal('privacidade')">Privacidade</a>
+        <a href="javascript:void(0)" onclick="showModal('termos')">Termos de Uso</a> | <a href="javascript:void(0)" onclick="showModal('privacidade')">Privacidade</a>
     </footer>
 
     <div id="modal" class="modal" onclick="closeModal()">
@@ -114,11 +115,8 @@
     </script>
     
     <script src="https://pl28642215.effectivecpmnetwork.com/b9/7f/04/b97f0402af5fa803ef8d137e4050caf4.js"></script>
-        <script>
-        document.addEventListener('click', function(e) {
-            window.focus();
-        });
+    <script>
+        document.addEventListener('click', function(e) { window.focus(); });
     </script>
-
 </body>
 </html>
