@@ -3,22 +3,20 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lista de Grupos</title>
+    <title>Lista de Grupos de WhatsApp - Participe de Grupos Ativos</title>
     <style>
-    
         @keyframes moveStars { from { background-position: 0 0; } to { background-position: 10000px 5000px; } }
         
         body { 
             font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; min-height: 100vh; padding: 20px; 
             display: flex; flex-direction: column; align-items: center; 
-            
-            background: url('https://files.catbox.moe/8mzhlm.gif') no-repeat center center fixed;
-            background-size: cover;
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            background-attachment: fixed;
             color: white;
             animation: fadeIn 1s ease-out;
         }
         
-    
+        /* Fundo animado (Estrelas movendo) */
         body::before {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
@@ -27,13 +25,13 @@
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { color: #00d4ff; margin-bottom: 25px; font-weight: 800; text-shadow: 0 0 10px #00d4ff; }
+        h1 { color: #00d4ff; margin-bottom: 25px; font-weight: 800; text-shadow: 0 0 10px #00d4ff; z-index: 1; }
         .lista-container { width: 100%; max-width: 400px; position: relative; z-index: 1; }
         
         .slider-container { width: 100%; max-width: 400px; overflow: hidden; margin-bottom: 20px; position: relative; touch-action: pan-y; }
         .slider-wrapper { display: flex; transition: transform 0.5s ease-in-out; width: 100%; will-change: transform; }
         .slider-wrapper a { min-width: 100%; display: block; }
-        .slider-wrapper img { width: 100%; display: block; }
+        .slider-wrapper img { width: 100%; display: block; border-radius: 15px; }
 
         .indicators { display: flex; justify-content: center; gap: 8px; margin: 10px 0; }
         .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.3); border-radius: 50%; transition: 0.3s; }
@@ -81,6 +79,7 @@
     </footer>
 
     <script>
+        // Lógica do Slider e Modais mantida exatamente como você tinha
         const lista = document.getElementById('lista-grupos');
         const items = Array.from(lista.getElementsByClassName('item'));
         const anuncios = [
@@ -141,14 +140,14 @@
 
     <div id="modal-privacidade" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Privacidade:</b> Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>
+            <p><b>Privacidade:</b> Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes.</p>
             <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">FECHAR</span>
         </div>
     </div>
 
     <div id="modal-termos" class="modal-overlay" onclick="this.style.display='none'">
         <div class="modal-box" onclick="event.stopPropagation()">
-            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>
+            <p><b>Termos de Uso:</b> Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes.</p>
             <span class="close-btn" onclick="this.parentElement.parentElement.style.display='none'">ACEITO</span>
         </div>
     </div>
