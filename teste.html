@@ -3,57 +3,447 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X23WZP - Grupos</title>
-    <style>
-        body { background-color: #0f172a; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
-        .card { background-color: #1e293b; padding: 15px; border-radius: 10px; margin: 10px 0; border: 1px solid #334155; }
-        a { color: #38bdf8; text-decoration: none; font-weight: bold; }
-    </style>
-</head>
-<body>
+    <title>Grupos de WhatsApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <h1>Grupos Disponíveis</h1>
-    <div id="lista-grupos">Carregando...</div>
+    <!-- Firebase SDKs (versão compatível para funcionar direto no HTML) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
-        // SUA CONFIGURAÇÃO DO FIREBASE
-        const firebaseConfig = {
-            apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL702fPXbhswuXM",
-            authDomain: "almanaque-2d45c.firebaseapp.com",
-            projectId: "almanaque-2d45c",
-            storageBucket: "almanaque-2d45c.appspot.com",
-            messagingSenderId: "438098113685",
-            appId: "1:438098113685:web:ee38a615cdf1166be9979c"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // FUNÇÃO QUE LÊ OS GRUPOS DO BANCO
-        async function carregar() {
-            const lista = document.getElementById('lista-grupos');
-            try {
-                const q = query(collection(db, "grupos"), where("status", "==", "aprovado"));
-                const querySnapshot = await getDocs(q);
-                
-                lista.innerHTML = "";
-                querySnapshot.forEach((doc) => {
-                    const grupo = doc.data();
-                    lista.innerHTML += `
-                        <div class="card">
-                            <h3>${grupo.nome}</h3>
-                            <a href="${grupo.link}" target="_blank">ENTRAR NO GRUPO</a>
-                        </div>`;
-                });
-            } catch (erro) {
-                lista.innerHTML = "Erro ao carregar: " + erro.message;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        zap: '#25D366',
+                        zapEscuro: '#128C7E',
+                        zapMaisEscuro: '#075E54'
+                    }
+                }
             }
         }
-        
-        carregar();
     </script>
+
+    <style>
+        .grupo-card { transition: transform 0.2s ease; }
+        .grupo-card:hover { transform: translateY(-4px); }
+        .texto-vermelho { color: #dc2626; }
+        .esconder { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- Cabeçalho -->
+<header class="bg-zapMaisEscuro text-white shadow-lg">
+    <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
+        <h1 class="text-2xl font-bold">Grupos de WhatsApp</h1>
+        <div class="flex gap-3">
+            <button onclick="abrirModal('modalEnviar')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
+                <i class="fa fa-paper-plane mr-1"></i> Enviar Grupo
+            </button>
+            <button onclick="abrirModal('modalMeusGrupos')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
+                <i class="fa fa-user mr-1"></i> Meus Grupos
+            </button>
+        </div>
+    </div>
+
+    <!-- Categorias -->
+    <div class="bg-zapEscuro px-4 py-2 overflow-x-auto">
+        <div class="container mx-auto flex gap-4 whitespace-nowrap">
+            <button onclick="filtrar('todos')" class="cat-btn text-white px-3 py-1 rounded hover:bg-zapMaisEscuro">Todos</button>
+            <button onclick="filtrar('amizade')" class="cat-btn text-white px-3 py-1 rounded hover:bg-zapMaisEscuro">Amizade</button>
+            <button onclick="filtrar('namoro')" class="cat-btn text-white px-3 py-1 rounded hover:bg-zapMaisEscuro">Namoro</button>
+            <button onclick="filtrar('figurinhas')" class="cat-btn text-white px-3 py-1 rounded hover:bg-zapMaisEscuro">Figurinhas</button>
+            <button onclick="filtrar('divulgacao')" class="cat-btn text-white px-3 py-1 rounded hover:bg-zapMaisEscuro">Divulgação</button>
+        </div>
+    </div>
+</header>
+
+<!-- Lista de Grupos -->
+<main class="container mx-auto px-4 py-6">
+    <div id="listaGrupos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+        <!-- Grupos carregam aqui -->
+    </div>
+
+    <!-- Paginação -->
+    <div class="flex justify-center items-center gap-4 mt-8">
+        <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" onclick="paginaAnterior()" disabled>Anterior</button>
+        <span id="paginaAtualTexto">Página 1</span>
+        <button id="btnProxima" class="bg-zap text-white px-4 py-2 rounded hover:bg-zapEscuro" onclick="paginaProxima()">Próxima</button>
+    </div>
+</main>
+
+<!-- Modal Enviar Grupo -->
+<div id="modalEnviar" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 esconder p-4">
+    <div class="bg-white rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Enviar Novo Grupo</h3>
+
+        <div class="mb-3">
+            <label class="block text-gray-700 mb-1">Link do Grupo *</label>
+            <input type="url" id="linkGrupo" class="w-full border p-2 rounded" placeholder="https://chat.whatsapp.com/..." required>
+        </div>
+
+        <div class="mb-3">
+            <label class="block text-gray-700 mb-1">Nome do Grupo *</label>
+            <input type="text" id="nomeGrupo" class="w-full border p-2 rounded" maxlength="50" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="block text-gray-700 mb-1">Foto do Grupo (máx 100KB)</label>
+            <input type="file" id="fotoGrupo" accept="image/*" class="w-full border p-2 rounded">
+            <p class="text-xs text-gray-500 mt-1">Se não enviar, usaremos uma foto padrão</p>
+        </div>
+
+        <div class="mb-3">
+            <label class="block text-gray-700 mb-1">Categoria *</label>
+            <select id="categoriaGrupo" class="w-full border p-2 rounded" required>
+                <option value="">Selecione</option>
+                <option value="amizade">Amizade</option>
+                <option value="namoro">Namoro</option>
+                <option value="figurinhas">Figurinhas</option>
+                <option value="divulgacao">Divulgação</option>
+            </select>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 mb-1">Descrição / Regras (máx 30 palavras) *</label>
+            <textarea id="descricaoGrupo" class="w-full border p-2 rounded" rows="3" maxlength="200" required></textarea>
+            <p id="avisoTexto" class="text-xs mt-1"></p>
+        </div>
+
+        <div class="flex gap-3 justify-end">
+            <button onclick="fecharModal('modalEnviar')" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
+            <button onclick="salvarGrupo()" class="px-4 py-2 bg-zap text-white rounded">Enviar para Análise</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Meus Grupos -->
+<div id="modalMeusGrupos" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 esconder p-4">
+    <div class="bg-white rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-xl font-bold mb-4 text-gray-800">Meus Grupos</h3>
+        <div id="conteudoMeusGrupos">
+            <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
+            <div class="text-center">
+                <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo Agora</button>
+            </div>
+        </div>
+        <div class="text-right mt-4">
+            <button onclick="fecharModal('modalMeusGrupos')" class="px-4 py-2 bg-gray-300 rounded">Fechar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detalhes do Grupo -->
+<div id="modalDetalhes" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 esconder p-4">
+    <div class="bg-white rounded-lg w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+        <div id="conteudoDetalhes"></div>
+        <div class="flex flex-wrap gap-3 justify-between mt-5">
+            <button onclick="abrirModal('modalDenuncia')" class="text-red-600 hover:underline">Denunciar</button>
+            <button onclick="fecharModal('modalDetalhes')" class="px-4 py-2 bg-gray-300 rounded">Fechar</button>
+            <button id="botaoEntrar" class="px-4 py-2 bg-zap text-white rounded">Entrar no Grupo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Denúncia -->
+<div id="modalDenuncia" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 esconder p-4">
+    <div class="bg-white rounded-lg w-full max-w-md p-6">
+        <h4 class="text-lg font-semibold mb-3">Motivo da Denúncia</h4>
+        <div class="space-y-2 mb-4">
+            <label class="flex items-center gap-2">
+                <input type="radio" name="motivoDenuncia" value="link_invalido" checked> Link inválido / expirado
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="radio" name="motivoDenuncia" value="conteudo_inapropriado"> Conteúdo inadequado
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="radio" name="motivoDenuncia" value="outro"> Outro
+            </label>
+        </div>
+        <div class="flex gap-3 justify-end">
+            <button onclick="fecharModal('modalDenuncia')" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
+            <button onclick="enviarDenuncia()" class="px-4 py-2 bg-red-600 text-white rounded">Enviar Denúncia</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====================== CONFIGURAÇÃO DO FIREBASE (SEUS DADOS JÁ AQUI) ======================
+const firebaseConfig = {
+  apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL7O2fPXbhswuXM",
+  authDomain: "almanaque-2d45c.firebaseapp.com",
+  projectId: "almanaque-2d45c",
+  storageBucket: "almanaque-2d45c.firebasestorage.app",
+  messagingSenderId: "438098113685",
+  appId: "1:438098113685:web:ee38a615cdf1166be9979c"
+};
+
+// Inicializa o Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const storage = firebase.storage();
+const auth = firebase.auth();
+
+// ====================== VARIÁVEIS GERAIS ======================
+const fotoPadrao = "https://cdn-icons-png.flaticon.com/512/124/124034.png";
+const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda"];
+let todosGrupos = [];
+let paginaAtual = 1;
+const itensPorPagina = 20;
+let categoriaAtual = "todos";
+let grupoSelecionado = null;
+
+// Login anônimo do usuário
+auth.signInAnonymously();
+
+// ====================== FUNÇÕES DE MODAL ======================
+function abrirModal(id) { document.getElementById(id).classList.remove("esconder"); }
+function fecharModal(id) { document.getElementById(id).classList.add("esconder"); }
+
+// ====================== VALIDAÇÕES ======================
+function temPalavraProibida(texto) {
+    return palavrasProibidas.some(p => texto.toLowerCase().includes(p));
+}
+
+function contarPalavras(texto) {
+    return texto.trim().split(/\s+/).filter(p => p).length;
+}
+
+// ====================== CARREGAR GRUPOS ======================
+async function carregarGrupos() {
+    const ref = db.collection("grupos")
+        .where("status", "==", "aprovado")
+        .orderBy("impulsionadoAte", "desc")
+        .orderBy("dataEnvio", "desc");
+
+    const snapshot = await ref.get();
+    todosGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    paginaAtual = 1;
+    mostrarPagina();
+}
+
+function filtrar(categoria) {
+    categoriaAtual = categoria;
+    paginaAtual = 1;
+    mostrarPagina();
+}
+
+function mostrarPagina() {
+    let filtrados = todosGrupos;
+    if (categoriaAtual !== "todos") {
+        filtrados = todosGrupos.filter(g => g.categoria === categoriaAtual);
+    }
+
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const gruposPagina = filtrados.slice(inicio, fim);
+
+    const container = document.getElementById("listaGrupos");
+    container.innerHTML = "";
+
+    if (gruposPagina.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`;
+        return;
+    }
+
+    gruposPagina.forEach(grupo => {
+        const card = document.createElement("div");
+        card.className = "grupo-card bg-white rounded-lg shadow overflow-hidden cursor-pointer";
+        card.innerHTML = `
+            <img src="${grupo.foto || fotoPadrao}" alt="${grupo.nome}" class="w-full h-40 object-cover">
+            <div class="p-4">
+                <h3 class="font-bold text-lg mb-2">${grupo.nome}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${grupo.descricao}</p>
+                <span class="text-xs bg-gray-200 px-2 py-1 rounded">${grupo.categoria.toUpperCase()}</span>
+            </div>
+        `;
+        card.onclick = () => abrirDetalhes(grupo);
+        container.appendChild(card);
+    });
+
+    document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual}`;
+    document.getElementById("btnAnterior").disabled = paginaAtual === 1;
+    document.getElementById("btnProxima").disabled = fim >= filtrados.length;
+}
+
+function paginaAnterior() { paginaAtual--; mostrarPagina(); }
+function paginaProxima() { paginaAtual++; mostrarPagina(); }
+
+// ====================== DETALHES DO GRUPO ======================
+function abrirDetalhes(grupo) {
+    grupoSelecionado = grupo;
+    document.getElementById("conteudoDetalhes").innerHTML = `
+        <div class="text-center mb-4">
+            <img src="${grupo.foto || fotoPadrao}" alt="${grupo.nome}" class="w-24 h-24 rounded-full mx-auto mb-3">
+            <h3 class="text-xl font-bold">${grupo.nome}</h3>
+            <span class="text-sm text-gray-500">Categoria: ${grupo.categoria}</span>
+        </div>
+        <div class="border-t border-b py-4 my-3">
+            <h4 class="font-semibold mb-2">Descrição e Regras:</h4>
+            <p class="text-gray-700 whitespace-pre-line">${grupo.descricao}</p>
+        </div>
+    `;
+    document.getElementById("botaoEntrar").onclick = () => window.open(grupo.link, "_blank");
+    abrirModal("modalDetalhes");
+}
+
+// ====================== SALVAR NOVO GRUPO ======================
+async function salvarGrupo() {
+    const link = document.getElementById("linkGrupo").value.trim();
+    const nome = document.getElementById("nomeGrupo").value.trim();
+    const categoria = document.getElementById("categoriaGrupo").value;
+    const descricao = document.getElementById("descricaoGrupo").value.trim();
+    const fotoArquivo = document.getElementById("fotoGrupo").files[0];
+    const aviso = document.getElementById("avisoTexto");
+
+    // Validações
+    if (!link || !nome || !categoria || !descricao) return alert("Preencha todos os campos!");
+    if (!link.startsWith("https://chat.whatsapp.com/")) return alert("Link inválido! Use link do WhatsApp.");
+
+    const qtdPalavras = contarPalavras(descricao);
+    if (qtdPalavras > 30) {
+        aviso.textContent = "Máximo 30 palavras!";
+        aviso.className = "texto-vermelho text-xs mt-1";
+        return;
+    }
+
+    if (temPalavraProibida(descricao)) {
+        aviso.textContent = "Texto contém palavras proibidas!";
+        aviso.className = "texto-vermelho text-xs mt-1";
+        return;
+    }
+
+    let urlFoto = fotoPadrao;
+    if (fotoArquivo) {
+        if (fotoArquivo.size > 100 * 1024) return alert("Imagem maior que 100KB!");
+        const nomeArquivo = Date.now() + "-" + Math.random().toString(36).substring(2);
+        const refStorage = storage.ref(`grupos/${nomeArquivo}`);
+        await refStorage.put(fotoArquivo);
+        urlFoto = await refStorage.getDownloadURL();
+    }
+
+    const usuarioId = auth.currentUser.uid;
+
+    await db.collection("grupos").add({
+        link,
+        nome,
+        categoria,
+        descricao,
+        foto: urlFoto,
+        status: "analise",
+        usuarioId,
+        dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
+        impulsionadoAte: null
+    });
+
+    fecharModal("modalEnviar");
+    alert("Grupo enviado com sucesso! Aguarde nossa análise.");
+    document.getElementById("linkGrupo").value = "";
+    document.getElementById("nomeGrupo").value = "";
+    document.getElementById("categoriaGrupo").value = "";
+    document.getElementById("descricaoGrupo").value = "";
+    document.getElementById("fotoGrupo").value = "";
+}
+
+// ====================== MEUS GRUPOS ======================
+async function carregarMeusGrupos() {
+    const usuarioId = auth.currentUser.uid;
+    const snapshot = await db.collection("grupos").where("usuarioId", "==", usuarioId).get();
+    const meusGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    const container = document.getElementById("conteudoMeusGrupos");
+    if (meusGrupos.length === 0) {
+        container.innerHTML = `
+            <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
+            <div class="text-center">
+                <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo Agora</button>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = "";
+    meusGrupos.forEach(grupo => {
+        const div = document.createElement("div");
+        div.className = "flex items-center justify-between border-b py-3";
+
+        let acao = "";
+        if (grupo.status === "analise") {
+            acao = `<span class="text-yellow-600 font-medium">Em análise</span>`;
+        } else if (grupo.status === "aprovado") {
+            const agora = new Date();
+            const fim = grupo.impulsionadoAte ? grupo.impulsionadoAte.toDate() : null;
+
+            if (!fim || agora > fim) {
+                acao = `<button onclick="impulsionar('${grupo.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Impulsionar Grupo</button>`;
+            } else {
+                const tempoRestante = Math.ceil((fim - agora) / 60000);
+                acao = `<span class="text-blue-600">Topo por mais ${tempoRestante} min</span>`;
+                atualizarContagem(grupo.id, fim, div);
+            }
+        }
+
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="${grupo.foto || fotoPadrao}" class="w-12 h-12 rounded-full object-cover">
+                <div>
+                    <p class="font-medium">${grupo.nome}</p>
+                    <p class="text-xs text-gray-500">${grupo.categoria}</p>
+                </div>
+            </div>
+            <div>${acao}</div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+// Contagem regressiva em tempo real
+function atualizarContagem(id, dataFim, elemento) {
+    const intervalo = setInterval(() => {
+        const agora = new Date();
+        const resto = dataFim - agora;
+        if (resto <= 0) {
+            clearInterval(intervalo);
+            elemento.querySelector("div:last-child").innerHTML = `<button onclick="impulsionar('${id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Impulsionar Grupo</button>`;
+            return;
+        }
+        const min = Math.floor(resto / 60000);
+        const seg = Math.floor((resto % 60000) / 1000);
+        elemento.querySelector("div:last-child").innerHTML = `<span class="text-blue-600">${min}min ${seg}seg restantes</span>`;
+    }, 1000);
+}
+
+// Impulsionar grupo por 2h
+async function impulsionar(idGrupo) {
+    const fim = new Date();
+    fim.setHours(fim.getHours() + 2);
+    await db.collection("grupos").doc(idGrupo).update({ impulsionadoAte: fim });
+    alert("Grupo impulsionado! Ficará no topo por 2 horas.");
+    carregarGrupos();
+    carregarMeusGrupos();
+}
+
+// ====================== DENÚNCIA ======================
+async function enviarDenuncia() {
+    const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
+    await db.collection("denuncias").add({
+        grupoId: grupoSelecionado.id,
+        motivo,
+        link: grupoSelecionado.link,
+        data: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    fecharModal("modalDenuncia");
+    fecharModal("modalDetalhes");
+    alert("Denúncia enviada! Obrigado.");
+}
+
+// Carregar grupos ao abrir a página
+window.onload = carregarGrupos;
+</script>
+
 </body>
 </html>
