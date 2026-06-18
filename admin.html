@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Grupos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+
+<div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
+    <h1 class="text-2xl font-bold mb-6 text-center">📋 Gerenciar Grupos</h1>
+
+    <div class="mb-4 flex gap-2">
+        <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Em análise</button>
+        <button onclick="filtrar('aprovado')" class="bg-green-500 text-white px-3 py-1 rounded">Aprovados</button>
+        <button onclick="filtrar('recusado')" class="bg-red-500 text-white px-3 py-1 rounded">Recusados</button>
+        <button onclick="filtrar('todos')" class="bg-gray-500 text-white px-3 py-1 rounded">Todos</button>
+    </div>
+
+    <div id="listaGrupos" class="space-y-4"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL7O2fPXbhswuXM",
+  authDomain: "almanaque-2d45c.firebaseapp.com",
+  projectId: "almanaque-2d45c",
+  storageBucket: "almanaque-2d45c.firebasestorage.app",
+  messagingSenderId: "438098113685",
+  appId: "1:438098113685:web:ee38a615cdf1166be9979c"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+let statusFiltro = "analise";
+
+// 🔑 CHAVE DE ADMINISTRADOR (SÓ VOCÊ TEM ESSA)
+const CHAVE_ADMIN = "SEU_CODIGO_SECRETO_AQUI_ESCOLHA_UM_BOM";
+
+// Carrega todos os grupos
+async function carregarGrupos() {
+    const ref = statusFiltro === "todos" 
+        ? db.collection("grupos").orderBy("dataEnvio", "desc")
+        : db.collection("grupos").where("status", "==", statusFiltro).orderBy("dataEnvio", "desc");
+
+    const snapshot = await ref.get();
+    const container = document.getElementById("listaGrupos");
+    container.innerHTML = "";
+
+    if (snapshot.empty) {
+        container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado.</p>";
+        return;
+    }
+
+    snapshot.docs.forEach(doc => {
+        const g = { id: doc.id, ...doc.data() };
+        const div = document.createElement("div");
+        div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between";
+
+        div.innerHTML = `
+            <div class="flex items-center gap-4">
+                <img src="${g.foto}" class="w-16 h-16 rounded-full object-cover">
+                <div>
+                    <h3 class="font-bold text-lg">${g.nome}</h3>
+                    <p class="text-sm text-gray-600">${g.categoria.toUpperCase()}</p>
+                    <p class="text-xs text-gray-500">${g.descricao}</p>
+                    <a href="${g.link}" target="_blank" class="text-blue-600 text-xs">Abrir link</a>
+                </div>
+            </div>
+            <div class="flex gap-2 items-center">
+                <span class="px-2 py-1 rounded text-xs font-bold ${
+                    g.status === 'analise' ? 'bg-yellow-100 text-yellow-800' :
+                    g.status === 'aprovado' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                }">${g.status.toUpperCase()}</span>
+                <input type="password" id="senha_${g.id}" placeholder="Chave admin" class="w-24 border p-1 text-xs rounded">
+                <button onclick="alterarStatus('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">Aprovar</button>
+                <button onclick="alterarStatus('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded text-sm">Recusar</button>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+async function alterarStatus(id, novoStatus) {
+    const senhaDigitada = document.getElementById(`senha_${id}`).value.trim();
+    if (senhaDigitada !== CHAVE_ADMIN) {
+        alert("❌ Acesso negado! Chave incorreta.");
+        return;
+    }
+
+    try {
+        await db.collection("grupos").doc(id).update({ status: novoStatus });
+        carregarGrupos();
+        alert(`✅ Grupo ${novoStatus === 'aprovado' ? 'aprovado' : 'recusado'}!`);
+    } catch (err) {
+        alert("❌ Erro: você não tem permissão para alterar.");
+    }
+}
+
+function filtrar(status) {
+    statusFiltro = status;
+    carregarGrupos();
+}
+
+window.onload = carregarGrupos;
+</script>
+</body>
+</html>
