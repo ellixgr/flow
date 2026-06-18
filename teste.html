@@ -165,7 +165,7 @@
 </div>
 
 <script>
-// Configuração do seu Firebase
+// Configuração Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL7O2fPXbhswuXM",
   authDomain: "almanaque-2d45c.firebaseapp.com",
@@ -187,40 +187,38 @@ let categoriaAtual = "todos";
 let grupoSelecionado = null;
 let fotoBase64 = "";
 let usuarioAtual = null;
+let usuarioPronto = false;
 
-// ✅ CORRIGIDO: Mantém o login do usuário
+// ✅ LOGIN CORRIGIDO: Espera e marca quando está pronto
 auth.onAuthStateChanged(user => {
     if (user) {
         usuarioAtual = user;
-        console.log("Usuário logado:", user.uid);
+        usuarioPronto = true;
+        console.log("Logado com ID:", user.uid);
         carregarGrupos();
     } else {
-        auth.signInAnonymously()
-            .catch(err => console.error("Erro ao logar:", err));
+        usuarioPronto = false;
+        auth.signInAnonymously().catch(err => console.error("Erro login:", err));
     }
 });
 
-// Processar foto escolhida
+// Processar foto
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
-
     const leitor = new FileReader();
-    leitor.onload = function(evento) {
+    leitor.onload = function(e) {
         const img = new Image();
-        img.src = evento.target.result;
+        img.src = e.target.result;
         img.onload = function() {
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
-            const tamanho = 150;
-            canvas.width = tamanho;
-            canvas.height = tamanho;
-            ctx.drawImage(img, 0, 0, tamanho, tamanho);
+            canvas.width = 150;
+            canvas.height = 150;
+            ctx.drawImage(img, 0, 0, 150, 150);
             fotoBase64 = canvas.toDataURL("image/jpeg", 0.7);
-
-            const preview = document.getElementById("previewFoto");
-            preview.style.backgroundImage = `url(${fotoBase64})`;
-            preview.classList.remove("hidden");
+            document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`;
+            document.getElementById("previewFoto").classList.remove("hidden");
         };
     };
     leitor.readAsDataURL(arquivo);
@@ -228,7 +226,6 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
 
 function abrirModal(id) {
     document.getElementById(id).classList.remove("esconder");
-    // ✅ CORRIGIDO: Carrega os grupos sempre que abrir o modal
     if (id === "modalMeusGrupos") carregarMeusGrupos();
 }
 function fecharModal(id) { document.getElementById(id).classList.add("esconder"); }
@@ -236,149 +233,125 @@ function fecharModal(id) { document.getElementById(id).classList.add("esconder")
 function temPalavraProibida(texto) {
     return palavrasProibidas.some(p => texto.toLowerCase().includes(p));
 }
-
 function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
-// Carrega só grupos aprovados
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
             .where("status", "==", "aprovado")
             .orderBy("impulsionadoAte", "desc")
             .orderBy("dataEnvio", "desc");
-
-        const snapshot = await ref.get();
-        todosGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snap = await ref.get();
+        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         paginaAtual = 1;
         mostrarPagina();
     } catch (err) {
-        console.error("Erro ao carregar grupos:", err);
-        if (err.code === "failed-precondition") {
-            alert("⚠️ Acesse o link que aparece no console do Firebase e crie o índice solicitado.");
-        }
+        console.error("Erro grupos:", err);
+        if (err.code === "failed-precondition") alert("⚠️ Crie o índice no link do console.");
     }
 }
 
-function filtrar(categoria) {
-    categoriaAtual = categoria;
+function filtrar(cat) {
+    categoriaAtual = cat;
     paginaAtual = 1;
     mostrarPagina();
 }
 
 function mostrarPagina() {
-    let filtrados = todosGrupos;
-    if (categoriaAtual !== "todos") {
-        filtrados = todosGrupos.filter(g => g.categoria === categoriaAtual);
-    }
-
+    let lista = todosGrupos;
+    if (categoriaAtual !== "todos") lista = lista.filter(g => g.categoria === categoriaAtual);
     const inicio = (paginaAtual - 1) * itensPorPagina;
     const fim = inicio + itensPorPagina;
-    const gruposPagina = filtrados.slice(inicio, fim);
-
+    const pag = lista.slice(inicio, fim);
     const container = document.getElementById("listaGrupos");
     container.innerHTML = "";
-
-    if (gruposPagina.length === 0) {
+    if (pag.length === 0) {
         container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`;
         return;
     }
-
-    gruposPagina.forEach(grupo => {
+    pag.forEach(g => {
         const card = document.createElement("div");
         card.className = "grupo-card bg-white rounded-lg shadow overflow-hidden cursor-pointer";
         card.innerHTML = `
-            <img src="${grupo.foto}" alt="${grupo.nome}" class="w-full h-40 object-cover">
+            <img src="${g.foto}" class="w-full h-40 object-cover">
             <div class="p-4">
-                <h3 class="font-bold text-lg mb-2">${grupo.nome}</h3>
-                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${grupo.descricao}</p>
-                <span class="text-xs bg-gray-200 px-2 py-1 rounded">${grupo.categoria.toUpperCase()}</span>
+                <h3 class="font-bold text-lg mb-2">${g.nome}</h3>
+                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${g.descricao}</p>
+                <span class="text-xs bg-gray-200 px-2 py-1 rounded">${g.categoria.toUpperCase()}</span>
             </div>
         `;
-        card.onclick = () => abrirDetalhes(grupo);
+        card.onclick = () => abrirDetalhes(g);
         container.appendChild(card);
     });
-
     document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual}`;
     document.getElementById("btnAnterior").disabled = paginaAtual === 1;
-    document.getElementById("btnProxima").disabled = fim >= filtrados.length;
+    document.getElementById("btnProxima").disabled = fim >= lista.length;
 }
 
 function paginaAnterior() { paginaAtual--; mostrarPagina(); }
 function paginaProxima() { paginaAtual++; mostrarPagina(); }
 
-function abrirDetalhes(grupo) {
-    grupoSelecionado = grupo;
+function abrirDetalhes(g) {
+    grupoSelecionado = g;
     document.getElementById("conteudoDetalhes").innerHTML = `
         <div class="text-center mb-4">
-            <img src="${grupo.foto}" alt="${grupo.nome}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
-            <h3 class="text-xl font-bold">${grupo.nome}</h3>
-            <span class="text-sm text-gray-500">Categoria: ${grupo.categoria}</span>
+            <img src="${g.foto}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="text-xl font-bold">${g.nome}</h3>
+            <span class="text-sm text-gray-500">Categoria: ${g.categoria}</span>
         </div>
         <div class="border-t border-b py-4 my-3">
-            <h4 class="font-semibold mb-2">Descrição e Regras:</h4>
-            <p class="text-gray-700 whitespace-pre-line">${grupo.descricao}</p>
+            <h4 class="font-semibold mb-2">Descrição:</h4>
+            <p class="text-gray-700 whitespace-pre-line">${g.descricao}</p>
         </div>
     `;
-    document.getElementById("botaoEntrar").onclick = () => window.open(grupo.link, "_blank");
+    document.getElementById("botaoEntrar").onclick = () => window.open(g.link, "_blank");
     abrirModal("modalDetalhes");
 }
 
-// ✅ CORRIGIDO: Salva com o ID correto do usuário
+// ✅ SALVAR CORRIGIDO: Só executa se o usuário estiver pronto
 async function salvarGrupo() {
+    if (!usuarioPronto || !usuarioAtual) {
+        alert("Aguarde um instante e tente novamente.");
+        return;
+    }
     const link = document.getElementById("linkGrupo").value.trim();
     const nome = document.getElementById("nomeGrupo").value.trim();
-    const categoria = document.getElementById("categoriaGrupo").value;
-    const descricao = document.getElementById("descricaoGrupo").value.trim();
+    const cat = document.getElementById("categoriaGrupo").value;
+    const desc = document.getElementById("descricaoGrupo").value.trim();
     const aviso = document.getElementById("avisoTexto");
-
     aviso.textContent = "";
     aviso.className = "text-xs mt-1";
 
-    if (!usuarioAtual) return alert("Aguarde o sistema carregar, tente novamente em 2 segundos.");
-    if (!link) return alert("Preencha o link do grupo!");
-    if (!nome) return alert("Digite o nome do grupo!");
-    if (!categoria) return alert("Escolha uma categoria!");
-    if (!descricao) return alert("Escreva a descrição!");
-    if (!fotoBase64) return alert("Escolha uma foto para o grupo!");
-
+    if (!link || !nome || !cat || !desc || !fotoBase64) return alert("Preencha todos os campos!");
     if (!link.startsWith("https://chat.whatsapp.com/")) {
-        aviso.textContent = "Link inválido! Use link do WhatsApp.";
-        aviso.className = "texto-vermelho text-xs mt-1";
+        aviso.textContent = "Link inválido!";
+        aviso.className = "texto-vermelho";
         return;
     }
-
-    const qtdPalavras = contarPalavras(descricao);
-    if (qtdPalavras > 30) {
+    if (contarPalavras(desc) > 30) {
         aviso.textContent = "Máximo 30 palavras!";
-        aviso.className = "texto-vermelho text-xs mt-1";
+        aviso.className = "texto-vermelho";
         return;
     }
-
-    if (temPalavraProibida(descricao)) {
+    if (temPalavraProibida(desc)) {
         aviso.textContent = "Texto contém palavras proibidas!";
-        aviso.className = "texto-vermelho text-xs mt-1";
+        aviso.className = "texto-vermelho";
         return;
     }
 
     try {
         await db.collection("grupos").add({
-            link,
-            nome,
-            categoria,
-            descricao,
-            foto: fotoBase64,
+            link, nome, categoria: cat, descricao: desc, foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
             dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
             impulsionadoAte: null
         });
-
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado com sucesso!");
-
-        // Limpar formulário
+        alert("✅ Grupo enviado para análise!");
+        // Limpar
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -386,30 +359,27 @@ async function salvarGrupo() {
         document.getElementById("fotoGrupo").value = "";
         document.getElementById("previewFoto").classList.add("hidden");
         fotoBase64 = "";
-
     } catch (erro) {
         console.error("Erro ao salvar:", erro);
-        alert("❌ Erro ao enviar.");
+        alert("❌ Erro ao enviar. Tente novamente.");
     }
 }
 
-// ✅ CORRIGIDO: Carrega os grupos do usuário sempre que abrir
+// ✅ CARREGAR MEUS GRUPOS: Não trava mais
 async function carregarMeusGrupos() {
-    if (!usuarioAtual) {
-        document.getElementById("conteudoMeusGrupos").innerHTML = `<p class="text-center text-gray-500 py-10">Aguarde...</p>`;
+    const container = document.getElementById("conteudoMeusGrupos");
+    if (!usuarioPronto || !usuarioAtual) {
+        container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
+        setTimeout(carregarMeusGrupos, 600);
         return;
     }
-
     try {
-        const snapshot = await db.collection("grupos")
+        const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
             .orderBy("dataEnvio", "desc")
             .get();
-
-        const meusGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const container = document.getElementById("conteudoMeusGrupos");
-
-        if (meusGrupos.length === 0) {
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (meus.length === 0) {
             container.innerHTML = `
                 <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
                 <div class="text-center">
@@ -418,33 +388,29 @@ async function carregarMeusGrupos() {
             `;
             return;
         }
-
         container.innerHTML = "";
-        meusGrupos.forEach(grupo => {
+        meus.forEach(g => {
             const div = document.createElement("div");
             div.className = "flex items-center justify-between border-b py-3";
-
-            let statusTexto = "";
-            if (grupo.status === "analise") statusTexto = `<span class="status-analise">⏳ Em análise</span>`;
-            else if (grupo.status === "aprovado") statusTexto = `<span class="status-aprovado">✅ Aprovado</span>`;
-            else if (grupo.status === "recusado") statusTexto = `<span class="status-recusado">❌ Recusado</span>`;
-
+            let status = "";
+            if (g.status === "analise") status = `<span class="status-analise">⏳ Em análise</span>`;
+            else if (g.status === "aprovado") status = `<span class="status-aprovado">✅ Aprovado</span>`;
+            else if (g.status === "recusado") status = `<span class="status-recusado">❌ Recusado</span>`;
             div.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${grupo.foto}" class="w-12 h-12 rounded-full object-cover">
+                    <img src="${g.foto}" class="w-12 h-12 rounded-full object-cover">
                     <div>
-                        <p class="font-medium">${grupo.nome}</p>
-                        <p class="text-xs text-gray-500">${grupo.categoria}</p>
+                        <p class="font-medium">${g.nome}</p>
+                        <p class="text-xs text-gray-500">${g.categoria}</p>
                     </div>
                 </div>
-                <div>${statusTexto}</div>
+                <div>${status}</div>
             `;
             container.appendChild(div);
         });
-
     } catch (err) {
-        console.error("Erro ao carregar meus grupos:", err);
-        document.getElementById("conteudoMeusGrupos").innerHTML = `<p class="text-center text-red-500 py-10">Erro ao carregar</p>`;
+        console.error("Erro meus grupos:", err);
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro ao carregar</p>`;
     }
 }
 
@@ -461,7 +427,7 @@ async function enviarDenuncia() {
         fecharModal("modalDetalhes");
         alert("✅ Denúncia enviada!");
     } catch (err) {
-        console.error("Erro ao enviar denúncia:", err);
+        console.error("Erro denúncia:", err);
         alert("❌ Erro ao enviar denúncia.");
     }
 }
