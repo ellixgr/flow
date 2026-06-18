@@ -7,10 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Firebase SDKs (versão compatível para funcionar direto no HTML) -->
+    <!-- Firebase só com os serviços gratuitos -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
     <script>
@@ -92,9 +91,10 @@
         </div>
 
         <div class="mb-3">
-            <label class="block text-gray-700 mb-1">Foto do Grupo (máx 100KB)</label>
-            <input type="file" id="fotoGrupo" accept="image/*" class="w-full border p-2 rounded">
-            <p class="text-xs text-gray-500 mt-1">Se não enviar, usaremos uma foto padrão</p>
+            <label class="block text-gray-700 mb-1">Foto do Grupo (máx 70KB) *</label>
+            <input type="file" id="fotoGrupo" accept="image/*" class="w-full border p-2 rounded" required>
+            <p class="text-xs text-gray-500 mt-1">Escolha a foto que quiser, o sistema já deixa ela pequena para não pesar</p>
+            <div id="previewFoto" class="mt-2 w-20 h-20 rounded-full border mx-auto hidden"></div>
         </div>
 
         <div class="mb-3">
@@ -172,7 +172,7 @@
 </div>
 
 <script>
-// ====================== CONFIGURAÇÃO DO FIREBASE (SEUS DADOS JÁ AQUI) ======================
+// ====================== CONFIGURAÇÃO DO FIREBASE ======================
 const firebaseConfig = {
   apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL7O2fPXbhswuXM",
   authDomain: "almanaque-2d45c.firebaseapp.com",
@@ -182,23 +182,51 @@ const firebaseConfig = {
   appId: "1:438098113685:web:ee38a615cdf1166be9979c"
 };
 
-// Inicializa o Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const storage = firebase.storage();
 const auth = firebase.auth();
 
 // ====================== VARIÁVEIS GERAIS ======================
-const fotoPadrao = "https://cdn-icons-png.flaticon.com/512/124/124034.png";
 const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda"];
 let todosGrupos = [];
 let paginaAtual = 1;
 const itensPorPagina = 20;
 let categoriaAtual = "todos";
 let grupoSelecionado = null;
+let fotoBase64 = "";
 
-// Login anônimo do usuário
+// Login anônimo
 auth.signInAnonymously();
+
+// Pré-visualizar e reduzir o tamanho da foto
+document.getElementById("fotoGrupo").addEventListener("change", function(e) {
+    const arquivo = e.target.files[0];
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+    leitor.onload = function(evento) {
+        const img = new Image();
+        img.src = evento.target.result;
+        img.onload = function() {
+            // Reduzir tamanho para ficar leve
+            const canvas = document.createElement("canvas");
+            const ctx = canvas.getContext("2d");
+            const tamanho = 120; // Tamanho pequeno suficiente para ver bem
+            canvas.width = tamanho;
+            canvas.height = tamanho;
+            ctx.drawImage(img, 0, 0, tamanho, tamanho);
+            // Converter para texto com qualidade baixa
+            fotoBase64 = canvas.toDataURL("image/jpeg", 0.7);
+
+            // Mostrar prévia
+            const preview = document.getElementById("previewFoto");
+            preview.style.backgroundImage = `url(${fotoBase64})`;
+            preview.style.backgroundSize = "cover";
+            preview.classList.remove("hidden");
+        };
+    };
+    leitor.readAsDataURL(arquivo);
+});
 
 // ====================== FUNÇÕES DE MODAL ======================
 function abrirModal(id) { document.getElementById(id).classList.remove("esconder"); }
@@ -254,7 +282,7 @@ function mostrarPagina() {
         const card = document.createElement("div");
         card.className = "grupo-card bg-white rounded-lg shadow overflow-hidden cursor-pointer";
         card.innerHTML = `
-            <img src="${grupo.foto || fotoPadrao}" alt="${grupo.nome}" class="w-full h-40 object-cover">
+            <img src="${grupo.foto}" alt="${grupo.nome}" class="w-full h-40 object-cover">
             <div class="p-4">
                 <h3 class="font-bold text-lg mb-2">${grupo.nome}</h3>
                 <p class="text-gray-600 text-sm mb-3 line-clamp-2">${grupo.descricao}</p>
@@ -278,7 +306,7 @@ function abrirDetalhes(grupo) {
     grupoSelecionado = grupo;
     document.getElementById("conteudoDetalhes").innerHTML = `
         <div class="text-center mb-4">
-            <img src="${grupo.foto || fotoPadrao}" alt="${grupo.nome}" class="w-24 h-24 rounded-full mx-auto mb-3">
+            <img src="${grupo.foto}" alt="${grupo.nome}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
             <h3 class="text-xl font-bold">${grupo.nome}</h3>
             <span class="text-sm text-gray-500">Categoria: ${grupo.categoria}</span>
         </div>
@@ -297,11 +325,9 @@ async function salvarGrupo() {
     const nome = document.getElementById("nomeGrupo").value.trim();
     const categoria = document.getElementById("categoriaGrupo").value;
     const descricao = document.getElementById("descricaoGrupo").value.trim();
-    const fotoArquivo = document.getElementById("fotoGrupo").files[0];
     const aviso = document.getElementById("avisoTexto");
 
-    // Validações
-    if (!link || !nome || !categoria || !descricao) return alert("Preencha todos os campos!");
+    if (!link || !nome || !categoria || !descricao || !fotoBase64) return alert("Preencha todos os campos e escolha uma foto!");
     if (!link.startsWith("https://chat.whatsapp.com/")) return alert("Link inválido! Use link do WhatsApp.");
 
     const qtdPalavras = contarPalavras(descricao);
@@ -317,15 +343,6 @@ async function salvarGrupo() {
         return;
     }
 
-    let urlFoto = fotoPadrao;
-    if (fotoArquivo) {
-        if (fotoArquivo.size > 100 * 1024) return alert("Imagem maior que 100KB!");
-        const nomeArquivo = Date.now() + "-" + Math.random().toString(36).substring(2);
-        const refStorage = storage.ref(`grupos/${nomeArquivo}`);
-        await refStorage.put(fotoArquivo);
-        urlFoto = await refStorage.getDownloadURL();
-    }
-
     const usuarioId = auth.currentUser.uid;
 
     await db.collection("grupos").add({
@@ -333,7 +350,7 @@ async function salvarGrupo() {
         nome,
         categoria,
         descricao,
-        foto: urlFoto,
+        foto: fotoBase64,
         status: "analise",
         usuarioId,
         dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
@@ -342,11 +359,14 @@ async function salvarGrupo() {
 
     fecharModal("modalEnviar");
     alert("Grupo enviado com sucesso! Aguarde nossa análise.");
+    // Limpar formulário
     document.getElementById("linkGrupo").value = "";
     document.getElementById("nomeGrupo").value = "";
     document.getElementById("categoriaGrupo").value = "";
     document.getElementById("descricaoGrupo").value = "";
     document.getElementById("fotoGrupo").value = "";
+    document.getElementById("previewFoto").classList.add("hidden");
+    fotoBase64 = "";
 }
 
 // ====================== MEUS GRUPOS ======================
@@ -389,7 +409,7 @@ async function carregarMeusGrupos() {
 
         div.innerHTML = `
             <div class="flex items-center gap-3">
-                <img src="${grupo.foto || fotoPadrao}" class="w-12 h-12 rounded-full object-cover">
+                <img src="${grupo.foto}" class="w-12 h-12 rounded-full object-cover">
                 <div>
                     <p class="font-medium">${grupo.nome}</p>
                     <p class="text-xs text-gray-500">${grupo.categoria}</p>
@@ -401,7 +421,6 @@ async function carregarMeusGrupos() {
     });
 }
 
-// Contagem regressiva em tempo real
 function atualizarContagem(id, dataFim, elemento) {
     const intervalo = setInterval(() => {
         const agora = new Date();
@@ -417,7 +436,6 @@ function atualizarContagem(id, dataFim, elemento) {
     }, 1000);
 }
 
-// Impulsionar grupo por 2h
 async function impulsionar(idGrupo) {
     const fim = new Date();
     fim.setHours(fim.getHours() + 2);
@@ -427,7 +445,6 @@ async function impulsionar(idGrupo) {
     carregarMeusGrupos();
 }
 
-// ====================== DENÚNCIA ======================
 async function enviarDenuncia() {
     const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
     await db.collection("denuncias").add({
@@ -441,7 +458,6 @@ async function enviarDenuncia() {
     alert("Denúncia enviada! Obrigado.");
 }
 
-// Carregar grupos ao abrir a página
 window.onload = carregarGrupos;
 </script>
 
