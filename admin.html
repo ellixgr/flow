@@ -25,10 +25,11 @@
         <button onclick="sair()" class="bg-red-500 text-white px-3 py-1 rounded">Sair</button>
     </div>
 
+    <!-- SOMENTE OS BOTÕES NECESSÁRIOS -->
     <div class="bg-white rounded shadow p-4 mb-4 flex gap-2">
-        <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Pendentes</button>
+        <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Pendentes / Em Análise</button>
         <button onclick="filtrar('aprovado')" class="bg-green-500 text-white px-3 py-1 rounded">Aprovados</button>
-        <button onclick="filtrar('todos')" class="bg-gray-500 text-white px-3 py-1 rounded">Todos</button>
+        <button onclick="filtrar('recusado')" class="bg-red-500 text-white px-3 py-1 rounded">Recusados</button>
     </div>
 
     <div id="listaGrupos" class="space-y-4"></div>
@@ -73,56 +74,67 @@ function sair() {
   document.getElementById("senha").value = "";
 }
 
+// ✅ FILTRO CERTO, funcionando
 async function carregarLista() {
-  const ref = filtroAtual === "todos"
-    ? db.collection("grupos").orderBy("dataEnvio", "desc")
-    : db.collection("grupos").where("status", "==", filtroAtual).orderBy("dataEnvio", "desc");
+  let ref = db.collection("grupos").where("status", "==", filtroAtual).orderBy("dataEnvio", "desc");
 
   const snap = await ref.get();
   const container = document.getElementById("listaGrupos");
   container.innerHTML = "";
 
   if (snap.empty) {
-    container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado</p>";
+    container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhum grupo com status: ${filtroAtual}</p>`;
     return;
   }
 
   snap.docs.forEach(doc => {
     const g = { id: doc.id, ...doc.data() };
-    container.innerHTML += `
-      <div class="border rounded p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    const div = document.createElement("div");
+    div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between";
+
+    div.innerHTML = `
+      <div class="flex items-center gap-4">
+        <img src="${g.foto || ''}" class="w-16 h-16 rounded-full object-cover" alt="Foto">
         <div>
-          <strong>${g.nome}</strong> | ${g.categoria}<br>
-          <span class="text-sm ${g.status === 'aprovado' ? 'text-green-600' : 'text-yellow-600'}">${g.status}</span>
-        </div>
-        <div class="flex gap-2">
-          <button onclick="alterar('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded">✅ Aprovar</button>
-          <button onclick="alterar('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded">❌ Recusar</button>
-          <button onclick="apagar('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded">🗑️ Apagar</button>
+          <h3 class="font-bold text-lg">${g.nome || 'Sem nome'}</h3>
+          <p class="text-sm text-gray-600">${g.categoria?.toUpperCase() || 'Sem categoria'}</p>
+          <p class="text-xs text-gray-500">Enviado por: ${g.emailUsuario || 'Não informado'}</p>
+          <p class="text-xs text-gray-500">Status: ${g.status}</p>
+          <a href="${g.link || '#'}" target="_blank" class="text-blue-600 text-xs mt-1 inline-block">🔗 Abrir link</a>
         </div>
       </div>
+      <div class="flex gap-2">
+        <button onclick="alterar('${g.id}', 'aprovado')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">✅ Aprovar</button>
+        <button onclick="alterar('${g.id}', 'recusado')" class="bg-red-600 text-white px-3 py-1 rounded text-sm">❌ Recusar</button>
+        <button onclick="apagar('${g.id}')" class="bg-gray-700 text-white px-3 py-1 rounded text-sm">🗑️ Apagar</button>
+      </div>
     `;
+    container.appendChild(div);
   });
 }
 
 async function alterar(id, novoStatus) {
   try {
-    await db.collection("grupos").doc(id).update({ status: novoStatus });
+    await db.collection("grupos").doc(id).update({
+      status: novoStatus,
+      dataAlteracao: firebase.firestore.FieldValue.serverTimestamp()
+    });
     carregarLista();
-    alert("✅ Feito!");
-  } catch {
-    alert("❌ Sem permissão!");
+    alert(`✅ Grupo marcado como: ${novoStatus}`);
+  } catch (erro) {
+    console.log(erro);
+    alert("❌ Erro ao alterar! Verifique permissões.");
   }
 }
 
 async function apagar(id) {
-  if (!confirm("Tem certeza?")) return;
+  if (!confirm("Tem certeza que quer apagar esse grupo? Essa ação não pode ser desfeita.")) return;
   try {
     await db.collection("grupos").doc(id).delete();
     carregarLista();
-    alert("✅ Apagado!");
+    alert("✅ Grupo apagado com sucesso!");
   } catch {
-    alert("❌ Sem permissão!");
+    alert("❌ Sem permissão para apagar.");
   }
 }
 
