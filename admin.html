@@ -74,26 +74,14 @@ function sair() {
   document.getElementById("senha").value = "";
 }
 
-// ✅ CORREÇÃO PRINCIPAL: consulta compatível com seus índices
+// ✅ FUNÇÃO CORRIGIDA — NÃO USA ORDENAÇÃO COMPOSTA NO FILTRO DE STATUS
 async function carregarLista() {
   const container = document.getElementById("listaGrupos");
   container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
 
   try {
-    let ref;
-
-    // Se for aprovado: usa o índice que já existe
-    if (filtroAtual === "aprovado") {
-      ref = db.collection("grupos")
-        .where("status", "==", "aprovado")
-        .orderBy("impulsionadoAte", "desc")
-        .orderBy("dataEnvio", "desc");
-    }
-    // Se for análise ou recusado: busca sem ordenação composta, depois ordena na tela
-    else {
-      ref = db.collection("grupos").where("status", "==", filtroAtual);
-    }
-
+    // Buscamos apenas pelo status, sem ordenação extra que peça índice novo
+    const ref = db.collection("grupos").where("status", "==", filtroAtual);
     const snap = await ref.get();
 
     if (snap.empty) {
@@ -101,9 +89,13 @@ async function carregarLista() {
       return;
     }
 
-    // Ordena por data mais recente primeiro
+    // Ordenamos por data diretamente no navegador — funciona sem índice
     const grupos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      .sort((a, b) => (b.dataEnvio?.seconds || 0) - (a.dataEnvio?.seconds || 0));
+      .sort((a, b) => {
+        const dataA = a.dataEnvio?.toDate() || 0;
+        const dataB = b.dataEnvio?.toDate() || 0;
+        return dataB - dataA; // Mais novos primeiro
+      });
 
     container.innerHTML = "";
 
