@@ -111,7 +111,7 @@ async function mudarStatus(id, novoStatus) {
     try {
         await db.collection("grupos").doc(id).update({
             status: novoStatus,
-            _segredo_admin: senhaAtual // Envia só aqui, não fica salvo
+            _segredo_admin: senhaAtual
         });
         carregarLista();
         alert("✅ Feito!");
