@@ -7,18 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
 
-<!-- Tela de senha antes de carregar tudo -->
-<div id="telaSenha" class="max-w-md mx-auto mt-20 bg-white p-6 rounded shadow-lg">
-    <h2 class="text-xl font-bold text-center mb-6">🔐 Acesso ao Painel</h2>
-    <input type="password" id="senhaDigitada" class="w-full border p-3 rounded mb-4" placeholder="Digite sua senha">
+<div id="telaLogin" class="max-w-md mx-auto mt-20 bg-white p-6 rounded shadow-lg">
+    <h2 class="text-xl font-bold text-center mb-6">🔐 Acesso Administrativo</h2>
+    <input type="email" id="email" class="w-full border p-3 rounded mb-3" placeholder="Seu e-mail cadastrado">
+    <input type="password" id="senha" class="w-full border p-3 rounded mb-4" placeholder="Sua senha">
     <button onclick="entrar()" class="w-full bg-green-600 text-white p-3 rounded font-medium">Entrar</button>
-    <p id="aviso" class="text-red-600 text-center mt-3 hidden">Senha incorreta!</p>
+    <p id="avisoErro" class="text-red-600 text-center mt-3 hidden">❌ E-mail ou senha incorretos!</p>
 </div>
 
-<!-- Painel só aparece depois de digitar -->
 <div id="painel" class="hidden max-w-5xl mx-auto">
     <div class="bg-white rounded shadow p-6 mb-4 flex justify-between items-center">
         <h1 class="text-2xl font-bold">📋 Gerenciar Grupos</h1>
@@ -46,98 +46,91 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-let senhaAtual = "";
-let filtro = "analise";
+const auth = firebase.auth();
+let filtroAtual = "analise";
 
-function entrar() {
-    senhaAtual = document.getElementById("senhaDigitada").value.trim();
-    if (!senhaAtual) return;
+async function entrar() {
+  const email = document.getElementById("email").value.trim();
+  const senha = document.getElementById("senha").value.trim();
+  if (!email || !senha) return;
 
-    // Abre o painel para ver a lista (ver é permitido para todos)
-    document.getElementById("telaSenha").classList.add("hidden");
+  try {
+    await auth.signInWithEmailAndPassword(email, senha);
+    document.getElementById("telaLogin").classList.add("hidden");
     document.getElementById("painel").classList.remove("hidden");
     carregarLista();
+  } catch {
+    document.getElementById("avisoErro").classList.remove("hidden");
+    setTimeout(() => document.getElementById("avisoErro").classList.add("hidden"), 3000);
+  }
 }
 
 function sair() {
-    senhaAtual = "";
-    document.getElementById("painel").classList.add("hidden");
-    document.getElementById("telaSenha").classList.remove("hidden");
-    document.getElementById("senhaDigitada").value = "";
+  auth.signOut();
+  document.getElementById("painel").classList.add("hidden");
+  document.getElementById("telaLogin").classList.remove("hidden");
+  document.getElementById("email").value = "";
+  document.getElementById("senha").value = "";
 }
 
 async function carregarLista() {
-    const ref = filtro === "todos" 
-        ? db.collection("grupos").orderBy("dataEnvio", "desc")
-        : db.collection("grupos").where("status", "==", filtro).orderBy("dataEnvio", "desc");
+  const ref = filtroAtual === "todos"
+    ? db.collection("grupos").orderBy("dataEnvio", "desc")
+    : db.collection("grupos").where("status", "==", filtroAtual).orderBy("dataEnvio", "desc");
 
-    const snap = await ref.get();
-    const container = document.getElementById("listaGrupos");
-    container.innerHTML = "";
+  const snap = await ref.get();
+  const container = document.getElementById("listaGrupos");
+  container.innerHTML = "";
 
-    if (snap.empty) {
-        container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado</p>";
-        return;
-    }
+  if (snap.empty) {
+    container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado</p>";
+    return;
+  }
 
-    snap.docs.forEach(doc => {
-        const g = { id: doc.id, ...doc.data() };
-        const div = document.createElement("div");
-        div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between";
-
-        div.innerHTML = `
-            <div class="flex items-center gap-4">
-                <img src="${g.foto}" class="w-16 h-16 rounded-full object-cover">
-                <div>
-                    <h3 class="font-bold">${g.nome}</h3>
-                    <p class="text-sm text-gray-600">${g.categoria.toUpperCase()}</p>
-                    <p class="text-xs text-gray-500">${g.descricao}</p>
-                    <a href="${g.link}" target="_blank" class="text-blue-600 text-xs">Abrir link</a>
-                </div>
-            </div>
-            <div class="flex gap-2">
-                <span class="px-2 py-1 rounded text-xs ${g.status==='analise'?'bg-yellow-100':'bg-green-100'}">${g.status.toUpperCase()}</span>
-                <button onclick="mudarStatus('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">✅ Aprovar</button>
-                <button onclick="mudarStatus('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded text-sm">❌ Não Aprovar</button>
-                <button onclick="apagarGrupo('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded text-sm">🗑️ Apagar</button>
-            </div>
-        `;
-        container.appendChild(div);
-    });
+  snap.docs.forEach(doc => {
+    const g = { id: doc.id, ...doc.data() };
+    container.innerHTML += `
+      <div class="border rounded p-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <strong>${g.nome}</strong> | ${g.categoria}<br>
+          <span class="text-sm ${g.status === 'aprovado' ? 'text-green-600' : 'text-yellow-600'}">${g.status}</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="alterar('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded">✅ Aprovar</button>
+          <button onclick="alterar('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded">❌ Recusar</button>
+          <button onclick="apagar('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded">🗑️ Apagar</button>
+        </div>
+      </div>
+    `;
+  });
 }
 
-// ✅ AQUI A SENHA É VALIDADA PELO BANCO, SEMPRE
-async function mudarStatus(id, novoStatus) {
-    try {
-        await db.collection("grupos").doc(id).update({
-            status: novoStatus,
-            _segredo_admin: senhaAtual
-        });
-        carregarLista();
-        alert("✅ Feito!");
-    } catch (erro) {
-        console.log(erro);
-        alert("❌ Senha incorreta ou sem permissão!");
-    }
+async function alterar(id, novoStatus) {
+  try {
+    await db.collection("grupos").doc(id).update({ status: novoStatus });
+    carregarLista();
+    alert("✅ Feito!");
+  } catch {
+    alert("❌ Sem permissão!");
+  }
 }
 
-async function apagarGrupo(id) {
-    if (!confirm("Apagar esse grupo?")) return;
-    try {
-        await db.collection("grupos").doc(id).delete({
-            _segredo_admin: senhaAtual
-        });
-        carregarLista();
-        alert("✅ Apagado!");
-    } catch {
-        alert("❌ Senha incorreta!");
-    }
+async function apagar(id) {
+  if (!confirm("Tem certeza?")) return;
+  try {
+    await db.collection("grupos").doc(id).delete();
+    carregarLista();
+    alert("✅ Apagado!");
+  } catch {
+    alert("❌ Sem permissão!");
+  }
 }
 
 function filtrar(tipo) {
-    filtro = tipo;
-    carregarLista();
+  filtroAtual = tipo;
+  carregarLista();
 }
 </script>
+
 </body>
 </html>
