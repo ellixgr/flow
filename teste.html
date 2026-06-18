@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X23WZP - Grupos</title>
+    <style>
+        body { background-color: #0f172a; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        .card { background-color: #1e293b; padding: 15px; border-radius: 10px; margin: 10px 0; border: 1px solid #334155; }
+        a { color: #38bdf8; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Grupos Disponíveis</h1>
+    <div id="lista-grupos">Carregando...</div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // SUA CONFIGURAÇÃO DO FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyCbn1DaAw4Uz5MzNDKGfL702fPXbhswuXM",
+            authDomain: "almanaque-2d45c.firebaseapp.com",
+            projectId: "almanaque-2d45c",
+            storageBucket: "almanaque-2d45c.appspot.com",
+            messagingSenderId: "438098113685",
+            appId: "1:438098113685:web:ee38a615cdf1166be9979c"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // FUNÇÃO QUE LÊ OS GRUPOS DO BANCO
+        async function carregar() {
+            const lista = document.getElementById('lista-grupos');
+            try {
+                const q = query(collection(db, "grupos"), where("status", "==", "aprovado"));
+                const querySnapshot = await getDocs(q);
+                
+                lista.innerHTML = "";
+                querySnapshot.forEach((doc) => {
+                    const grupo = doc.data();
+                    lista.innerHTML += `
+                        <div class="card">
+                            <h3>${grupo.nome}</h3>
+                            <a href="${grupo.link}" target="_blank">ENTRAR NO GRUPO</a>
+                        </div>`;
+                });
+            } catch (erro) {
+                lista.innerHTML = "Erro ao carregar: " + erro.message;
+            }
+        }
+        
+        carregar();
+    </script>
+</body>
+</html>
