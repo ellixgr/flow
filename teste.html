@@ -30,6 +30,9 @@
         .grupo-card:hover { transform: translateY(-4px); }
         .texto-vermelho { color: #dc2626; }
         .esconder { display: none !important; }
+        .status-analise { color: #ca8a04; }
+        .status-aprovado { color: #15803d; }
+        .status-recusado { color: #dc2626; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -227,6 +230,7 @@ function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
+// ✅ CORRIGIDO: Carrega SOMENTE grupos aprovados para a página inicial
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
@@ -240,6 +244,10 @@ async function carregarGrupos() {
         mostrarPagina();
     } catch (err) {
         console.error("Erro ao carregar grupos:", err);
+        // Se der erro de índice, avise para criar o índice no Firestore
+        if (err.code === "failed-precondition") {
+            alert("⚠️ Para funcionar bem, crie o índice que aparece no link do erro no console do Firebase.");
+        }
     }
 }
 
@@ -307,7 +315,7 @@ function abrirDetalhes(grupo) {
     abrirModal("modalDetalhes");
 }
 
-// Função de envio CORRIGIDA
+// ✅ CORRIGIDO: Salva com status e identificador do usuário corretos
 async function salvarGrupo() {
     const link = document.getElementById("linkGrupo").value.trim();
     const nome = document.getElementById("nomeGrupo").value.trim();
@@ -352,8 +360,8 @@ async function salvarGrupo() {
             categoria,
             descricao,
             foto: fotoBase64,
-            status: "analise",
-            usuarioId,
+            status: "analise", // ⬅️ Sempre começa como em análise
+            usuarioId: usuarioId, // ⬅️ Identifica quem enviou
             dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
             impulsionadoAte: null
         });
@@ -372,17 +380,22 @@ async function salvarGrupo() {
 
     } catch (erro) {
         console.error("Erro ao salvar:", erro);
-        alert("❌ Erro ao enviar. Verifique se o Firebase está configurado corretamente.");
+        alert("❌ Erro ao enviar. Tente novamente.");
     }
 }
 
+// ✅ CORRIGIDO: Mostra todos os grupos do usuário com status
 async function carregarMeusGrupos() {
     try {
         const usuarioId = auth.currentUser.uid;
-        const snapshot = await db.collection("grupos").where("usuarioId", "==", usuarioId).get();
-        const meusGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const snapshot = await db.collection("grupos")
+            .where("usuarioId", "==", usuarioId)
+            .orderBy("dataEnvio", "desc")
+            .get();
 
+        const meusGrupos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const container = document.getElementById("conteudoMeusGrupos");
+
         if (meusGrupos.length === 0) {
             container.innerHTML = `
                 <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
@@ -398,20 +411,13 @@ async function carregarMeusGrupos() {
             const div = document.createElement("div");
             div.className = "flex items-center justify-between border-b py-3";
 
-            let acao = "";
+            let statusTexto = "";
             if (grupo.status === "analise") {
-                acao = `<span class="text-yellow-600 font-medium">Em análise</span>`;
+                statusTexto = `<span class="status-analise font-medium">⏳ Em análise</span>`;
             } else if (grupo.status === "aprovado") {
-                const agora = new Date();
-                const fim = grupo.impulsionadoAte ? grupo.impulsionadoAte.toDate() : null;
-
-                if (!fim || agora > fim) {
-                    acao = `<button onclick="impulsionar('${grupo.id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Impulsionar Grupo</button>`;
-                } else {
-                    const tempoRestante = Math.ceil((fim - agora) / 60000);
-                    acao = `<span class="text-blue-600">Topo por mais ${tempoRestante} min</span>`;
-                    atualizarContagem(grupo.id, fim, div);
-                }
+                statusTexto = `<span class="status-aprovado font-medium">✅ Aprovado</span>`;
+            } else if (grupo.status === "recusado") {
+                statusTexto = `<span class="status-recusado font-medium">❌ Recusado</span>`;
             }
 
             div.innerHTML = `
@@ -422,7 +428,7 @@ async function carregarMeusGrupos() {
                         <p class="text-xs text-gray-500">${grupo.categoria}</p>
                     </div>
                 </div>
-                <div>${acao}</div>
+                <div>${statusTexto}</div>
             `;
             container.appendChild(div);
         });
