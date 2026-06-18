@@ -201,23 +201,20 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// ✅ Configuração de login PERSISTENTE
+// ✅ Login PERSISTENTE: mantém o mesmo ID mesmo recarregando
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda"];
 const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
-// ✅ Novo sistema de login: mantém o mesmo ID sempre
 auth.onAuthStateChanged(user => {
     if (user) {
         usuarioAtual = user;
         usuarioPronto = true;
         carregarGrupos();
     } else {
-        // Faz login anônimo apenas uma vez, e mantém salvo
-        auth.signInAnonymously()
-            .catch(err => console.error("Erro no login:", err));
+        auth.signInAnonymously().catch(err => console.error("Erro login:", err));
     }
 });
 
@@ -254,8 +251,8 @@ async function carregarGrupos() {
         paginaAtual = 1; mostrarPagina();
     } catch (err) {
         console.error(err);
-        if (err.code === "failed-precondition") alert("⚠️ Crie o índice pelo link que aparece no console!");
-        else alert("⚠️ Verifique a conexão ou o índice.");
+        if (err.code === "failed-precondition") alert("⚠️ Crie o índice da lista principal pelo link do console.");
+        else alert("⚠️ Verifique a conexão.");
     }
 }
 
@@ -302,7 +299,7 @@ async function salvarGrupo() {
     } catch (erro) { alert("❌ Erro ao salvar."); }
 }
 
-// ✅ Consulta que funciona com o índice e mantém todos os grupos
+// ✅ FUNÇÃO CORRIGIDA: SEM ORDENAÇÃO NO BANCO → NÃO PEDE ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -311,12 +308,18 @@ async function carregarMeusGrupos() {
         return; 
     }
     try {
+        // Busca SEM orderBy → NÃO PRECISA DE ÍNDICE
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "desc")
             .get();
 
-        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Ordena manualmente no navegador
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => {
+                const dataA = a.dataEnvio ? a.dataEnvio.toDate() : new Date(0);
+                const dataB = b.dataEnvio ? b.dataEnvio.toDate() : new Date(0);
+                return dataB - dataA;
+            });
 
         if (meus.length === 0) {
             container.innerHTML = `<p class="text-center text-gray-500 py-10">Você ainda não enviou nenhum grupo.</p><div class="text-center"><button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo</button></div>`;
@@ -367,13 +370,13 @@ async function carregarMeusGrupos() {
         });
 
     } catch (err) {
-        console.error("Erro ao carregar meus grupos:", err);
+        console.error("Erro:", err);
         container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`;
     }
 }
 
 async function impulsionarGrupo(id) {
-    if (!confirm("Impulsionar este grupo por 2 horas? Ele ficará no topo da lista.")) return;
+    if (!confirm("Impulsionar por 2 horas?")) return;
     try {
         const fim = new Date(Date.now() + TEMPO_IMPULSAO);
         await db.collection("grupos").doc(id).update({
