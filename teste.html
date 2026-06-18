@@ -189,7 +189,6 @@ let fotoBase64 = "";
 let usuarioAtual = null;
 let usuarioPronto = false;
 
-// ✅ LOGIN ANÔNIMO ATIVADO E ESTÁVEL
 async function inicializarLogin() {
     try {
         await auth.signOut();
@@ -205,7 +204,6 @@ async function inicializarLogin() {
 }
 inicializarLogin();
 
-// ✅ TRATAMENTO DE FOTO COM LIMITE DE TAMANHO
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
@@ -247,20 +245,23 @@ function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
-// ✅ CARREGAR LISTA PRINCIPAL → BATE COM O ÍNDICE 2
+// ✅ LISTA PRINCIPAL → BATE COM O ÍNDICE: impulsionadoAte ASC + dataEnvio ASC
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
-            .where("status", "==", "aprovado")
-            .orderBy("impulsionadoAte", "desc")
-            .orderBy("dataEnvio", "desc");
+            .orderBy("impulsionadoAte", "asc")
+            .orderBy("dataEnvio", "asc");
         const snap = await ref.get();
-        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Filtra só os aprovados e inverte para mostrar mais novos primeiro
+        todosGrupos = snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .filter(g => g.status === "aprovado")
+            .reverse();
         paginaAtual = 1;
         mostrarPagina();
     } catch (err) {
-        console.error("Erro grupos:", err);
-        if (err.code === "failed-precondition") alert("⚠️ Verifique os índices no Firebase.");
+        console.error("❌ Erro grupos:", err);
+        alert("⚠️ Verifique a conexão com o Firebase.");
     }
 }
 
@@ -375,7 +376,7 @@ async function salvarGrupo() {
     }
 }
 
-// ✅ CARREGAR MEUS GRUPOS → AGORA BATE 100% COM O ÍNDICE 1 QUE VOCÊ TEM
+// ✅ MEUS GRUPOS → BATE COM O ÍNDICE: usuarioId ASC + dataEnvio ASC
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) {
@@ -385,13 +386,12 @@ async function carregarMeusGrupos() {
     }
 
     try {
-        // Ordem exata do índice: usuarioId (crescente) + dataEnvio (crescente)
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
             .orderBy("dataEnvio", "asc")
             .get();
 
-        // Inverte para manter visualmente o mais novo primeiro
+        // Inverte para mostrar os mais novos primeiro
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
 
         if (meus.length === 0) {
