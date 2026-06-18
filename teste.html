@@ -30,9 +30,9 @@
         .grupo-card:hover { transform: translateY(-4px); }
         .texto-vermelho { color: #dc2626; }
         .esconder { display: none !important; }
-        .status-analise { color: #ca8a04; }
-        .status-aprovado { color: #15803d; }
-        .status-recusado { color: #dc2626; }
+        .status-analise { color: #ca8a04; font-weight: 500; }
+        .status-aprovado { color: #15803d; font-weight: 500; }
+        .status-recusado { color: #dc2626; font-weight: 500; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -122,10 +122,7 @@
     <div class="bg-white rounded-lg w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
         <h3 class="text-xl font-bold mb-4 text-gray-800">Meus Grupos</h3>
         <div id="conteudoMeusGrupos">
-            <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
-            <div class="text-center">
-                <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo Agora</button>
-            </div>
+            <p class="text-center text-gray-500 py-10">Carregando...</p>
         </div>
         <div class="text-right mt-4">
             <button onclick="fecharModal('modalMeusGrupos')" class="px-4 py-2 bg-gray-300 rounded">Fechar</button>
@@ -189,9 +186,19 @@ const itensPorPagina = 20;
 let categoriaAtual = "todos";
 let grupoSelecionado = null;
 let fotoBase64 = "";
+let usuarioAtual = null;
 
-// Login anônimo
-auth.signInAnonymously().catch(err => console.error("Erro login:", err));
+// ✅ CORRIGIDO: Mantém o login do usuário
+auth.onAuthStateChanged(user => {
+    if (user) {
+        usuarioAtual = user;
+        console.log("Usuário logado:", user.uid);
+        carregarGrupos();
+    } else {
+        auth.signInAnonymously()
+            .catch(err => console.error("Erro ao logar:", err));
+    }
+});
 
 // Processar foto escolhida
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
@@ -219,7 +226,11 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     leitor.readAsDataURL(arquivo);
 });
 
-function abrirModal(id) { document.getElementById(id).classList.remove("esconder"); }
+function abrirModal(id) {
+    document.getElementById(id).classList.remove("esconder");
+    // ✅ CORRIGIDO: Carrega os grupos sempre que abrir o modal
+    if (id === "modalMeusGrupos") carregarMeusGrupos();
+}
 function fecharModal(id) { document.getElementById(id).classList.add("esconder"); }
 
 function temPalavraProibida(texto) {
@@ -230,7 +241,7 @@ function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
-// ✅ CORRIGIDO: Carrega SOMENTE grupos aprovados para a página inicial
+// Carrega só grupos aprovados
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
@@ -244,9 +255,8 @@ async function carregarGrupos() {
         mostrarPagina();
     } catch (err) {
         console.error("Erro ao carregar grupos:", err);
-        // Se der erro de índice, avise para criar o índice no Firestore
         if (err.code === "failed-precondition") {
-            alert("⚠️ Para funcionar bem, crie o índice que aparece no link do erro no console do Firebase.");
+            alert("⚠️ Acesse o link que aparece no console do Firebase e crie o índice solicitado.");
         }
     }
 }
@@ -315,7 +325,7 @@ function abrirDetalhes(grupo) {
     abrirModal("modalDetalhes");
 }
 
-// ✅ CORRIGIDO: Salva com status e identificador do usuário corretos
+// ✅ CORRIGIDO: Salva com o ID correto do usuário
 async function salvarGrupo() {
     const link = document.getElementById("linkGrupo").value.trim();
     const nome = document.getElementById("nomeGrupo").value.trim();
@@ -326,6 +336,7 @@ async function salvarGrupo() {
     aviso.textContent = "";
     aviso.className = "text-xs mt-1";
 
+    if (!usuarioAtual) return alert("Aguarde o sistema carregar, tente novamente em 2 segundos.");
     if (!link) return alert("Preencha o link do grupo!");
     if (!nome) return alert("Digite o nome do grupo!");
     if (!categoria) return alert("Escolha uma categoria!");
@@ -352,22 +363,20 @@ async function salvarGrupo() {
     }
 
     try {
-        const usuarioId = auth.currentUser.uid;
-
         await db.collection("grupos").add({
             link,
             nome,
             categoria,
             descricao,
             foto: fotoBase64,
-            status: "analise", // ⬅️ Sempre começa como em análise
-            usuarioId: usuarioId, // ⬅️ Identifica quem enviou
+            status: "analise",
+            usuarioId: usuarioAtual.uid,
             dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
             impulsionadoAte: null
         });
 
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado com sucesso! Aguarde nossa análise.");
+        alert("✅ Grupo enviado com sucesso!");
 
         // Limpar formulário
         document.getElementById("linkGrupo").value = "";
@@ -380,16 +389,20 @@ async function salvarGrupo() {
 
     } catch (erro) {
         console.error("Erro ao salvar:", erro);
-        alert("❌ Erro ao enviar. Tente novamente.");
+        alert("❌ Erro ao enviar.");
     }
 }
 
-// ✅ CORRIGIDO: Mostra todos os grupos do usuário com status
+// ✅ CORRIGIDO: Carrega os grupos do usuário sempre que abrir
 async function carregarMeusGrupos() {
+    if (!usuarioAtual) {
+        document.getElementById("conteudoMeusGrupos").innerHTML = `<p class="text-center text-gray-500 py-10">Aguarde...</p>`;
+        return;
+    }
+
     try {
-        const usuarioId = auth.currentUser.uid;
         const snapshot = await db.collection("grupos")
-            .where("usuarioId", "==", usuarioId)
+            .where("usuarioId", "==", usuarioAtual.uid)
             .orderBy("dataEnvio", "desc")
             .get();
 
@@ -412,13 +425,9 @@ async function carregarMeusGrupos() {
             div.className = "flex items-center justify-between border-b py-3";
 
             let statusTexto = "";
-            if (grupo.status === "analise") {
-                statusTexto = `<span class="status-analise font-medium">⏳ Em análise</span>`;
-            } else if (grupo.status === "aprovado") {
-                statusTexto = `<span class="status-aprovado font-medium">✅ Aprovado</span>`;
-            } else if (grupo.status === "recusado") {
-                statusTexto = `<span class="status-recusado font-medium">❌ Recusado</span>`;
-            }
+            if (grupo.status === "analise") statusTexto = `<span class="status-analise">⏳ Em análise</span>`;
+            else if (grupo.status === "aprovado") statusTexto = `<span class="status-aprovado">✅ Aprovado</span>`;
+            else if (grupo.status === "recusado") statusTexto = `<span class="status-recusado">❌ Recusado</span>`;
 
             div.innerHTML = `
                 <div class="flex items-center gap-3">
@@ -432,37 +441,10 @@ async function carregarMeusGrupos() {
             `;
             container.appendChild(div);
         });
+
     } catch (err) {
         console.error("Erro ao carregar meus grupos:", err);
-    }
-}
-
-function atualizarContagem(id, dataFim, elemento) {
-    const intervalo = setInterval(() => {
-        const agora = new Date();
-        const resto = dataFim - agora;
-        if (resto <= 0) {
-            clearInterval(intervalo);
-            elemento.querySelector("div:last-child").innerHTML = `<button onclick="impulsionar('${id}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm">Impulsionar Grupo</button>`;
-            return;
-        }
-        const min = Math.floor(resto / 60000);
-        const seg = Math.floor((resto % 60000) / 1000);
-        elemento.querySelector("div:last-child").innerHTML = `<span class="text-blue-600">${min}min ${seg}seg restantes</span>`;
-    }, 1000);
-}
-
-async function impulsionar(idGrupo) {
-    try {
-        const fim = new Date();
-        fim.setHours(fim.getHours() + 2);
-        await db.collection("grupos").doc(idGrupo).update({ impulsionadoAte: fim });
-        alert("✅ Grupo impulsionado! Ficará no topo por 2 horas.");
-        carregarGrupos();
-        carregarMeusGrupos();
-    } catch (err) {
-        console.error("Erro ao impulsionar:", err);
-        alert("❌ Erro ao impulsionar.");
+        document.getElementById("conteudoMeusGrupos").innerHTML = `<p class="text-center text-red-500 py-10">Erro ao carregar</p>`;
     }
 }
 
@@ -477,14 +459,12 @@ async function enviarDenuncia() {
         });
         fecharModal("modalDenuncia");
         fecharModal("modalDetalhes");
-        alert("✅ Denúncia enviada! Obrigado.");
+        alert("✅ Denúncia enviada!");
     } catch (err) {
         console.error("Erro ao enviar denúncia:", err);
         alert("❌ Erro ao enviar denúncia.");
     }
 }
-
-window.onload = carregarGrupos;
 </script>
 
 </body>
