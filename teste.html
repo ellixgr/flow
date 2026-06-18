@@ -189,7 +189,7 @@ let fotoBase64 = "";
 let usuarioAtual = null;
 let usuarioPronto = false;
 
-// ✅ LOGIN CORRIGIDO: Sempre limpa e cria novo usuário sem travar
+// ✅ LOGIN ANÔNIMO ATIVADO E ESTÁVEL
 async function inicializarLogin() {
     try {
         await auth.signOut();
@@ -205,14 +205,13 @@ async function inicializarLogin() {
 }
 inicializarLogin();
 
-// ✅ PROCESSAR FOTO: Verifica tamanho real e garante <70KB
+// ✅ TRATAMENTO DE FOTO COM LIMITE DE TAMANHO
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
 
-    // Verifica tamanho antes de tudo
     if (arquivo.size > 70 * 1024) {
-        alert("❌ Imagem muito grande! Máximo 70KB. Escolha uma mais leve.");
+        alert("❌ Imagem maior que 70KB! Escolha uma mais leve.");
         this.value = "";
         return;
     }
@@ -227,7 +226,6 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
             canvas.width = 150;
             canvas.height = 150;
             ctx.drawImage(img, 0, 0, 150, 150);
-            // Qualidade ajustada para ficar sempre abaixo de 70KB
             fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
             document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`;
             document.getElementById("previewFoto").classList.remove("hidden");
@@ -249,6 +247,7 @@ function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
+// ✅ CARREGAR LISTA PRINCIPAL → BATE COM O ÍNDICE 2
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
@@ -261,7 +260,7 @@ async function carregarGrupos() {
         mostrarPagina();
     } catch (err) {
         console.error("Erro grupos:", err);
-        if (err.code === "failed-precondition") alert("⚠️ Crie o índice no console do Firebase.");
+        if (err.code === "failed-precondition") alert("⚠️ Verifique os índices no Firebase.");
     }
 }
 
@@ -322,10 +321,9 @@ function abrirDetalhes(g) {
     abrirModal("modalDetalhes");
 }
 
-// ✅ SALVAR CORRIGIDO: Sem verificação de estado travada
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) {
-        alert("⏳ Aguarde a conexão, tente novamente em 2 segundos.");
+        alert("⏳ Aguarde a conexão e tente novamente.");
         return;
     }
 
@@ -339,17 +337,17 @@ async function salvarGrupo() {
 
     if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
     if (!link.startsWith("https://chat.whatsapp.com/")) {
-        aviso.textContent = "❌ Link inválido! Use o formato do WhatsApp.";
+        aviso.textContent = "❌ Link inválido!";
         aviso.className = "texto-vermelho";
         return;
     }
     if (contarPalavras(desc) > 30) {
-        aviso.textContent = "❌ Máximo 30 palavras na descrição.";
+        aviso.textContent = "❌ Máximo 30 palavras!";
         aviso.className = "texto-vermelho";
         return;
     }
     if (temPalavraProibida(desc)) {
-        aviso.textContent = "❌ Texto contém palavras não permitidas.";
+        aviso.textContent = "❌ Palavras não permitidas!";
         aviso.className = "texto-vermelho";
         return;
     }
@@ -363,8 +361,7 @@ async function salvarGrupo() {
             impulsionadoAte: null
         });
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado para análise com sucesso!");
-        // Limpar formulário
+        alert("✅ Grupo enviado para análise!");
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -374,11 +371,11 @@ async function salvarGrupo() {
         fotoBase64 = "";
     } catch (erro) {
         console.error("❌ Erro ao salvar:", erro);
-        alert("❌ Erro de conexão. Atualize a página e tente novamente.");
+        alert("❌ Erro. Atualize a página e tente novamente.");
     }
 }
 
-// ✅ CARREGAR MEUS GRUPOS: Definitivo, sem travamento
+// ✅ CARREGAR MEUS GRUPOS → AGORA BATE 100% COM O ÍNDICE 1 QUE VOCÊ TEM
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) {
@@ -388,18 +385,20 @@ async function carregarMeusGrupos() {
     }
 
     try {
+        // Ordem exata do índice: usuarioId (crescente) + dataEnvio (crescente)
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
             .orderBy("dataEnvio", "asc")
             .get();
 
+        // Inverte para manter visualmente o mais novo primeiro
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
 
         if (meus.length === 0) {
             container.innerHTML = `
                 <p class="text-center text-gray-500 py-10">Você ainda não enviou nenhum grupo.</p>
                 <div class="text-center">
-                    <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar meu primeiro grupo</button>
+                    <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo</button>
                 </div>
             `;
             return;
@@ -443,7 +442,7 @@ async function enviarDenuncia() {
         });
         fecharModal("modalDenuncia");
         fecharModal("modalDetalhes");
-        alert("✅ Denúncia enviada com sucesso!");
+        alert("✅ Denúncia enviada!");
     } catch (err) {
         console.error("❌ Erro denúncia:", err);
         alert("❌ Não foi possível enviar a denúncia.");
