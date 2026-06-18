@@ -365,7 +365,7 @@ async function salvarGrupo() {
     }
 }
 
-// ✅ CARREGAR MEUS GRUPOS: Não trava mais
+// ✅ CARREGAR MEUS GRUPOS: CORRIGIDO PARA BATER COM O ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) {
@@ -376,9 +376,12 @@ async function carregarMeusGrupos() {
     try {
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "desc")
+            .orderBy("dataEnvio", "asc") // ← Agora bate com o índice que você tem
             .get();
-        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // ← Inverte para continuar mostrando o mais novo primeiro
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
+
         if (meus.length === 0) {
             container.innerHTML = `
                 <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
