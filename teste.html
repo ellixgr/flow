@@ -201,20 +201,25 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// ✅ Configuração de login PERSISTENTE
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda"];
 const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
-async function inicializarLogin() {
-    try {
-        await auth.signOut();
-        const userCred = await auth.signInAnonymously();
-        usuarioAtual = userCred.user;
+// ✅ Novo sistema de login: mantém o mesmo ID sempre
+auth.onAuthStateChanged(user => {
+    if (user) {
+        usuarioAtual = user;
         usuarioPronto = true;
         carregarGrupos();
-    } catch (err) { setTimeout(inicializarLogin, 1500); }
-}
-inicializarLogin();
+    } else {
+        // Faz login anônimo apenas uma vez, e mantém salvo
+        auth.signInAnonymously()
+            .catch(err => console.error("Erro no login:", err));
+    }
+});
 
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
@@ -297,7 +302,7 @@ async function salvarGrupo() {
     } catch (erro) { alert("❌ Erro ao salvar."); }
 }
 
-// ✅ FUNÇÃO CORRIGIDA: NÃO USA ORDENAÇÃO COMPOSTA, FUNCIONA COM QUALQUER STATUS
+// ✅ Consulta que funciona com o índice e mantém todos os grupos
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -306,18 +311,12 @@ async function carregarMeusGrupos() {
         return; 
     }
     try {
-        // Consulta simples, sem ordenação que peça índice extra
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
+            .orderBy("dataEnvio", "desc")
             .get();
 
-        // Ordenamos manualmente por data, mais novos primeiro
-        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-            .sort((a, b) => {
-                const dataA = a.dataEnvio ? a.dataEnvio.toDate() : 0;
-                const dataB = b.dataEnvio ? b.dataEnvio.toDate() : 0;
-                return dataB - dataA;
-            });
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
         if (meus.length === 0) {
             container.innerHTML = `<p class="text-center text-gray-500 py-10">Você ainda não enviou nenhum grupo.</p><div class="text-center"><button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo</button></div>`;
