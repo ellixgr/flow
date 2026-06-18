@@ -3,24 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Grupos</title>
+    <title>Painel Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
 
-<div class="max-w-5xl mx-auto bg-white rounded-lg shadow p-6">
-    <h1 class="text-2xl font-bold mb-6 text-center">📋 Gerenciar Grupos</h1>
+<!-- Tela de Login -->
+<div id="telaLogin" class="max-w-md mx-auto mt-20 bg-white p-6 rounded shadow-lg">
+    <h2 class="text-xl font-bold text-center mb-6">🔐 Acesso ao Painel</h2>
+    <input type="password" id="senhaDigitada" class="w-full border p-3 rounded mb-4" placeholder="Digite sua senha de admin">
+    <button onclick="verificarAcesso()" class="w-full bg-green-600 text-white p-3 rounded font-medium">Entrar</button>
+    <p id="aviso" class="text-red-600 text-center mt-3 hidden">Senha incorreta ou sem permissão!</p>
+</div>
 
-    <div class="mb-4 flex gap-2">
-        <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Em análise</button>
+<!-- Painel só aparece depois de tentar -->
+<div id="painel" class="hidden max-w-5xl mx-auto">
+    <div class="bg-white rounded shadow p-6 mb-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">📋 Gerenciar Grupos</h1>
+        <button onclick="sair()" class="bg-red-500 text-white px-3 py-1 rounded">Sair</button>
+    </div>
+
+    <div class="bg-white rounded shadow p-4 mb-4 flex gap-2">
+        <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Pendentes</button>
         <button onclick="filtrar('aprovado')" class="bg-green-500 text-white px-3 py-1 rounded">Aprovados</button>
-        <button onclick="filtrar('recusado')" class="bg-red-500 text-white px-3 py-1 rounded">Recusados</button>
         <button onclick="filtrar('todos')" class="bg-gray-500 text-white px-3 py-1 rounded">Todos</button>
     </div>
 
-    <div id="listaGrupos" class="space-y-4"></div>
+    <div id="lista" class="space-y-4"></div>
 </div>
 
 <script>
@@ -35,27 +46,57 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-let statusFiltro = "analise";
+let senhaAtual = "";
+let filtro = "analise";
 
-// 🔑 CHAVE DE ADMINISTRADOR (SÓ VOCÊ TEM ESSA)
-const CHAVE_ADMIN = "SEU_CODIGO_SECRETO_AQUI_ESCOLHA_UM_BOM";
+// Primeiro passo: testa a senha direto no banco
+async function verificarAcesso() {
+    senhaAtual = document.getElementById("senhaDigitada").value.trim();
+    if (!senhaAtual) return;
 
-// Carrega todos os grupos
-async function carregarGrupos() {
-    const ref = statusFiltro === "todos" 
-        ? db.collection("grupos").orderBy("dataEnvio", "desc")
-        : db.collection("grupos").where("status", "==", statusFiltro).orderBy("dataEnvio", "desc");
+    try {
+        // Tenta fazer uma alteração de teste para ver se a senha funciona
+        await db.collection("grupos").limit(1).get();
+        // Para testar, enviamos um valor temporário
+        const teste = await db.collection("grupos").doc("teste_acesso").set({
+            _segredo_admin: senhaAtual
+        }, { merge: true });
 
-    const snapshot = await ref.get();
-    const container = document.getElementById("listaGrupos");
+        // Se chegou aqui sem erro → senha correta
+        document.getElementById("telaLogin").classList.add("hidden");
+        document.getElementById("painel").classList.remove("hidden");
+        carregarLista();
+    } catch (erro) {
+        document.getElementById("aviso").classList.remove("hidden");
+        setTimeout(() => document.getElementById("aviso").classList.add("hidden"), 3000);
+    }
+}
+
+function sair() {
+    senhaAtual = "";
+    document.getElementById("painel").classList.add("hidden");
+    document.getElementById("telaLogin").classList.remove("hidden");
+    document.getElementById("senhaDigitada").value = "";
+}
+
+async function carregarLista() {
+    let ref;
+    if (filtro === "todos") {
+        ref = db.collection("grupos").orderBy("dataEnvio", "desc");
+    } else {
+        ref = db.collection("grupos").where("status", "==", filtro).orderBy("dataEnvio", "desc");
+    }
+
+    const snap = await ref.get();
+    const container = document.getElementById("lista");
     container.innerHTML = "";
 
-    if (snapshot.empty) {
-        container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado.</p>";
+    if (snap.empty) {
+        container.innerHTML = "<p class='text-center text-gray-500 py-10'>Nenhum grupo encontrado</p>";
         return;
     }
 
-    snapshot.docs.forEach(doc => {
+    snap.docs.forEach(doc => {
         const g = { id: doc.id, ...doc.data() };
         const div = document.createElement("div");
         div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between";
@@ -64,49 +105,54 @@ async function carregarGrupos() {
             <div class="flex items-center gap-4">
                 <img src="${g.foto}" class="w-16 h-16 rounded-full object-cover">
                 <div>
-                    <h3 class="font-bold text-lg">${g.nome}</h3>
+                    <h3 class="font-bold">${g.nome}</h3>
                     <p class="text-sm text-gray-600">${g.categoria.toUpperCase()}</p>
                     <p class="text-xs text-gray-500">${g.descricao}</p>
                     <a href="${g.link}" target="_blank" class="text-blue-600 text-xs">Abrir link</a>
                 </div>
             </div>
-            <div class="flex gap-2 items-center">
-                <span class="px-2 py-1 rounded text-xs font-bold ${
-                    g.status === 'analise' ? 'bg-yellow-100 text-yellow-800' :
-                    g.status === 'aprovado' ? 'bg-green-100 text-green-800' :
-                    'bg-red-100 text-red-800'
+            <div class="flex gap-2">
+                <span class="px-2 py-1 rounded text-xs ${
+                    g.status === "analise" ? "bg-yellow-100" :
+                    g.status === "aprovado" ? "bg-green-100" : "bg-red-100"
                 }">${g.status.toUpperCase()}</span>
-                <input type="password" id="senha_${g.id}" placeholder="Chave admin" class="w-24 border p-1 text-xs rounded">
-                <button onclick="alterarStatus('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">Aprovar</button>
-                <button onclick="alterarStatus('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded text-sm">Recusar</button>
+                <button onclick="mudarStatus('${g.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">✅ Aprovar</button>
+                <button onclick="mudarStatus('${g.id}', 'recusado')" class="bg-red-600 text-white px-2 py-1 rounded text-sm">❌ Não Aprovar</button>
+                <button onclick="apagarGrupo('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded text-sm">🗑️ Apagar</button>
             </div>
         `;
         container.appendChild(div);
     });
 }
 
-async function alterarStatus(id, novoStatus) {
-    const senhaDigitada = document.getElementById(`senha_${id}`).value.trim();
-    if (senhaDigitada !== CHAVE_ADMIN) {
-        alert("❌ Acesso negado! Chave incorreta.");
-        return;
-    }
-
+async function mudarStatus(id, novoStatus) {
     try {
-        await db.collection("grupos").doc(id).update({ status: novoStatus });
-        carregarGrupos();
-        alert(`✅ Grupo ${novoStatus === 'aprovado' ? 'aprovado' : 'recusado'}!`);
-    } catch (err) {
-        alert("❌ Erro: você não tem permissão para alterar.");
+        await db.collection("grupos").doc(id).update({
+            status: novoStatus,
+            _segredo_admin: senhaAtual // Envia só na hora da ação
+        });
+        carregarLista();
+    } catch (e) {
+        alert("❌ Senha incorreta ou sem permissão!");
     }
 }
 
-function filtrar(status) {
-    statusFiltro = status;
-    carregarGrupos();
+async function apagarGrupo(id) {
+    if (!confirm("Tem certeza que quer apagar?")) return;
+    try {
+        await db.collection("grupos").doc(id).delete({
+            _segredo_admin: senhaAtual
+        });
+        carregarLista();
+    } catch (e) {
+        alert("❌ Senha incorreta ou sem permissão!");
+    }
 }
 
-window.onload = carregarGrupos;
+function filtrar(tipo) {
+    filtro = tipo;
+    carregarLista();
+}
 </script>
 </body>
 </html>
