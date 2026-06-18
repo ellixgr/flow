@@ -189,23 +189,34 @@ let fotoBase64 = "";
 let usuarioAtual = null;
 let usuarioPronto = false;
 
-// ✅ LOGIN CORRIGIDO: Espera e marca quando está pronto
-auth.onAuthStateChanged(user => {
-    if (user) {
-        usuarioAtual = user;
+// ✅ LOGIN CORRIGIDO: Sempre limpa e cria novo usuário sem travar
+async function inicializarLogin() {
+    try {
+        await auth.signOut();
+        const userCred = await auth.signInAnonymously();
+        usuarioAtual = userCred.user;
         usuarioPronto = true;
-        console.log("Logado com ID:", user.uid);
+        console.log("✅ Usuário logado:", usuarioAtual.uid);
         carregarGrupos();
-    } else {
-        usuarioPronto = false;
-        auth.signInAnonymously().catch(err => console.error("Erro login:", err));
+    } catch (err) {
+        console.error("❌ Erro no login:", err);
+        setTimeout(inicializarLogin, 1500);
     }
-});
+}
+inicializarLogin();
 
-// Processar foto
+// ✅ PROCESSAR FOTO: Verifica tamanho real e garante <70KB
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
+
+    // Verifica tamanho antes de tudo
+    if (arquivo.size > 70 * 1024) {
+        alert("❌ Imagem muito grande! Máximo 70KB. Escolha uma mais leve.");
+        this.value = "";
+        return;
+    }
+
     const leitor = new FileReader();
     leitor.onload = function(e) {
         const img = new Image();
@@ -216,7 +227,8 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
             canvas.width = 150;
             canvas.height = 150;
             ctx.drawImage(img, 0, 0, 150, 150);
-            fotoBase64 = canvas.toDataURL("image/jpeg", 0.7);
+            // Qualidade ajustada para ficar sempre abaixo de 70KB
+            fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
             document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`;
             document.getElementById("previewFoto").classList.remove("hidden");
         };
@@ -249,7 +261,7 @@ async function carregarGrupos() {
         mostrarPagina();
     } catch (err) {
         console.error("Erro grupos:", err);
-        if (err.code === "failed-precondition") alert("⚠️ Crie o índice no link do console.");
+        if (err.code === "failed-precondition") alert("⚠️ Crie o índice no console do Firebase.");
     }
 }
 
@@ -310,12 +322,13 @@ function abrirDetalhes(g) {
     abrirModal("modalDetalhes");
 }
 
-// ✅ SALVAR CORRIGIDO: Só executa se o usuário estiver pronto
+// ✅ SALVAR CORRIGIDO: Sem verificação de estado travada
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) {
-        alert("Aguarde um instante e tente novamente.");
+        alert("⏳ Aguarde a conexão, tente novamente em 2 segundos.");
         return;
     }
+
     const link = document.getElementById("linkGrupo").value.trim();
     const nome = document.getElementById("nomeGrupo").value.trim();
     const cat = document.getElementById("categoriaGrupo").value;
@@ -324,19 +337,19 @@ async function salvarGrupo() {
     aviso.textContent = "";
     aviso.className = "text-xs mt-1";
 
-    if (!link || !nome || !cat || !desc || !fotoBase64) return alert("Preencha todos os campos!");
+    if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
     if (!link.startsWith("https://chat.whatsapp.com/")) {
-        aviso.textContent = "Link inválido!";
+        aviso.textContent = "❌ Link inválido! Use o formato do WhatsApp.";
         aviso.className = "texto-vermelho";
         return;
     }
     if (contarPalavras(desc) > 30) {
-        aviso.textContent = "Máximo 30 palavras!";
+        aviso.textContent = "❌ Máximo 30 palavras na descrição.";
         aviso.className = "texto-vermelho";
         return;
     }
     if (temPalavraProibida(desc)) {
-        aviso.textContent = "Texto contém palavras proibidas!";
+        aviso.textContent = "❌ Texto contém palavras não permitidas.";
         aviso.className = "texto-vermelho";
         return;
     }
@@ -350,8 +363,8 @@ async function salvarGrupo() {
             impulsionadoAte: null
         });
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado para análise!");
-        // Limpar
+        alert("✅ Grupo enviado para análise com sucesso!");
+        // Limpar formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -360,37 +373,38 @@ async function salvarGrupo() {
         document.getElementById("previewFoto").classList.add("hidden");
         fotoBase64 = "";
     } catch (erro) {
-        console.error("Erro ao salvar:", erro);
-        alert("❌ Erro ao enviar. Tente novamente.");
+        console.error("❌ Erro ao salvar:", erro);
+        alert("❌ Erro de conexão. Atualize a página e tente novamente.");
     }
 }
 
-// ✅ CARREGAR MEUS GRUPOS: CORRIGIDO PARA BATER COM O ÍNDICE
+// ✅ CARREGAR MEUS GRUPOS: Definitivo, sem travamento
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) {
         container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
-        setTimeout(carregarMeusGrupos, 600);
+        setTimeout(carregarMeusGrupos, 800);
         return;
     }
+
     try {
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "asc") // ← Agora bate com o índice que você tem
+            .orderBy("dataEnvio", "asc")
             .get();
 
-        // ← Inverte para continuar mostrando o mais novo primeiro
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
 
         if (meus.length === 0) {
             container.innerHTML = `
-                <p class="text-center text-gray-500 py-10">Você não tem grupos enviados.</p>
+                <p class="text-center text-gray-500 py-10">Você ainda não enviou nenhum grupo.</p>
                 <div class="text-center">
-                    <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar Grupo Agora</button>
+                    <button onclick="fecharModal('modalMeusGrupos'); abrirModal('modalEnviar')" class="bg-zap text-white px-4 py-2 rounded">Enviar meu primeiro grupo</button>
                 </div>
             `;
             return;
         }
+
         container.innerHTML = "";
         meus.forEach(g => {
             const div = document.createElement("div");
@@ -411,9 +425,10 @@ async function carregarMeusGrupos() {
             `;
             container.appendChild(div);
         });
+
     } catch (err) {
-        console.error("Erro meus grupos:", err);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro ao carregar</p>`;
+        console.error("❌ Erro ao carregar meus grupos:", err);
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`;
     }
 }
 
@@ -428,10 +443,10 @@ async function enviarDenuncia() {
         });
         fecharModal("modalDenuncia");
         fecharModal("modalDetalhes");
-        alert("✅ Denúncia enviada!");
+        alert("✅ Denúncia enviada com sucesso!");
     } catch (err) {
-        console.error("Erro denúncia:", err);
-        alert("❌ Erro ao enviar denúncia.");
+        console.error("❌ Erro denúncia:", err);
+        alert("❌ Não foi possível enviar a denúncia.");
     }
 }
 </script>
