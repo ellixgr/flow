@@ -245,23 +245,24 @@ function contarPalavras(texto) {
     return texto.trim().split(/\s+/).filter(p => p).length;
 }
 
-// ✅ LISTA PRINCIPAL → BATE COM O ÍNDICE: impulsionadoAte ASC + dataEnvio ASC
+// ✅ LISTA PRINCIPAL → EXATO com seu índice: impulsionadoAte ASC + dataEnvio ASC
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
-            .orderBy("impulsionadoAte", "asc")
-            .orderBy("dataEnvio", "asc");
+            .orderBy("impulsionadoAte", firebase.firestore.Ascending)
+            .orderBy("dataEnvio", firebase.firestore.Ascending);
+
         const snap = await ref.get();
-        // Filtra só os aprovados e inverte para mostrar mais novos primeiro
         todosGrupos = snap.docs
             .map(d => ({ id: d.id, ...d.data() }))
             .filter(g => g.status === "aprovado")
             .reverse();
+
         paginaAtual = 1;
         mostrarPagina();
     } catch (err) {
         console.error("❌ Erro grupos:", err);
-        alert("⚠️ Verifique a conexão com o Firebase.");
+        alert("⚠️ Verifique a conexão ou o índice no Firebase.");
     }
 }
 
@@ -376,7 +377,7 @@ async function salvarGrupo() {
     }
 }
 
-// ✅ MEUS GRUPOS → BATE COM O ÍNDICE: usuarioId ASC + dataEnvio ASC
+// ✅ MEUS GRUPOS → EXATO com seu índice: usuarioId ASC + dataEnvio ASC
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) {
@@ -388,10 +389,9 @@ async function carregarMeusGrupos() {
     try {
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "asc")
+            .orderBy("dataEnvio", firebase.firestore.Ascending)
             .get();
 
-        // Inverte para mostrar os mais novos primeiro
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).reverse();
 
         if (meus.length === 0) {
