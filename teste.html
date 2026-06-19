@@ -29,34 +29,90 @@
                         zap: '#25D366',
                         zapEscuro: '#128C7E',
                         zapMaisEscuro: '#075E54'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif']
                     }
                 }
             }
         }
     </script>
     <style>
+        /* Animações globais */
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            scroll-behavior: smooth;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .sucesso-notificacao {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #15803d;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 99999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .sucesso-notificacao.mostrar {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
         .grupo-card { 
-            transition: transform 0.2s ease; 
+            transition: all 0.3s ease; 
             max-width: 100%;
             overflow: hidden;
+            animation: fadeIn 0.4s ease-out forwards;
         }
-        .grupo-card:hover { transform: translateY(-3px); }
+        .grupo-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
         .texto-vermelho { color: #dc2626; }
         .esconder { display: none !important; }
         .status-analise { color: #ca8a04; font-weight: 500; }
         .status-aprovado { color: #15803d; font-weight: 500; }
         .status-recusado { color: #dc2626; font-weight: 500; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-        .modal-content { background: white; border-radius: 0.75rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
-        .pagina-tela-cheia { position: fixed; inset: 0; background: #f3f4f6; z-index: 10000; overflow-y: auto; }
-        .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: fadeIn 0.2s ease; }
+        .modal-content { background: white; border-radius: 0.75rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: fadeIn 0.2s ease; }
+        
+        /* CORREÇÃO: Página Meus Grupos NÃO é fixa, para o rodapé aparecer */
+        .pagina-tela-cheia { 
+            position: absolute; 
+            inset: 0; 
+            background: #f3f4f6; 
+            z-index: 10000; 
+            overflow-y: auto; 
+            min-height: 100vh;
+        }
+        .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; padding-bottom: 6rem; }
+        .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; transition: transform 0.2s ease; }
+        .logo:hover { transform: scale(1.05); }
+        
         /* Ajuste do card igual ao modelo */
         .card-img {
             width: 100%;
             height: 180px;
             object-fit: cover;
             object-position: center;
+            transition: transform 0.3s ease;
+        }
+        .grupo-card:hover .card-img {
+            transform: scale(1.03);
         }
         .card-body {
             padding: 1rem;
@@ -89,9 +145,16 @@
         .paginacao-container {
             display: none;
         }
+        /* Botões com animação */
+        button {
+            transition: all 0.2s ease;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col relative">
 
 <header class="bg-zapMaisEscuro text-white shadow-lg">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
@@ -100,10 +163,10 @@
             <h1 class="text-2xl font-bold">Grupos de WhatsApp</h1>
         </div>
         <div class="flex gap-3">
-            <button onclick="abrirModal('modalEnviar')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
+            <button onclick="abrirModal('modalEnviar')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100 hover:shadow-md">
                 <i class="fa fa-paper-plane mr-1"></i> Enviar Grupo
             </button>
-            <button onclick="abrirPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
+            <button onclick="abrirPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100 hover:shadow-md">
                 <i class="fa fa-user mr-1"></i> Meus Grupos
             </button>
         </div>
@@ -129,7 +192,7 @@
     </div>
 </main>
 
-<footer class="bg-gray-800 text-gray-300 text-center py-4 mt-8">
+<footer class="bg-gray-800 text-gray-300 text-center py-4 mt-8 z-10 relative">
     <div class="container mx-auto px-4">
         <p>© 2024 - 2026 Todos os direitos reservados</p>
         <div class="mt-2 space-x-4">
@@ -139,8 +202,11 @@
     </div>
 </footer>
 
+<!-- Notificação de sucesso -->
+<div id="notificacaoSucesso" class="sucesso-notificacao">✅ Grupo impulsionado 🎉</div>
+
 <div id="paginaMeusGrupos" class="pagina-tela-cheia esconder">
-    <div class="bg-zapMaisEscuro text-white shadow-md p-4 flex justify-between items-center">
+    <div class="bg-zapMaisEscuro text-white shadow-md p-4 flex justify-between items-center sticky top-0 z-20">
         <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
         <button onclick="fecharPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-3 py-1 rounded hover:bg-gray-100">
             <i class="fa fa-arrow-left mr-1"></i> Voltar
@@ -149,6 +215,15 @@
     <div class="conteudo-tela-cheia">
         <div id="conteudoMeusGrupos"><p class="text-center text-gray-500 py-10 text-lg">Carregando seus grupos...</p></div>
     </div>
+    <footer class="bg-gray-800 text-gray-300 text-center py-4 mt-8">
+        <div class="container mx-auto px-4">
+            <p>© 2024 - 2026 Todos os direitos reservados</p>
+            <div class="mt-2 space-x-4">
+                <button onclick="abrirModal('modalTermos')" class="hover:text-white underline">Termos de Uso</button>
+                <button onclick="abrirModal('modalPrivacidade')" class="hover:text-white underline">Política de Privacidade</button>
+            </div>
+        </div>
+    </footer>
 </div>
 
 <div id="modalEnviar" class="modal-overlay esconder">
@@ -278,6 +353,13 @@ const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 const LIMITE_GRUPOS_DIA = 3;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
+function mostrarNotificacao(texto = "✅ Grupo impulsionado 🎉") {
+    const el = document.getElementById("notificacaoSucesso");
+    el.textContent = texto;
+    el.classList.add("mostrar");
+    setTimeout(() => el.classList.remove("mostrar"), 3000);
+}
+
 function voltarInicio() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -285,9 +367,11 @@ function voltarInicio() {
 function abrirPaginaMeusGrupos() {
     document.getElementById("paginaMeusGrupos").classList.remove("esconder");
     carregarMeusGrupos();
+    document.body.style.overflow = "hidden";
 }
 function fecharPaginaMeusGrupos() {
     document.getElementById("paginaMeusGrupos").classList.add("esconder");
+    document.body.style.overflow = "auto";
 }
 
 auth.onAuthStateChanged(user => {
@@ -486,13 +570,15 @@ async function salvarGrupo() {
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.Timestamp.now()
+            dataEnvio: firebase.firestore.Timestamp.now(),
+            impulsionadoAte: null,
+            jaImpulsionado: false
         };
 
         await db.collection("grupos").add(dados);
 
         fecharModal("modalEnviar");
-        alert("✅ Enviado com sucesso!");
+        mostrarNotificacao("✅ Grupo enviado para análise!");
 
         // Limpa formulário
         document.getElementById("linkGrupo").value = "";
@@ -511,7 +597,7 @@ async function salvarGrupo() {
 }
 
 
-// ✅ MEUS GRUPOS SEM ÍNDICE
+// ✅ MEUS GRUPOS COM MELHORIAS
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -540,8 +626,10 @@ async function carregarMeusGrupos() {
             const horas = Math.floor(tempoRestante / 3600000);
             const minutos = Math.floor((tempoRestante % 3600000) / 60000);
 
+            // ✅ Remove "Aprovado" se já impulsionou uma vez
             const statusTexto = g.status === "analise" ? "⏳ Em análise" : 
-                                g.status === "aprovado" ? "✅ Aprovado" : 
+                                g.status === "aprovado" && !g.jaImpulsionado ? "✅ Aprovado" : 
+                                g.status === "aprovado" && g.jaImpulsionado ? "" : 
                                 "❌ Recusado";
 
             const statusClasse = g.status === "analise" ? "status-analise" : 
@@ -558,14 +646,14 @@ async function carregarMeusGrupos() {
             }
 
             const card = document.createElement("div");
-            card.className = "bg-white rounded-lg shadow p-5 border";
+            card.className = "bg-white rounded-lg shadow p-5 border fade-in";
             card.innerHTML = `
                 <div class="flex items-center gap-4 mb-4">
                     <img src="${g.foto || ''}" alt="${escaparHTML(g.nome)}" class="w-16 h-16 rounded-full object-cover border">
                     <div>
                         <h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3>
                         <p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p>
-                        <p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p>
+                        ${statusTexto ? `<p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p>` : ''}
                     </div>
                 </div>
                 <p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>
@@ -579,18 +667,19 @@ async function carregarMeusGrupos() {
     }
 }
 
+// ✅ IMPULSÃO SEM CONFIRMAÇÃO
 async function impulsionarGrupo(id) {
-    if (!confirm("Impulsionar este grupo por 2 horas?")) return;
     try {
         const fim = new Date(Date.now() + TEMPO_IMPULSAO);
         await db.collection("grupos").doc(id).update({
-            impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim)
+            impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim),
+            jaImpulsionado: true
         });
-        alert("✅ Grupo impulsionado com sucesso!");
+        mostrarNotificacao("✅ Grupo impulsionado 🎉");
         carregarMeusGrupos();
         carregarGrupos();
     } catch (err) {
-        alert("❌ Erro: " + err.message);
+        mostrarNotificacao("❌ Erro: " + err.message);
     }
 }
 
@@ -606,9 +695,9 @@ async function enviarDenuncia() {
         });
         fecharModal("modalDenuncia"); 
         fecharModal("modalDetalhes"); 
-        alert("✅ Denúncia enviada!");
+        mostrarNotificacao("✅ Denúncia enviada!");
     } catch (err) { 
-        alert("❌ Não foi possível enviar a denúncia."); 
+        mostrarNotificacao("❌ Não foi possível enviar a denúncia."); 
     }
 }
 </script>
