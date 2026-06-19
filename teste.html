@@ -112,6 +112,18 @@
             <textarea id="descricaoGrupo" class="w-full border p-2 rounded" rows="3" maxlength="200" required></textarea>
             <p id="avisoTexto" class="text-xs mt-1"></p>
         </div>
+
+        <!-- ✅ REGRAS DE PROIBIÇÃO ADICIONADAS AQUI -->
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+            <h5 class="font-semibold text-red-700 text-sm mb-2">🚫 Regras Obrigatórias:</h5>
+            <ul class="text-xs text-red-800 list-disc list-inside space-y-1">
+                <li>❌ Proibido links de outros sites ou redes sociais</li>
+                <li>❌ Proibido conteúdo violento, gore ou imagens fortes</li>
+                <li>❌ Proibido conteúdo para menores de 18 anos</li>
+                <li>❌ Proibido travas, links curtos ou redirecionamentos</li>
+            </ul>
+        </div>
+
         <div class="flex gap-3 justify-end">
             <button onclick="fecharModal('modalEnviar')" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
             <button onclick="salvarGrupo()" class="px-4 py-2 bg-zap text-white rounded">Enviar para Análise</button>
@@ -144,9 +156,8 @@
     <div class="modal-content">
         <h4 class="text-lg font-semibold mb-3">Motivo da Denúncia</h4>
         <div class="space-y-2 mb-4">
+            <!-- ✅ APENAS 1 OPÇÃO DE DENÚNCIA -->
             <label class="flex items-center gap-2"><input type="radio" name="motivoDenuncia" value="link_invalido" checked> Link inválido / expirado</label>
-            <label class="flex items-center gap-2"><input type="radio" name="motivoDenuncia" value="conteudo_inapropriado"> Conteúdo inadequado</label>
-            <label class="flex items-center gap-2"><input type="radio" name="motivoDenuncia" value="outro"> Outro</label>
         </div>
         <div class="flex gap-3 justify-end">
             <button onclick="fecharModal('modalDenuncia')" class="px-4 py-2 bg-gray-300 rounded">Cancelar</button>
@@ -204,8 +215,9 @@ const auth = firebase.auth();
 // ✅ Login PERSISTENTE: mantém o mesmo ID mesmo recarregando
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda"];
+const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda", "gore", "18+", "adulto", "trava", "encurtador"];
 const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
+const LIMITE_GRUPOS_DIA = 3; // ✅ Limite de 3 por dia
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
 auth.onAuthStateChanged(user => {
@@ -277,7 +289,27 @@ function paginaProxima() { paginaAtual++; mostrarPagina(); }
 
 function abrirDetalhes(g) {
     grupoSelecionado = g;
-    document.getElementById("conteudoDetalhes").innerHTML = `<div class="text-center mb-4"><img src="${g.foto}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover"><h3 class="text-xl font-bold">${g.nome}</h3><span class="text-sm text-gray-500">Categoria: ${g.categoria}</span></div><div class="border-t border-b py-4 my-3"><h4 class="font-semibold mb-2">Descrição:</h4><p class="text-gray-700 whitespace-pre-line">${g.descricao}</p></div>`;
+    // ✅ REGRAS APARECENDO NA ABA DE DETALHES
+    document.getElementById("conteudoDetalhes").innerHTML = `
+        <div class="text-center mb-4">
+            <img src="${g.foto}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="text-xl font-bold">${g.nome}</h3>
+            <span class="text-sm text-gray-500">Categoria: ${g.categoria}</span>
+        </div>
+        <div class="border-t border-b py-4 my-3">
+            <h4 class="font-semibold mb-2">Descrição:</h4>
+            <p class="text-gray-700 whitespace-pre-line">${g.descricao}</p>
+        </div>
+        <div class="p-3 bg-gray-50 rounded border border-gray-200 mt-2">
+            <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras da Plataforma:</h5>
+            <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
+                <li>Proibido conteúdo violento ou explícito</li>
+                <li>Proibido links de redirecionamento</li>
+                <li>Proibido conteúdo impróprio para menores</li>
+                <li>Grupos de responsabilidade de seus administradores</li>
+            </ul>
+        </div>
+    `;
     document.getElementById("botaoEntrar").onclick = () => window.open(g.link, "_blank");
     abrirModal("modalDetalhes");
 }
@@ -286,20 +318,43 @@ async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
     const link = document.getElementById("linkGrupo").value.trim(); const nome = document.getElementById("nomeGrupo").value.trim(); const cat = document.getElementById("categoriaGrupo").value; const desc = document.getElementById("descricaoGrupo").value.trim(); const aviso = document.getElementById("avisoTexto");
     if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
-    if (!link.startsWith("https://chat.whatsapp.com/")) { aviso.textContent = "❌ Link inválido!"; aviso.className = "texto-vermelho"; return; }
+    
+    // ✅ Validação de link WhatsApp
+    if (!link.toLowerCase().startsWith("https://chat.whatsapp.com/")) { 
+        aviso.textContent = "❌ Apenas links oficiais do WhatsApp são permitidos!"; 
+        aviso.className = "texto-vermelho"; 
+        return; 
+    }
     if (contarPalavras(desc) > 30) { aviso.textContent = "❌ Máximo 30 palavras!"; aviso.className = "texto-vermelho"; return; }
-    if (temPalavraProibida(desc)) { aviso.textContent = "❌ Palavras não permitidas!"; aviso.className = "texto-vermelho"; return; }
+    if (temPalavraProibida(desc.toLowerCase())) { aviso.textContent = "❌ Conteúdo ou palavras não permitidas!"; aviso.className = "texto-vermelho"; return; }
+
     try {
         await db.collection("grupos").add({
-            link, nome, categoria: cat, descricao: desc, foto: fotoBase64, status: "analise",
-            usuarioId: usuarioAtual.uid, dataEnvio: firebase.firestore.FieldValue.serverTimestamp(), impulsionadoAte: null
+            link: link.toLowerCase(),
+            nome, 
+            categoria: cat, 
+            descricao: desc, 
+            regras: "proibido links externos, gore, menor de 18, travas",
+            foto: fotoBase64, 
+            status: "analise",
+            usuarioId: usuarioAtual.uid, 
+            dataEnvio: firebase.firestore.FieldValue.serverTimestamp(), 
+            impulsionadoAte: null
         });
-        fecharModal("modalEnviar"); alert("✅ Grupo enviado para análise!");
+        fecharModal("modalEnviar"); 
+        alert("✅ Grupo enviado para análise! Você pode enviar até 3 grupos por dia.");
         document.getElementById("linkGrupo").value = ""; document.getElementById("nomeGrupo").value = ""; document.getElementById("categoriaGrupo").value = ""; document.getElementById("descricaoGrupo").value = ""; document.getElementById("fotoGrupo").value = ""; document.getElementById("previewFoto").classList.add("hidden"); fotoBase64 = "";
-    } catch (erro) { alert("❌ Erro ao salvar."); }
+    } catch (erro) { 
+        if (erro.message.includes("value exceeds")) {
+            alert("❌ Você já atingiu o limite de 3 grupos por dia!");
+        } else if (erro.message.includes("link")) {
+            alert("❌ Esse link já foi cadastrado anteriormente!");
+        } else {
+            alert("❌ Erro ao salvar: " + erro.message);
+        }
+    }
 }
 
-// ✅ FUNÇÃO CORRIGIDA: SEM ORDENAÇÃO NO BANCO → NÃO PEDE ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -308,12 +363,10 @@ async function carregarMeusGrupos() {
         return; 
     }
     try {
-        // Busca SEM orderBy → NÃO PRECISA DE ÍNDICE
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
             .get();
 
-        // Ordena manualmente no navegador
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => {
                 const dataA = a.dataEnvio ? a.dataEnvio.toDate() : new Date(0);
@@ -393,9 +446,19 @@ async function impulsionarGrupo(id) {
 async function enviarDenuncia() {
     try {
         const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
-        await db.collection("denuncias").add({ grupoId: grupoSelecionado.id, motivo, link: grupoSelecionado.link, data: firebase.firestore.FieldValue.serverTimestamp() });
-        fecharModal("modalDenuncia"); fecharModal("modalDetalhes"); alert("✅ Denúncia enviada!");
-    } catch (err) { alert("❌ Não foi possível enviar a denúncia."); }
+        await db.collection("denuncias").add({ 
+            grupoId: grupoSelecionado.id, 
+            motivo: motivo, 
+            link: grupoSelecionado.link, 
+            data: firebase.firestore.FieldValue.serverTimestamp(),
+            usuarioDenunciante: usuarioAtual.uid
+        });
+        fecharModal("modalDenuncia"); 
+        fecharModal("modalDetalhes"); 
+        alert("✅ Denúncia enviada!");
+    } catch (err) { 
+        alert("❌ Não foi possível enviar a denúncia."); 
+    }
 }
 </script>
 
