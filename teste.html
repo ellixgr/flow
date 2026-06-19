@@ -55,7 +55,8 @@
 <header class="bg-zapMaisEscuro text-white shadow-lg">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
         <div class="flex items-center gap-3">
-            <img src="logo-site.png" alt="Logo do Site" class="logo" onclick="voltarInicio()">
+            <!-- ✅ LOGO CORRIGIDA AQUI -->
+            <img src="https://files.catbox.moe/grr1fk.png" alt="Logo do Site" class="logo" onclick="voltarInicio()">
             <h1 class="text-2xl font-bold">Grupos de WhatsApp</h1>
         </div>
         <div class="flex gap-3">
@@ -461,7 +462,7 @@ async function salvarGrupo() {
     }
 }
 
-// ✅ AJUSTADO PARA SEU ÍNDICE DE MEUS GRUPOS
+// ✅ AJUSTADO PARA NÃO PEDIR ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -470,9 +471,9 @@ async function carregarMeusGrupos() {
         return; 
     }
     try {
+        // Consulta sem ordenação composta para não precisar de índice
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "asc")
             .get();
 
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
