@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- ✅ MELHORIAS PARA SEO -->
     <title>Grupos de WhatsApp - Amizade, Namoro, Figurinhas e Mais</title>
     <meta name="description" content="Encontre e compartilhe os melhores grupos de WhatsApp de amizade, namoro, figurinhas e divulgação. Plataforma segura e fácil de usar.">
     <meta name="keywords" content="grupos de whatsapp, links de grupos, amizade, namoro, figurinhas, divulgação, whatsapp">
@@ -18,7 +17,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-    <!-- ✅ PROTEÇÕES DE SEGURANÇA -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.gstatic.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.tailwindcss.com; img-src 'self' data: https://*; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com;">
@@ -46,20 +44,16 @@
         .status-recusado { color: #dc2626; font-weight: 500; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
         .modal-content { background: white; border-radius: 0.75rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; }
-        /* ✅ ESTILO PARA ABA MEUS GRUPOS EM TELA CHEIA */
         .pagina-tela-cheia { position: fixed; inset: 0; background: #f3f4f6; z-index: 10000; overflow-y: auto; }
         .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
-        /* ✅ LOGOTIPO */
         .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
 
-<!-- ✅ CABEÇALHO COM LOGOTIPO -->
 <header class="bg-zapMaisEscuro text-white shadow-lg">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
         <div class="flex items-center gap-3">
-            <!-- LOGOTIPO QUE VOLTA PARA INÍCIO -->
             <img src="logo-site.png" alt="Logo do Site" class="logo" onclick="voltarInicio()">
             <h1 class="text-2xl font-bold">Grupos de WhatsApp</h1>
         </div>
@@ -67,7 +61,6 @@
             <button onclick="abrirModal('modalEnviar')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
                 <i class="fa fa-paper-plane mr-1"></i> Enviar Grupo
             </button>
-            <!-- BOTÃO QUE ABRE A PÁGINA COMPLETA -->
             <button onclick="abrirPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100">
                 <i class="fa fa-user mr-1"></i> Meus Grupos
             </button>
@@ -103,7 +96,6 @@
     </div>
 </footer>
 
-<!-- ✅ PÁGINA TELA CHEIA - MEUS GRUPOS -->
 <div id="paginaMeusGrupos" class="pagina-tela-cheia esconder">
     <div class="bg-zapMaisEscuro text-white shadow-md p-4 flex justify-between items-center">
         <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
@@ -116,7 +108,6 @@
     </div>
 </div>
 
-<!-- Modais -->
 <div id="modalEnviar" class="modal-overlay esconder">
     <div class="modal-content">
         <h3 class="text-xl font-bold mb-4 text-gray-800">Enviar Novo Grupo</h3>
@@ -244,12 +235,10 @@ const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 const LIMITE_GRUPOS_DIA = 3;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
-// ✅ FUNÇÃO DO LOGOTIPO - VOLTA PARA INÍCIO
 function voltarInicio() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ✅ FUNÇÕES PARA A PÁGINA DE MEUS GRUPOS
 function abrirPaginaMeusGrupos() {
     document.getElementById("paginaMeusGrupos").classList.remove("esconder");
     carregarMeusGrupos();
@@ -268,7 +257,6 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// ✅ CONVERSÃO AUTOMÁTICA DA FOTO PARA ATÉ 100KB
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
@@ -302,7 +290,6 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
 function abrirModal(id) { document.getElementById(id).classList.remove("esconder"); }
 function fecharModal(id) { document.getElementById(id).classList.add("esconder"); }
 
-// ✅ PROTEÇÃO CONTRA INJEÇÃO DE CÓDIGO
 function escaparHTML(texto) {
     return texto.replace(/[&<>"']/g, (c) => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
@@ -315,26 +302,32 @@ function temPalavraProibida(texto) {
 }
 function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p).length; }
 
+// ✅ AJUSTADO PARA SEUS ÍNDICES ATUAIS
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
             .where("status", "==", "aprovado")
-            .orderBy("impulsionadoAte", "desc")
-            .orderBy("dataEnvio", "desc");
+            .orderBy("impulsionadoAte", "asc")
+            .orderBy("dataEnvio", "asc");
+            
         const snap = await ref.get();
-        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => {
+                const dataA = a.impulsionadoAte ? a.impulsionadoAte.toDate().getTime() : 0;
+                const dataB = b.impulsionadoAte ? b.impulsionadoAte.toDate().getTime() : 0;
+                if (dataA !== dataB) return dataB - dataA;
+                const envioA = a.dataEnvio.toDate().getTime();
+                const envioB = b.dataEnvio.toDate().getTime();
+                return envioB - envioA;
+            });
+            
         paginaAtual = 1;
         mostrarPagina();
     } catch (err) {
         console.error(err);
-        if (err.code === "failed-precondition") {
-            alert("⚠️ Índice ainda criando, aguarde 2 minutos e atualize");
-        } else {
-            alert("✅ Conectado! Se aparecer erro de permissão, é só atualizar");
-        }
+        document.getElementById("listaGrupos").innerHTML = `<p class="col-span-full text-center text-red-500 py-10">Erro: ${err.message}</p>`;
     }
 }
-
 
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
 function mostrarPagina() {
@@ -413,7 +406,6 @@ async function salvarGrupo() {
     const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
-        // Verifica link duplicado
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { 
             aviso.textContent = "❌ Esse link já foi cadastrado!"; 
@@ -421,7 +413,6 @@ async function salvarGrupo() {
             return; 
         }
 
-        // Verifica limite de 3 grupos por dia (lado do cliente, seguro)
         const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const contagemSnap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
@@ -435,7 +426,6 @@ async function salvarGrupo() {
             return; 
         }
 
-        // ✅ Salva com Timestamp oficial compatível com as regras
         await db.collection("grupos").add({
             link: link,
             nome: nome,
@@ -452,7 +442,6 @@ async function salvarGrupo() {
         fecharModal("modalEnviar");
         alert("✅ Grupo enviado para análise!");
 
-        // Limpa formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -463,11 +452,12 @@ async function salvarGrupo() {
         fotoBase64 = "";
 
     } catch (erro) {
-        console.error("ERRO COMPLETO:", erro);
-        alert("❌ Detalhe do erro: " + erro.code + " | " + erro.message);
+        console.error("ERRO:", erro);
+        alert("❌ " + erro.code + " | " + erro.message);
     }
 }
 
+// ✅ AJUSTADO PARA SEU ÍNDICE DE MEUS GRUPOS
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -478,10 +468,11 @@ async function carregarMeusGrupos() {
     try {
         const snap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .orderBy("dataEnvio", "desc")
+            .orderBy("dataEnvio", "asc")
             .get();
 
-        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime());
 
         if (meus.length === 0) {
             container.innerHTML = `<div class="text-center py-10"><p class="text-gray-500 mb-4">Você ainda não enviou nenhum grupo.</p><button onclick="fecharPaginaMeusGrupos(); abrirModal('modalEnviar')" class="bg-zap text-white px-6 py-2 rounded hover:bg-zapEscuro">Enviar Meu Primeiro Grupo</button></div>`;
@@ -533,7 +524,7 @@ async function carregarMeusGrupos() {
 
     } catch (err) {
         console.error("Erro:", err);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro ao carregar grupos: ${err.message}</p>`;
+        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`;
     }
 }
 
