@@ -325,8 +325,11 @@ async function carregarGrupos() {
         paginaAtual = 1; mostrarPagina();
     } catch (err) {
         console.error(err);
-        if (err.code === "failed-precondition") alert("⚠️ Índice criando, aguarde 1-2 minutos");
-        else alert("⚠️ Verifique a conexão.");
+        if (err.code === "failed-precondition") {
+            alert("⚠️ Criando índice... Clique no link do console do Firebase e aguarde 1-2 minutos");
+        } else {
+            alert("⚠️ Verifique a conexão: " + err.message);
+        }
     }
 }
 
@@ -407,6 +410,7 @@ async function salvarGrupo() {
     const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
+        // Verifica link duplicado
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { 
             aviso.textContent = "❌ Esse link já foi cadastrado!"; 
@@ -414,10 +418,11 @@ async function salvarGrupo() {
             return; 
         }
 
+        // Verifica limite de 3 grupos por dia (lado do cliente, seguro)
         const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const contagemSnap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .where("dataEnvio", ">=", umDiaAtras)
+            .where("dataEnvio", ">=", firebase.firestore.Timestamp.fromDate(umDiaAtras))
             .limit(4)
             .get();
 
@@ -427,6 +432,7 @@ async function salvarGrupo() {
             return; 
         }
 
+        // ✅ Salva com Timestamp oficial compatível com as regras
         await db.collection("grupos").add({
             link: link,
             nome: nome,
@@ -436,13 +442,14 @@ async function salvarGrupo() {
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: new Date(),
+            dataEnvio: firebase.firestore.Timestamp.fromDate(new Date()),
             impulsionadoAte: null
         });
 
         fecharModal("modalEnviar");
         alert("✅ Grupo enviado para análise!");
 
+        // Limpa formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
