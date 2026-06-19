@@ -447,26 +447,38 @@ function abrirDetalhes(g) {
 }
 
 async function salvarGrupo() {
-    if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
+    if (!usuarioPronto || !usuarioAtual) { 
+        alert("⏳ Aguarde um momento, conectando..."); 
+        return; 
+    }
+
     const link = document.getElementById("linkGrupo").value.trim().toLowerCase();
     const nome = document.getElementById("nomeGrupo").value.trim();
     const cat = document.getElementById("categoriaGrupo").value;
     const desc = document.getElementById("descricaoGrupo").value.trim();
     const aviso = document.getElementById("avisoTexto");
 
-    if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
+    // Validação básica
+    if (!link || !nome || !cat || !desc || !fotoBase64) {
+        aviso.textContent = "❌ Preencha todos os campos obrigatórios!";
+        aviso.className = "texto-vermelho";
+        return;
+    }
+
     if (!link.startsWith("https://chat.whatsapp.com/")) { 
-        aviso.textContent = "❌ Apenas links do WhatsApp!"; 
+        aviso.textContent = "❌ Use apenas links oficiais do WhatsApp!"; 
         aviso.className = "texto-vermelho"; 
         return; 
     }
+
     if (contarPalavras(desc) > 30) { 
-        aviso.textContent = "❌ Máximo 30 palavras!"; 
+        aviso.textContent = "❌ Descrição com no máximo 30 palavras!"; 
         aviso.className = "texto-vermelho"; 
         return; 
     }
+
     if (temPalavraProibida(desc.toLowerCase())) { 
-        aviso.textContent = "❌ Conteúdo não permitido!"; 
+        aviso.textContent = "❌ Conteúdo não permitido nas regras!"; 
         aviso.className = "texto-vermelho"; 
         return; 
     }
@@ -474,13 +486,15 @@ async function salvarGrupo() {
     const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
+        // Verifica se link já existe
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { 
-            aviso.textContent = "❌ Esse link já foi cadastrado!"; 
+            aviso.textContent = "❌ Esse link já foi cadastrado antes!"; 
             aviso.className = "texto-vermelho"; 
             return; 
         }
 
+        // Limite de 3 grupos por dia
         const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const contagemSnap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
@@ -489,12 +503,13 @@ async function salvarGrupo() {
             .get();
 
         if (contagemSnap.size >= 3) { 
-            aviso.textContent = "❌ Você já enviou 3 grupos hoje!"; 
+            aviso.textContent = "❌ Você já enviou 3 grupos hoje, volte amanhã!"; 
             aviso.className = "texto-vermelho"; 
             return; 
         }
 
-        await db.collection("grupos").add({
+        // Cria o documento com valores exatos que a regra aceita
+        const dadosGrupo = {
             link: link,
             nome: nome,
             categoria: cat,
@@ -503,13 +518,17 @@ async function salvarGrupo() {
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.Timestamp.fromDate(new Date()),
+            dataEnvio: firebase.firestore.Timestamp.now(),
             impulsionadoAte: null
-        });
+        };
 
+        await db.collection("grupos").add(dadosGrupo);
+
+        // Sucesso
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado para análise!");
+        alert("✅ Grupo enviado para análise com sucesso!");
 
+        // Limpa o formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -520,10 +539,16 @@ async function salvarGrupo() {
         fotoBase64 = "";
 
     } catch (erro) {
-        console.error("ERRO:", erro);
-        alert("❌ " + erro.code + " | " + erro.message);
+        console.error("ERRO DETALHADO:", erro.code, erro.message);
+        if (erro.code === "permission-denied") {
+            aviso.textContent = "❌ Erro de permissão: verifique as regras do Firestore!";
+        } else {
+            aviso.textContent = `❌ Erro: ${erro.message}`;
+        }
+        aviso.className = "texto-vermelho";
     }
 }
+
 
 // ✅ MEUS GRUPOS SEM ÍNDICE
 async function carregarMeusGrupos() {
