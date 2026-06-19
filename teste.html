@@ -51,44 +51,12 @@
         .pagina-tela-cheia { position: fixed; inset: 0; background: #f3f4f6; z-index: 10000; overflow-y: auto; }
         .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
         .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; }
-        /* Ajuste do card igual ao modelo */
-        .card-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            object-position: center;
-        }
-        .card-body {
-            padding: 1rem;
-        }
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-        .card-desc {
-            font-size: 0.9rem;
-            color: #4b5563;
-            margin-bottom: 0.8rem;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .card-categoria {
-            font-size: 0.75rem;
-            background: #e5e7eb;
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        /* Paginação só aparece quando necessário */
-        .paginacao-container {
-            display: none;
-        }
+        .card-img { width: 100%; height: 180px; object-fit: cover; object-position: center; }
+        .card-body { padding: 1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3; }
+        .card-desc { font-size: 0.9rem; color: #4b5563; margin-bottom: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-categoria { font-size: 0.75rem; background: #e5e7eb; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 500; text-transform: uppercase; }
+        .paginacao-container { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -121,7 +89,6 @@
 
 <main class="container mx-auto px-4 py-6 flex-grow">
     <div id="listaGrupos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-    <!-- Paginação: só aparece se tiver mais de 20 itens -->
     <div id="paginacao" class="paginacao-container flex justify-center items-center gap-4 mt-8">
         <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" onclick="paginaAnterior()" disabled>Anterior</button>
         <span id="paginaAtualTexto">Página 1</span>
@@ -187,18 +154,10 @@
         <div class="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
             <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras do Grupo (marque as que se aplicam):</h5>
             <div class="space-y-2 text-sm">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_links"> Proibido links externos
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_gore"> Proibido conteúdo violento/gore
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_menor18"> Proibido conteúdo para menores de 18
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_travas"> Proibido travas/redirecionamentos
-                </label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="regra" value="proibido_links"> Proibido links externos</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="regra" value="proibido_gore"> Proibido conteúdo violento/gore</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="regra" value="proibido_menor18"> Proibido conteúdo para menores de 18</label>
+                <label class="flex items-center gap-2"><input type="checkbox" name="regra" value="proibido_travas"> Proibido travas/redirecionamentos</label>
             </div>
         </div>
 
@@ -236,24 +195,16 @@
 <div id="modalTermos" class="modal-overlay esconder">
     <div class="modal-content">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📄 Termos de Uso</h3>
-        <div class="text-gray-700 space-y-3 text-sm">
-            <p>Ao utilizar nossa plataforma, você concorda com as regras estabelecidas.</p>
-        </div>
-        <div class="text-right mt-4">
-            <button onclick="fecharModal('modalTermos')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button>
-        </div>
+        <div class="text-gray-700 space-y-3 text-sm"><p>Ao utilizar nossa plataforma, você concorda com as regras estabelecidas.</p></div>
+        <div class="text-right mt-4"><button onclick="fecharModal('modalTermos')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button></div>
     </div>
 </div>
 
 <div id="modalPrivacidade" class="modal-overlay esconder">
     <div class="modal-content">
         <h3 class="text-xl font-bold mb-4 text-gray-800">🔒 Política de Privacidade</h3>
-        <div class="text-gray-700 space-y-3 text-sm">
-            <p>Coletamos apenas dados necessários para o funcionamento do sistema.</p>
-        </div>
-        <div class="text-right mt-4">
-            <button onclick="fecharModal('modalPrivacidade')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button>
-        </div>
+        <div class="text-gray-700 space-y-3 text-sm"><p>Coletamos apenas dados necessários para o funcionamento do sistema.</p></div>
+        <div class="text-right mt-4"><button onclick="fecharModal('modalPrivacidade')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button></div>
     </div>
 </div>
 
@@ -270,7 +221,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
-
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const palavrasProibidas = ["porno", "sexo", "gore", "18+", "adulto", "trava", "encurtador", "<script", "javascript", "onload", "onclick", "eval"];
@@ -278,53 +228,25 @@ const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 const LIMITE_GRUPOS_DIA = 3;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
-function voltarInicio() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function abrirPaginaMeusGrupos() {
-    document.getElementById("paginaMeusGrupos").classList.remove("esconder");
-    carregarMeusGrupos();
-}
-function fecharPaginaMeusGrupos() {
-    document.getElementById("paginaMeusGrupos").classList.add("esconder");
-}
+function voltarInicio() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function abrirPaginaMeusGrupos() { document.getElementById("paginaMeusGrupos").classList.remove("esconder"); carregarMeusGrupos(); }
+function fecharPaginaMeusGrupos() { document.getElementById("paginaMeusGrupos").classList.add("esconder"); }
 
 auth.onAuthStateChanged(user => {
-    if (user) {
-        usuarioAtual = user;
-        usuarioPronto = true;
-        carregarGrupos();
-    } else {
-        auth.signInAnonymously().catch(err => console.error("Erro login:", err));
-    }
+    if (user) { usuarioAtual = user; usuarioPronto = true; carregarGrupos(); } 
+    else { auth.signInAnonymously().catch(err => console.error("Erro login:", err)); }
 });
 
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
-
     const leitor = new FileReader();
     leitor.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
+        const img = new Image(); img.src = e.target.result;
         img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = 150;
-            canvas.height = 150;
-            ctx.drawImage(img, 0, 0, 150, 150);
-
-            let qualidade = 0.8;
-            let tentativa;
-            do {
-                tentativa = canvas.toDataURL("image/jpeg", qualidade);
-                qualidade -= 0.05;
-            } while (tentativa.length > 100 * 1024 * 1.33 && qualidade > 0.2);
-
-            fotoBase64 = tentativa;
-            document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`;
-            document.getElementById("previewFoto").classList.remove("hidden");
+            const canvas = document.createElement("canvas"); const ctx = canvas.getContext("2d"); canvas.width = 150; canvas.height = 150; ctx.drawImage(img, 0, 0, 150, 150);
+            let qualidade = 0.8, tentativa; do { tentativa = canvas.toDataURL("image/jpeg", qualidade); qualidade -= 0.05; } while (tentativa.length > 100 * 1024 * 1.33 && qualidade > 0.2);
+            fotoBase64 = tentativa; document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`; document.getElementById("previewFoto").classList.remove("hidden");
         };
     };
     leitor.readAsDataURL(arquivo);
@@ -332,25 +254,14 @@ document.getElementById("fotoGrupo").addEventListener("change", function(e) {
 
 function abrirModal(id) { document.getElementById(id).classList.remove("esconder"); }
 function fecharModal(id) { document.getElementById(id).classList.add("esconder"); }
-
-function escaparHTML(texto) {
-    return texto.replace(/[&<>"']/g, (c) => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-    }[c]));
-}
-
-function temPalavraProibida(texto) {
-    const textoMin = texto.toLowerCase();
-    return palavrasProibidas.some(p => textoMin.includes(p));
-}
+function escaparHTML(texto) { return texto.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c]); }
+function temPalavraProibida(texto) { const textoMin = texto.toLowerCase(); return palavrasProibidas.some(p => textoMin.includes(p)); }
 function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p).length; }
 
-// ✅ FUNÇÃO CORRIGIDA: SEM ÍNDICE, SEM ERRO
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos").where("status", "==", "aprovado");
         const snap = await ref.get();
-        
         todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => {
                 const agora = Date.now();
@@ -359,9 +270,7 @@ async function carregarGrupos() {
                 if (valA !== valB) return valB - valA;
                 return b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime();
             });
-            
-        paginaAtual = 1;
-        mostrarPagina();
+        paginaAtual = 1; mostrarPagina();
     } catch (err) {
         console.error(err);
         document.getElementById("listaGrupos").innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado no momento</p>`;
@@ -369,247 +278,79 @@ async function carregarGrupos() {
 }
 
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
-
-// ✅ FUNÇÃO DE EXIBIÇÃO COM REGRAS DE PAGINAÇÃO E CARDS CORRETOS
 function mostrarPagina() {
-    let lista = todosGrupos;
-    if (categoriaAtual !== "todos") lista = lista.filter(g => g.categoria === categoriaAtual);
-    
-    const totalItens = lista.length;
-    const totalPaginas = Math.ceil(totalItens / itensPorPagina);
-
-    // Mostra/esconde paginação só se tiver mais de 20 grupos
-    const paginacaoEl = document.getElementById("paginacao");
-    if (totalItens > itensPorPagina) {
-        paginacaoEl.style.display = "flex";
-    } else {
-        paginacaoEl.style.display = "none";
-    }
-
-    const inicio = (paginaAtual - 1) * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-    const pag = lista.slice(inicio, fim);
-
-    const container = document.getElementById("listaGrupos");
-    container.innerHTML = "";
-
-    if (pag.length === 0) {
-        container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`;
-        return;
-    }
-
-    // Renderiza cards com tamanho e proporção corretos
+    let lista = todosGrupos; if (categoriaAtual !== "todos") lista = lista.filter(g => g.categoria === categoriaAtual);
+    const totalItens = lista.length; const totalPaginas = Math.ceil(totalItens / itensPorPagina);
+    const paginacaoEl = document.getElementById("paginacao"); paginacaoEl.style.display = totalItens > itensPorPagina ? "flex" : "none";
+    const inicio = (paginaAtual - 1) * itensPorPagina; const fim = inicio + itensPorPagina; const pag = lista.slice(inicio, fim);
+    const container = document.getElementById("listaGrupos"); container.innerHTML = "";
+    if (pag.length === 0) { container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`; return; }
     pag.forEach(g => {
-        const card = document.createElement("div");
-        card.className = "grupo-card bg-white rounded-lg shadow cursor-pointer";
-        card.innerHTML = `
-            <img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="card-img" loading="lazy">
-            <div class="card-body">
-                <h3 class="card-title">${escaparHTML(g.nome)}</h3>
-                <p class="card-desc">${escaparHTML(g.descricao)}</p>
-                <span class="card-categoria">${escaparHTML(g.categoria.toUpperCase())}</span>
-            </div>`;
-        card.onclick = () => abrirDetalhes(g);
-        container.appendChild(card);
+        const card = document.createElement("div"); card.className = "grupo-card bg-white rounded-lg shadow cursor-pointer";
+        card.innerHTML = `<img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="card-img" loading="lazy"><div class="card-body"><h3 class="card-title">${escaparHTML(g.nome)}</h3><p class="card-desc">${escaparHTML(g.descricao)}</p><span class="card-categoria">${escaparHTML(g.categoria.toUpperCase())}</span></div>`;
+        card.onclick = () => abrirDetalhes(g); container.appendChild(card);
     });
-
-    // Atualiza botões
     document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
-    document.getElementById("btnAnterior").disabled = paginaAtual === 1;
-    document.getElementById("btnProxima").disabled = paginaAtual >= totalPaginas;
+    document.getElementById("btnAnterior").disabled = paginaAtual === 1; document.getElementById("btnProxima").disabled = paginaAtual >= totalPaginas;
 }
-
 function paginaAnterior() { paginaAtual--; mostrarPagina(); }
 function paginaProxima() { paginaAtual++; mostrarPagina(); }
 
 function abrirDetalhes(g) {
     grupoSelecionado = g;
-    const regrasTexto = g.regrasMarcadas && g.regrasMarcadas.length > 0
-        ? g.regrasMarcadas.map(r => `• ${escaparHTML(r.replace("proibido_", "").replace("_", " "))}`).join("<br>")
-        : "Nenhuma regra específica marcada";
-
-    document.getElementById("conteudoDetalhes").innerHTML = `
-        <div class="text-center mb-4">
-            <img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
-            <h3 class="text-xl font-bold">${escaparHTML(g.nome)}</h3>
-            <span class="text-sm text-gray-500">Categoria: ${escaparHTML(g.categoria)}</span>
-        </div>
-        <div class="border-t border-b py-4 my-3">
-            <h4 class="font-semibold mb-2">Descrição:</h4>
-            <p class="text-gray-700 whitespace-pre-line">${escaparHTML(g.descricao)}</p>
-        </div>
-        <div class="p-3 bg-gray-50 rounded border border-gray-200 mt-2">
-            <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras marcadas:</h5>
-            <p class="text-xs text-gray-600">${regrasTexto}</p>
-        </div>`;
-    document.getElementById("botaoEntrar").onclick = () => window.open(g.link, "_blank", "noopener noreferrer");
-    abrirModal("modalDetalhes");
+    const regrasTexto = g.regrasMarcadas && g.regrasMarcadas.length > 0 ? g.regrasMarcadas.map(r => `• ${escaparHTML(r.replace("proibido_", "").replace("_", " "))}`).join("<br>") : "Nenhuma regra específica marcada";
+    document.getElementById("conteudoDetalhes").innerHTML = `<div class="text-center mb-4"><img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover"><h3 class="text-xl font-bold">${escaparHTML(g.nome)}</h3><span class="text-sm text-gray-500">Categoria: ${escaparHTML(g.categoria)}</span></div><div class="border-t border-b py-4 my-3"><h4 class="font-semibold mb-2">Descrição:</h4><p class="text-gray-700 whitespace-pre-line">${escaparHTML(g.descricao)}</p></div><div class="p-3 bg-gray-50 rounded border border-gray-200 mt-2"><h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras marcadas:</h5><p class="text-xs text-gray-600">${regrasTexto}</p></div>`;
+    document.getElementById("botaoEntrar").onclick = () => window.open(g.link, "_blank", "noopener noreferrer"); abrirModal("modalDetalhes");
 }
 
 async function salvarGrupo() {
-    if (!usuarioPronto || !usuarioAtual) { 
-        alert("⏳ Aguarde..."); 
-        return; 
-    }
-
-    const link = document.getElementById("linkGrupo").value.trim().toLowerCase();
-    const nome = document.getElementById("nomeGrupo").value.trim();
-    const cat = document.getElementById("categoriaGrupo").value;
-    const desc = document.getElementById("descricaoGrupo").value.trim();
-    const aviso = document.getElementById("avisoTexto");
-
-    if (!link || !nome || !cat || !desc || !fotoBase64) {
-        aviso.textContent = "❌ Preencha todos os campos!";
-        aviso.className = "texto-vermelho";
-        return;
-    }
-
-    if (!link.startsWith("https://chat.whatsapp.com/")) { 
-        aviso.textContent = "❌ Link inválido, use apenas do WhatsApp!"; 
-        aviso.className = "texto-vermelho"; 
-        return; 
-    }
-
+    if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
+    const link = document.getElementById("linkGrupo").value.trim().toLowerCase(); const nome = document.getElementById("nomeGrupo").value.trim(); const cat = document.getElementById("categoriaGrupo").value; const desc = document.getElementById("descricaoGrupo").value.trim(); const aviso = document.getElementById("avisoTexto");
+    if (!link || !nome || !cat || !desc || !fotoBase64) { aviso.textContent = "❌ Preencha todos os campos!"; aviso.className = "texto-vermelho"; return; }
+    if (!link.startsWith("https://chat.whatsapp.com/")) { aviso.textContent = "❌ Link inválido, use apenas do WhatsApp!"; aviso.className = "texto-vermelho"; return; }
     try {
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
-        if (!linkSnap.empty) { 
-            aviso.textContent = "❌ Esse link já foi cadastrado!"; 
-            aviso.className = "texto-vermelho"; 
-            return; 
-        }
-
-        const dados = {
-            link: link,
-            nome: nome,
-            categoria: cat,
-            descricao: desc,
-            foto: fotoBase64,
-            status: "analise",
-            usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.Timestamp.now()
-        };
-
+        if (!linkSnap.empty) { aviso.textContent = "❌ Esse link já foi cadastrado!"; aviso.className = "texto-vermelho"; return; }
+        const dados = { link, nome, categoria: cat, descricao: desc, foto: fotoBase64, status: "analise", usuarioId: usuarioAtual.uid, dataEnvio: firebase.firestore.Timestamp.now() };
         await db.collection("grupos").add(dados);
-
-        fecharModal("modalEnviar");
-        alert("✅ Enviado com sucesso!");
-
-        // Limpa formulário
-        document.getElementById("linkGrupo").value = "";
-        document.getElementById("nomeGrupo").value = "";
-        document.getElementById("categoriaGrupo").value = "";
-        document.getElementById("descricaoGrupo").value = "";
-        document.getElementById("fotoGrupo").value = "";
-        document.getElementById("previewFoto").classList.add("hidden");
-        fotoBase64 = "";
-
-    } catch (erro) {
-        console.error("ERRO:", erro);
-        aviso.textContent = `❌ ${erro.message}`;
-        aviso.className = "texto-vermelho";
-    }
+        fecharModal("modalEnviar"); alert("✅ Enviado com sucesso!");
+        document.getElementById("linkGrupo").value = ""; document.getElementById("nomeGrupo").value = ""; document.getElementById("categoriaGrupo").value = ""; document.getElementById("descricaoGrupo").value = ""; document.getElementById("fotoGrupo").value = ""; document.getElementById("previewFoto").classList.add("hidden"); fotoBase64 = "";
+    } catch (erro) { aviso.textContent = `❌ ${erro.message}`; aviso.className = "texto-vermelho"; }
 }
 
-
-// ✅ MEUS GRUPOS SEM ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
-    if (!usuarioPronto || !usuarioAtual) { 
-        container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`; 
-        setTimeout(carregarMeusGrupos, 800); 
-        return; 
-    }
+    if (!usuarioPronto || !usuarioAtual) { container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`; setTimeout(carregarMeusGrupos, 800); return; }
     try {
         const snap = await db.collection("grupos").where("usuarioId", "==", usuarioAtual.uid).get();
-
-        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-            .sort((a, b) => b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime());
-
-        if (meus.length === 0) {
-            container.innerHTML = `<div class="text-center py-10"><p class="text-gray-500 mb-4">Você ainda não enviou nenhum grupo.</p><button onclick="fecharPaginaMeusGrupos(); abrirModal('modalEnviar')" class="bg-zap text-white px-6 py-2 rounded hover:bg-zapEscuro">Enviar Meu Primeiro Grupo</button></div>`;
-            return;
-        }
-
-        container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>`;
-        const grade = container.querySelector("div");
-        const agora = Date.now();
-
+        const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime());
+        if (meus.length === 0) { container.innerHTML = `<div class="text-center py-10"><p class="text-gray-500 mb-4">Você ainda não enviou nenhum grupo.</p><button onclick="fecharPaginaMeusGrupos(); abrirModal('modalEnviar')" class="bg-zap text-white px-6 py-2 rounded hover:bg-zapEscuro">Enviar Meu Primeiro Grupo</button></div>`; return; }
+        container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>`; const grade = container.querySelector("div"); const agora = Date.now();
         meus.forEach(g => {
             const podeImpulsionar = g.status === "aprovado" && (!g.impulsionadoAte || g.impulsionadoAte.toDate().getTime() < agora);
-            const tempoRestante = g.impulsionadoAte ? Math.max(0, g.impulsionadoAte.toDate().getTime() - agora) : 0;
-            const horas = Math.floor(tempoRestante / 3600000);
-            const minutos = Math.floor((tempoRestante % 3600000) / 60000);
-
-            const statusTexto = g.status === "analise" ? "⏳ Em análise" : 
-                                g.status === "aprovado" ? "✅ Aprovado" : 
-                                "❌ Recusado";
-
-            const statusClasse = g.status === "analise" ? "status-analise" : 
-                                 g.status === "aprovado" ? "status-aprovado" : 
-                                 "status-recusado";
-
+            const tempoRestante = g.impulsionadoAte ? Math.max(0, g.impulsionadoAte.toDate().getTime() - agora) : 0; const horas = Math.floor(tempoRestante / 3600000); const minutos = Math.floor((tempoRestante % 3600000) / 60000);
+            const statusTexto = g.status === "analise" ? "⏳ Em análise" : g.status === "aprovado" ? "✅ Aprovado" : g.status === "recusado" ? "❌ Recusado" : g.status === "denunciado" ? "🚫 Grupo denunciado/recusado" : "❌ Recusado";
+            const statusClasse = g.status === "analise" ? "status-analise" : g.status === "aprovado" ? "status-aprovado" : "status-recusado";
             let botaoImp = "";
-            if (g.status === "aprovado") {
-                if (podeImpulsionar) {
-                    botaoImp = `<button onclick="impulsionarGrupo('${g.id}')" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium">🚀 Impulsionar por 2h</button>`;
-                } else {
-                    botaoImp = `<p class="text-xs text-gray-500 mt-2 text-center">⏳ Disponível em ${horas}h ${minutos}min</p>`;
-                }
-            }
-
-            const card = document.createElement("div");
-            card.className = "bg-white rounded-lg shadow p-5 border";
-            card.innerHTML = `
-                <div class="flex items-center gap-4 mb-4">
-                    <img src="${g.foto || ''}" alt="${escaparHTML(g.nome)}" class="w-16 h-16 rounded-full object-cover border">
-                    <div>
-                        <h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3>
-                        <p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p>
-                        <p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p>
-                    </div>
-                </div>
-                <p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>
-                ${botaoImp}`;
+            if (g.status === "aprovado") { if (podeImpulsionar) botaoImp = `<button onclick="impulsionarGrupo('${g.id}')" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium">🚀 Impulsionar por 2h</button>`; else botaoImp = `<p class="text-xs text-gray-500 mt-2 text-center">⏳ Disponível em ${horas}h ${minutos}min</p>`; }
+            const card = document.createElement("div"); card.className = "bg-white rounded-lg shadow p-5 border";
+            card.innerHTML = `<div class="flex items-center gap-4 mb-4"><img src="${g.foto || ''}" alt="${escaparHTML(g.nome)}" class="w-16 h-16 rounded-full object-cover border"><div><h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3><p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p><p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p></div></div><p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>${botaoImp}`;
             grade.appendChild(card);
         });
-
-    } catch (err) {
-        console.error("Erro:", err);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`;
-    }
+    } catch (err) { container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`; }
 }
 
 async function impulsionarGrupo(id) {
     if (!confirm("Impulsionar este grupo por 2 horas?")) return;
-    try {
-        const fim = new Date(Date.now() + TEMPO_IMPULSAO);
-        await db.collection("grupos").doc(id).update({
-            impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim)
-        });
-        alert("✅ Grupo impulsionado com sucesso!");
-        carregarMeusGrupos();
-        carregarGrupos();
-    } catch (err) {
-        alert("❌ Erro: " + err.message);
-    }
+    try { const fim = new Date(Date.now() + TEMPO_IMPULSAO); await db.collection("grupos").doc(id).update({ impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim) }); alert("✅ Grupo impulsionado com sucesso!"); carregarMeusGrupos(); carregarGrupos(); } catch (err) { alert("❌ Erro: " + err.message); }
 }
 
 async function enviarDenuncia() {
     try {
         const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
-        await db.collection("denuncias").add({ 
-            grupoId: grupoSelecionado.id, 
-            motivo: motivo, 
-            link: grupoSelecionado.link, 
-            data: firebase.firestore.FieldValue.serverTimestamp(),
-            usuarioDenunciante: usuarioAtual.uid
-        });
-        fecharModal("modalDenuncia"); 
-        fecharModal("modalDetalhes"); 
-        alert("✅ Denúncia enviada!");
-    } catch (err) { 
-        alert("❌ Não foi possível enviar a denúncia."); 
-    }
+        await db.collection("denuncias").add({ grupoId: grupoSelecionado.id, motivo: motivo, link: grupoSelecionado.link, data: firebase.firestore.FieldValue.serverTimestamp(), usuarioDenunciante: usuarioAtual.uid });
+        fecharModal("modalDenuncia"); fecharModal("modalDetalhes"); alert("✅ Denúncia enviada!");
+    } catch (err) { alert("❌ Não foi possível enviar a denúncia."); }
 }
 </script>
 
