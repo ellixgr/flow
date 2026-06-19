@@ -8,9 +8,8 @@
     <meta name="keywords" content="grupos de whatsapp, links de grupos, amizade, namoro, figurinhas, divulgação, whatsapp">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Seu Site">
-<link rel="icon" href="https://files.catbox.moe/grr1fk.png" type="image/png">
-<link rel="shortcut icon" href="https://files.catbox.moe/grr1fk.png" type="image/png">
-
+    <link rel="icon" href="https://files.catbox.moe/grr1fk.png" type="image/png">
+    <link rel="shortcut icon" href="https://files.catbox.moe/grr1fk.png" type="image/png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,8 +35,12 @@
         }
     </script>
     <style>
-        .grupo-card { transition: transform 0.2s ease; }
-        .grupo-card:hover { transform: translateY(-4px); }
+        .grupo-card { 
+            transition: transform 0.2s ease; 
+            max-width: 100%;
+            overflow: hidden;
+        }
+        .grupo-card:hover { transform: translateY(-3px); }
         .texto-vermelho { color: #dc2626; }
         .esconder { display: none !important; }
         .status-analise { color: #ca8a04; font-weight: 500; }
@@ -48,6 +51,44 @@
         .pagina-tela-cheia { position: fixed; inset: 0; background: #f3f4f6; z-index: 10000; overflow-y: auto; }
         .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; }
         .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; }
+        /* Ajuste do card igual ao modelo */
+        .card-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            object-position: center;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+        .card-desc {
+            font-size: 0.9rem;
+            color: #4b5563;
+            margin-bottom: 0.8rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .card-categoria {
+            font-size: 0.75rem;
+            background: #e5e7eb;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+        /* Paginação só aparece quando necessário */
+        .paginacao-container {
+            display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
@@ -55,7 +96,6 @@
 <header class="bg-zapMaisEscuro text-white shadow-lg">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
         <div class="flex items-center gap-3">
-            <!-- ✅ LOGO CORRIGIDA AQUI -->
             <img src="https://files.catbox.moe/grr1fk.png" alt="Logo do Site" class="logo" onclick="voltarInicio()">
             <h1 class="text-2xl font-bold">Grupos de WhatsApp</h1>
         </div>
@@ -80,8 +120,9 @@
 </header>
 
 <main class="container mx-auto px-4 py-6 flex-grow">
-    <div id="listaGrupos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"></div>
-    <div class="flex justify-center items-center gap-4 mt-8">
+    <div id="listaGrupos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    <!-- Paginação: só aparece se tiver mais de 20 itens -->
+    <div id="paginacao" class="paginacao-container flex justify-center items-center gap-4 mt-8">
         <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" onclick="paginaAnterior()" disabled>Anterior</button>
         <span id="paginaAtualTexto">Página 1</span>
         <button id="btnProxima" class="bg-zap text-white px-4 py-2 rounded hover:bg-zapEscuro" onclick="paginaProxima()">Próxima</button>
@@ -174,7 +215,7 @@
         <div class="flex flex-wrap gap-3 justify-between mt-5">
             <button onclick="abrirModal('modalDenuncia')" class="text-red-600 hover:underline">Denunciar</button>
             <button onclick="fecharModal('modalDetalhes')" class="px-4 py-2 bg-gray-300 rounded">Fechar</button>
-            <button id="botaoEntrar" class="px-4 py-2 bg-zap text-white rounded">Entrar no Grupo</button>
+            <button id="botaoEntrar" class="px-4 py-2 bg-zap text-white rounded w-full">Entrar no Grupo</button>
         </div>
     </div>
 </div>
@@ -304,24 +345,18 @@ function temPalavraProibida(texto) {
 }
 function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p).length; }
 
-// ✅ FUNÇÃO CORRIGIDA: NÃO USA ORDEM COMPOSTA = NÃO PEDE ÍNDICE
+// ✅ FUNÇÃO CORRIGIDA: SEM ÍNDICE, SEM ERRO
 async function carregarGrupos() {
     try {
-        // Consulta SIMPLES, sem ordenação composta — funciona SEM índice especial
-        const ref = db.collection("grupos")
-            .where("status", "==", "aprovado");
-
+        const ref = db.collection("grupos").where("status", "==", "aprovado");
         const snap = await ref.get();
         
-        // Ordena TUDO na memória, igual o resultado que você quer
         todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => {
                 const agora = Date.now();
-                // Impulsionados primeiro
                 const valA = a.impulsionadoAte && a.impulsionadoAte.toDate().getTime() > agora ? 2 : 1;
                 const valB = b.impulsionadoAte && b.impulsionadoAte.toDate().getTime() > agora ? 2 : 1;
                 if (valA !== valB) return valB - valA;
-                // Depois por data de envio (mais novos primeiro)
                 return b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime();
             });
             
@@ -333,29 +368,57 @@ async function carregarGrupos() {
     }
 }
 
-
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
+
+// ✅ FUNÇÃO DE EXIBIÇÃO COM REGRAS DE PAGINAÇÃO E CARDS CORRETOS
 function mostrarPagina() {
     let lista = todosGrupos;
     if (categoriaAtual !== "todos") lista = lista.filter(g => g.categoria === categoriaAtual);
-    const inicio = (paginaAtual - 1) * itensPorPagina; const fim = inicio + itensPorPagina; const pag = lista.slice(inicio, fim);
-    const container = document.getElementById("listaGrupos"); container.innerHTML = "";
-    if (pag.length === 0) { container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`; return; }
+    
+    const totalItens = lista.length;
+    const totalPaginas = Math.ceil(totalItens / itensPorPagina);
+
+    // Mostra/esconde paginação só se tiver mais de 20 grupos
+    const paginacaoEl = document.getElementById("paginacao");
+    if (totalItens > itensPorPagina) {
+        paginacaoEl.style.display = "flex";
+    } else {
+        paginacaoEl.style.display = "none";
+    }
+
+    const inicio = (paginaAtual - 1) * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const pag = lista.slice(inicio, fim);
+
+    const container = document.getElementById("listaGrupos");
+    container.innerHTML = "";
+
+    if (pag.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`;
+        return;
+    }
+
+    // Renderiza cards com tamanho e proporção corretos
     pag.forEach(g => {
-        const card = document.createElement("div"); card.className = "grupo-card bg-white rounded-lg shadow overflow-hidden cursor-pointer";
+        const card = document.createElement("div");
+        card.className = "grupo-card bg-white rounded-lg shadow cursor-pointer";
         card.innerHTML = `
-            <img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="w-full h-40 object-cover">
-            <div class="p-4">
-                <h3 class="font-bold text-lg mb-2">${escaparHTML(g.nome)}</h3>
-                <p class="text-gray-600 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao)}</p>
-                <span class="text-xs bg-gray-200 px-2 py-1 rounded">${escaparHTML(g.categoria.toUpperCase())}</span>
+            <img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="card-img" loading="lazy">
+            <div class="card-body">
+                <h3 class="card-title">${escaparHTML(g.nome)}</h3>
+                <p class="card-desc">${escaparHTML(g.descricao)}</p>
+                <span class="card-categoria">${escaparHTML(g.categoria.toUpperCase())}</span>
             </div>`;
-        card.onclick = () => abrirDetalhes(g); container.appendChild(card);
+        card.onclick = () => abrirDetalhes(g);
+        container.appendChild(card);
     });
-    document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual}`;
+
+    // Atualiza botões
+    document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
     document.getElementById("btnAnterior").disabled = paginaAtual === 1;
-    document.getElementById("btnProxima").disabled = fim >= lista.length;
+    document.getElementById("btnProxima").disabled = paginaAtual >= totalPaginas;
 }
+
 function paginaAnterior() { paginaAtual--; mostrarPagina(); }
 function paginaProxima() { paginaAtual++; mostrarPagina(); }
 
@@ -462,7 +525,7 @@ async function salvarGrupo() {
     }
 }
 
-// ✅ AJUSTADO PARA NÃO PEDIR ÍNDICE
+// ✅ MEUS GRUPOS SEM ÍNDICE
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -471,10 +534,7 @@ async function carregarMeusGrupos() {
         return; 
     }
     try {
-        // Consulta sem ordenação composta para não precisar de índice
-        const snap = await db.collection("grupos")
-            .where("usuarioId", "==", usuarioAtual.uid)
-            .get();
+        const snap = await db.collection("grupos").where("usuarioId", "==", usuarioAtual.uid).get();
 
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime());
