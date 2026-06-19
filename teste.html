@@ -316,44 +316,70 @@ function abrirDetalhes(g) {
 
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
-    const link = document.getElementById("linkGrupo").value.trim(); const nome = document.getElementById("nomeGrupo").value.trim(); const cat = document.getElementById("categoriaGrupo").value; const desc = document.getElementById("descricaoGrupo").value.trim(); const aviso = document.getElementById("avisoTexto");
+    const link = document.getElementById("linkGrupo").value.trim().toLowerCase();
+    const nome = document.getElementById("nomeGrupo").value.trim();
+    const cat = document.getElementById("categoriaGrupo").value;
+    const desc = document.getElementById("descricaoGrupo").value.trim();
+    const aviso = document.getElementById("avisoTexto");
+
     if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
-    
-    // ✅ Validação de link WhatsApp
-    if (!link.toLowerCase().startsWith("https://chat.whatsapp.com/")) { 
-        aviso.textContent = "❌ Apenas links oficiais do WhatsApp são permitidos!"; 
-        aviso.className = "texto-vermelho"; 
-        return; 
-    }
+    if (!link.startsWith("https://chat.whatsapp.com/")) { aviso.textContent = "❌ Apenas links do WhatsApp!"; aviso.className = "texto-vermelho"; return; }
     if (contarPalavras(desc) > 30) { aviso.textContent = "❌ Máximo 30 palavras!"; aviso.className = "texto-vermelho"; return; }
-    if (temPalavraProibida(desc.toLowerCase())) { aviso.textContent = "❌ Conteúdo ou palavras não permitidas!"; aviso.className = "texto-vermelho"; return; }
+    if (temPalavraProibida(desc.toLowerCase())) { aviso.textContent = "❌ Conteúdo não permitido!"; aviso.className = "texto-vermelho"; return; }
 
     try {
+        // 🔍 Verifica se link já existe
+        const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
+        if (!linkSnap.empty) {
+            aviso.textContent = "❌ Esse link já foi cadastrado!";
+            aviso.className = "texto-vermelho";
+            return;
+        }
+
+        // 📊 Conta quantos grupos enviou nas últimas 24h
+        const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const contagemSnap = await db.collection("grupos")
+            .where("usuarioId", "==", usuarioAtual.uid)
+            .where("dataEnvio", ">=", firebase.firestore.Timestamp.fromDate(umDiaAtras))
+            .limit(4)
+            .get();
+
+        if (contagemSnap.size >= 3) {
+            aviso.textContent = "❌ Você já enviou 3 grupos hoje! Volte amanhã.";
+            aviso.className = "texto-vermelho";
+            return;
+        }
+
+        // ✅ Salva o grupo
         await db.collection("grupos").add({
-            link: link.toLowerCase(),
-            nome, 
-            categoria: cat, 
-            descricao: desc, 
+            link: link,
+            nome,
+            categoria: cat,
+            descricao: desc,
             regras: "proibido links externos, gore, menor de 18, travas",
-            foto: fotoBase64, 
+            foto: fotoBase64,
             status: "analise",
-            usuarioId: usuarioAtual.uid, 
-            dataEnvio: firebase.firestore.FieldValue.serverTimestamp(), 
+            usuarioId: usuarioAtual.uid,
+            dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
             impulsionadoAte: null
         });
-        fecharModal("modalEnviar"); 
-        alert("✅ Grupo enviado para análise! Você pode enviar até 3 grupos por dia.");
-        document.getElementById("linkGrupo").value = ""; document.getElementById("nomeGrupo").value = ""; document.getElementById("categoriaGrupo").value = ""; document.getElementById("descricaoGrupo").value = ""; document.getElementById("fotoGrupo").value = ""; document.getElementById("previewFoto").classList.add("hidden"); fotoBase64 = "";
-    } catch (erro) { 
-        if (erro.message.includes("value exceeds")) {
-            alert("❌ Você já atingiu o limite de 3 grupos por dia!");
-        } else if (erro.message.includes("link")) {
-            alert("❌ Esse link já foi cadastrado anteriormente!");
-        } else {
-            alert("❌ Erro ao salvar: " + erro.message);
-        }
+
+        fecharModal("modalEnviar");
+        alert("✅ Grupo enviado para análise!");
+        document.getElementById("linkGrupo").value = "";
+        document.getElementById("nomeGrupo").value = "";
+        document.getElementById("categoriaGrupo").value = "";
+        document.getElementById("descricaoGrupo").value = "";
+        document.getElementById("fotoGrupo").value = "";
+        document.getElementById("previewFoto").classList.add("hidden");
+        fotoBase64 = "";
+
+    } catch (erro) {
+        console.error(erro);
+        alert("❌ Erro: " + erro.message);
     }
 }
+
 
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
