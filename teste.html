@@ -318,20 +318,23 @@ function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p)
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos")
+            .where("status", "==", "aprovado")
             .orderBy("impulsionadoAte", "desc")
             .orderBy("dataEnvio", "desc");
         const snap = await ref.get();
-        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(g => g.status === "aprovado");
-        paginaAtual = 1; mostrarPagina();
+        todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        paginaAtual = 1;
+        mostrarPagina();
     } catch (err) {
         console.error(err);
         if (err.code === "failed-precondition") {
-            alert("⚠️ Criando índice... Clique no link do console do Firebase e aguarde 1-2 minutos");
+            alert("⚠️ Índice ainda criando, aguarde 2 minutos e atualize");
         } else {
-            alert("⚠️ Verifique a conexão: " + err.message);
+            alert("✅ Conectado! Se aparecer erro de permissão, é só atualizar");
         }
     }
 }
+
 
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
 function mostrarPagina() {
