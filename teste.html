@@ -44,6 +44,9 @@
         }
         body {
             scroll-behavior: smooth;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
         .fade-in {
             animation: fadeIn 0.3s ease-out forwards;
@@ -90,17 +93,30 @@
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: fadeIn 0.2s ease; }
         .modal-content { background: white; border-radius: 0.75rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: fadeIn 0.2s ease; }
         
-        /* CORREÇÃO: Página Meus Grupos NÃO é fixa, para o rodapé aparecer */
+        /* CORREÇÃO: Página Meus Grupos agora empurra o rodapé para o final */
         .pagina-tela-cheia { 
-            position: absolute; 
+            position: fixed; 
             inset: 0; 
             background: #f3f4f6; 
             z-index: 10000; 
             overflow-y: auto; 
-            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-        .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; padding-bottom: 6rem; }
-        .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; transition: transform 0.2s ease; }
+        .conteudo-tela-cheia { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 2rem 1rem; 
+            flex: 1;
+        }
+        .logo { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            object-fit: cover; 
+            transition: transform 0.2s ease; 
+        }
         .logo:hover { transform: scale(1.05); }
         
         /* Ajuste do card igual ao modelo */
@@ -151,6 +167,10 @@
         }
         button:active {
             transform: scale(0.98);
+        }
+        /* Rodapé sempre no final */
+        footer {
+            margin-top: auto;
         }
     </style>
 </head>
@@ -207,7 +227,11 @@
 
 <div id="paginaMeusGrupos" class="pagina-tela-cheia esconder">
     <div class="bg-zapMaisEscuro text-white shadow-md p-4 flex justify-between items-center sticky top-0 z-20">
-        <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
+        <!-- ✅ LOGO ADICIONADO NA ABA MEUS GRUPOS -->
+        <div class="flex items-center gap-3">
+            <img src="https://files.catbox.moe/grr1fk.png" alt="Logo do Site" class="logo" onclick="fecharPaginaMeusGrupos(); voltarInicio()">
+            <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
+        </div>
         <button onclick="fecharPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-3 py-1 rounded hover:bg-gray-100">
             <i class="fa fa-arrow-left mr-1"></i> Voltar
         </button>
@@ -532,7 +556,8 @@ function abrirDetalhes(g) {
 
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { 
-        alert("⏳ Aguarde..."); 
+        avisoTexto.textContent = "⏳ Aguarde conectando..."; 
+        avisoTexto.className = "texto-vermelho";
         return; 
     }
 
@@ -540,25 +565,25 @@ async function salvarGrupo() {
     const nome = document.getElementById("nomeGrupo").value.trim();
     const cat = document.getElementById("categoriaGrupo").value;
     const desc = document.getElementById("descricaoGrupo").value.trim();
-    const aviso = document.getElementById("avisoTexto");
+    const avisoTexto = document.getElementById("avisoTexto");
 
     if (!link || !nome || !cat || !desc || !fotoBase64) {
-        aviso.textContent = "❌ Preencha todos os campos!";
-        aviso.className = "texto-vermelho";
+        avisoTexto.textContent = "❌ Preencha todos os campos obrigatórios!";
+        avisoTexto.className = "texto-vermelho";
         return;
     }
 
     if (!link.startsWith("https://chat.whatsapp.com/")) { 
-        aviso.textContent = "❌ Link inválido, use apenas do WhatsApp!"; 
-        aviso.className = "texto-vermelho"; 
+        avisoTexto.textContent = "❌ Apenas links do WhatsApp são permitidos!"; 
+        avisoTexto.className = "texto-vermelho"; 
         return; 
     }
 
     try {
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { 
-            aviso.textContent = "❌ Esse link já foi cadastrado!"; 
-            aviso.className = "texto-vermelho"; 
+            avisoTexto.textContent = "❌ Esse link já foi cadastrado!"; 
+            avisoTexto.className = "texto-vermelho"; 
             return; 
         }
 
@@ -591,8 +616,8 @@ async function salvarGrupo() {
 
     } catch (erro) {
         console.error("ERRO:", erro);
-        aviso.textContent = `❌ ${erro.message}`;
-        aviso.className = "texto-vermelho";
+        avisoTexto.textContent = `❌ ${erro.message}`;
+        avisoTexto.className = "texto-vermelho";
     }
 }
 
@@ -626,7 +651,7 @@ async function carregarMeusGrupos() {
             const horas = Math.floor(tempoRestante / 3600000);
             const minutos = Math.floor((tempoRestante % 3600000) / 60000);
 
-            // ✅ Remove "Aprovado" se já impulsionou uma vez
+            // ✅ Remove "Aprovado" após primeiro impulso
             const statusTexto = g.status === "analise" ? "⏳ Em análise" : 
                                 g.status === "aprovado" && !g.jaImpulsionado ? "✅ Aprovado" : 
                                 g.status === "aprovado" && g.jaImpulsionado ? "" : 
