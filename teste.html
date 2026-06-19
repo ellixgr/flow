@@ -448,7 +448,7 @@ function abrirDetalhes(g) {
 
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { 
-        alert("⏳ Aguarde um momento, conectando..."); 
+        alert("⏳ Aguarde..."); 
         return; 
     }
 
@@ -458,93 +458,54 @@ async function salvarGrupo() {
     const desc = document.getElementById("descricaoGrupo").value.trim();
     const aviso = document.getElementById("avisoTexto");
 
-    // Validação básica
     if (!link || !nome || !cat || !desc || !fotoBase64) {
-        aviso.textContent = "❌ Preencha todos os campos obrigatórios!";
+        aviso.textContent = "❌ Preencha todos os campos!";
         aviso.className = "texto-vermelho";
         return;
     }
 
     if (!link.startsWith("https://chat.whatsapp.com/")) { 
-        aviso.textContent = "❌ Use apenas links oficiais do WhatsApp!"; 
+        aviso.textContent = "❌ Link inválido, use apenas do WhatsApp!"; 
         aviso.className = "texto-vermelho"; 
         return; 
     }
-
-    if (contarPalavras(desc) > 30) { 
-        aviso.textContent = "❌ Descrição com no máximo 30 palavras!"; 
-        aviso.className = "texto-vermelho"; 
-        return; 
-    }
-
-    if (temPalavraProibida(desc.toLowerCase())) { 
-        aviso.textContent = "❌ Conteúdo não permitido nas regras!"; 
-        aviso.className = "texto-vermelho"; 
-        return; 
-    }
-
-    const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
-        // Verifica se link já existe
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { 
-            aviso.textContent = "❌ Esse link já foi cadastrado antes!"; 
+            aviso.textContent = "❌ Esse link já foi cadastrado!"; 
             aviso.className = "texto-vermelho"; 
             return; 
         }
 
-        // Limite de 3 grupos por dia
-        const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
-        const contagemSnap = await db.collection("grupos")
-            .where("usuarioId", "==", usuarioAtual.uid)
-            .where("dataEnvio", ">=", firebase.firestore.Timestamp.fromDate(umDiaAtras))
-            .limit(4)
-            .get();
-
-        if (contagemSnap.size >= 3) { 
-            aviso.textContent = "❌ Você já enviou 3 grupos hoje, volte amanhã!"; 
-            aviso.className = "texto-vermelho"; 
-            return; 
-        }
-
-        // Cria o documento com valores exatos que a regra aceita
-        const dadosGrupo = {
+        const dados = {
             link: link,
             nome: nome,
             categoria: cat,
             descricao: desc,
-            regrasMarcadas: regrasMarcadas,
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.Timestamp.now(),
-            impulsionadoAte: null
+            dataEnvio: firebase.firestore.Timestamp.now()
         };
 
-        await db.collection("grupos").add(dadosGrupo);
+        await db.collection("grupos").add(dados);
 
-        // Sucesso
         fecharModal("modalEnviar");
-        alert("✅ Grupo enviado para análise com sucesso!");
+        alert("✅ Enviado com sucesso!");
 
-        // Limpa o formulário
+        // Limpa formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
         document.getElementById("descricaoGrupo").value = "";
         document.getElementById("fotoGrupo").value = "";
         document.getElementById("previewFoto").classList.add("hidden");
-        document.querySelectorAll('input[name="regra"]').forEach(el => el.checked = false);
         fotoBase64 = "";
 
     } catch (erro) {
-        console.error("ERRO DETALHADO:", erro.code, erro.message);
-        if (erro.code === "permission-denied") {
-            aviso.textContent = "❌ Erro de permissão: verifique as regras do Firestore!";
-        } else {
-            aviso.textContent = `❌ Erro: ${erro.message}`;
-        }
+        console.error("ERRO:", erro);
+        aviso.textContent = `❌ ${erro.message}`;
         aviso.className = "texto-vermelho";
     }
 }
