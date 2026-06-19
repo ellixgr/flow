@@ -38,53 +38,14 @@
         }
     </script>
     <style>
-        /* Animações globais */
-        html {
-            scroll-behavior: smooth;
-        }
-        body {
-            scroll-behavior: smooth;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        .fade-in {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .sucesso-notificacao {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #15803d;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 99999;
-            opacity: 0;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        .sucesso-notificacao.mostrar {
-            opacity: 1;
-            transform: translateX(-50%) translateY(10px);
-        }
-
-        .grupo-card { 
-            transition: all 0.3s ease; 
-            max-width: 100%;
-            overflow: hidden;
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-        .grupo-card:hover { 
-            transform: translateY(-5px); 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
+        html { scroll-behavior: smooth; }
+        body { scroll-behavior: smooth; display: flex; flex-direction: column; min-height: 100vh; }
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .sucesso-notificacao { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #15803d; color: white; padding: 12px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 99999; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+        .sucesso-notificacao.mostrar { opacity: 1; transform: translateX(-50%) translateY(10px); }
+        .grupo-card { transition: all 0.3s ease; max-width: 100%; overflow: hidden; animation: fadeIn 0.4s ease-out forwards; }
+        .grupo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .texto-vermelho { color: #dc2626; }
         .esconder { display: none !important; }
         .status-analise { color: #ca8a04; font-weight: 500; }
@@ -92,86 +53,20 @@
         .status-recusado { color: #dc2626; font-weight: 500; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: fadeIn 0.2s ease; }
         .modal-content { background: white; border-radius: 0.75rem; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 1.5rem; animation: fadeIn 0.2s ease; }
-        
-        /* CORREÇÃO: Página Meus Grupos agora empurra o rodapé para o final */
-        .pagina-tela-cheia { 
-            position: fixed; 
-            inset: 0; 
-            background: #f3f4f6; 
-            z-index: 10000; 
-            overflow-y: auto; 
-            display: flex;
-            flex-direction: column;
-        }
-        .conteudo-tela-cheia { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 2rem 1rem; 
-            flex: 1;
-        }
-        .logo { 
-            width: 48px; 
-            height: 48px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            object-fit: cover; 
-            transition: transform 0.2s ease; 
-        }
+        .pagina-tela-cheia { position: fixed; inset: 0; background: #f3f4f6; z-index: 10000; overflow-y: auto; display: flex; flex-direction: column; }
+        .conteudo-tela-cheia { max-width: 1200px; margin: 0 auto; padding: 2rem 1rem; flex: 1; }
+        .logo { width: 48px; height: 48px; border-radius: 8px; cursor: pointer; object-fit: cover; transition: transform 0.2s ease; }
         .logo:hover { transform: scale(1.05); }
-        
-        /* Ajuste do card igual ao modelo */
-        .card-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            object-position: center;
-            transition: transform 0.3s ease;
-        }
-        .grupo-card:hover .card-img {
-            transform: scale(1.03);
-        }
-        .card-body {
-            padding: 1rem;
-        }
-        .card-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            line-height: 1.3;
-        }
-        .card-desc {
-            font-size: 0.9rem;
-            color: #4b5563;
-            margin-bottom: 0.8rem;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        .card-categoria {
-            font-size: 0.75rem;
-            background: #e5e7eb;
-            padding: 0.25rem 0.6rem;
-            border-radius: 4px;
-            font-weight: 500;
-            text-transform: uppercase;
-        }
-        /* Paginação só aparece quando necessário */
-        .paginacao-container {
-            display: none;
-        }
-        /* Botões com animação */
-        button {
-            transition: all 0.2s ease;
-        }
-        button:active {
-            transform: scale(0.98);
-        }
-        /* Rodapé sempre no final */
-        footer {
-            margin-top: auto;
-        }
+        .card-img { width: 100%; height: 180px; object-fit: cover; object-position: center; transition: transform 0.3s ease; }
+        .grupo-card:hover .card-img { transform: scale(1.03); }
+        .card-body { padding: 1rem; }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.3; }
+        .card-desc { font-size: 0.9rem; color: #4b5563; margin-bottom: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-categoria { font-size: 0.75rem; background: #e5e7eb; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 500; text-transform: uppercase; }
+        .paginacao-container { display: none; }
+        button { transition: all 0.2s ease; }
+        button:active { transform: scale(0.98); }
+        footer { margin-top: auto; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col relative">
@@ -204,7 +99,6 @@
 
 <main class="container mx-auto px-4 py-6 flex-grow">
     <div id="listaGrupos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
-    <!-- Paginação: só aparece se tiver mais de 20 itens -->
     <div id="paginacao" class="paginacao-container flex justify-center items-center gap-4 mt-8">
         <button id="btnAnterior" class="bg-gray-300 px-4 py-2 rounded disabled:opacity-50" onclick="paginaAnterior()" disabled>Anterior</button>
         <span id="paginaAtualTexto">Página 1</span>
@@ -222,12 +116,10 @@
     </div>
 </footer>
 
-<!-- Notificação de sucesso -->
 <div id="notificacaoSucesso" class="sucesso-notificacao">✅ Grupo impulsionado 🎉</div>
 
 <div id="paginaMeusGrupos" class="pagina-tela-cheia esconder">
     <div class="bg-zapMaisEscuro text-white shadow-md p-4 flex justify-between items-center sticky top-0 z-20">
-        <!-- ✅ LOGO ADICIONADO NA ABA MEUS GRUPOS -->
         <div class="flex items-center gap-3">
             <img src="https://files.catbox.moe/grr1fk.png" alt="Logo do Site" class="logo" onclick="fecharPaginaMeusGrupos(); voltarInicio()">
             <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
@@ -453,7 +345,6 @@ function temPalavraProibida(texto) {
 }
 function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p).length; }
 
-// ✅ FUNÇÃO CORRIGIDA: SEM ÍNDICE, SEM ERRO
 async function carregarGrupos() {
     try {
         const ref = db.collection("grupos").where("status", "==", "aprovado");
@@ -478,7 +369,6 @@ async function carregarGrupos() {
 
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
 
-// ✅ FUNÇÃO DE EXIBIÇÃO COM REGRAS DE PAGINAÇÃO E CARDS CORRETOS
 function mostrarPagina() {
     let lista = todosGrupos;
     if (categoriaAtual !== "todos") lista = lista.filter(g => g.categoria === categoriaAtual);
@@ -486,13 +376,8 @@ function mostrarPagina() {
     const totalItens = lista.length;
     const totalPaginas = Math.ceil(totalItens / itensPorPagina);
 
-    // Mostra/esconde paginação só se tiver mais de 20 grupos
     const paginacaoEl = document.getElementById("paginacao");
-    if (totalItens > itensPorPagina) {
-        paginacaoEl.style.display = "flex";
-    } else {
-        paginacaoEl.style.display = "none";
-    }
+    paginacaoEl.style.display = totalItens > itensPorPagina ? "flex" : "none";
 
     const inicio = (paginaAtual - 1) * itensPorPagina;
     const fim = inicio + itensPorPagina;
@@ -506,7 +391,6 @@ function mostrarPagina() {
         return;
     }
 
-    // Renderiza cards com tamanho e proporção corretos
     pag.forEach(g => {
         const card = document.createElement("div");
         card.className = "grupo-card bg-white rounded-lg shadow cursor-pointer";
@@ -521,7 +405,6 @@ function mostrarPagina() {
         container.appendChild(card);
     });
 
-    // Atualiza botões
     document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
     document.getElementById("btnAnterior").disabled = paginaAtual === 1;
     document.getElementById("btnProxima").disabled = paginaAtual >= totalPaginas;
@@ -556,8 +439,8 @@ function abrirDetalhes(g) {
 
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { 
-        avisoTexto.textContent = "⏳ Aguarde conectando..."; 
-        avisoTexto.className = "texto-vermelho";
+        document.getElementById("avisoTexto").textContent = "⏳ Aguarde conectando..."; 
+        document.getElementById("avisoTexto").className = "texto-vermelho";
         return; 
     }
 
@@ -605,7 +488,6 @@ async function salvarGrupo() {
         fecharModal("modalEnviar");
         mostrarNotificacao("✅ Grupo enviado para análise!");
 
-        // Limpa formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
         document.getElementById("categoriaGrupo").value = "";
@@ -621,8 +503,7 @@ async function salvarGrupo() {
     }
 }
 
-
-// ✅ MEUS GRUPOS COM MELHORIAS
+// ✅ CORRIGIDO: Recusado aparece para o usuário, só some quando apagado
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
     if (!usuarioPronto || !usuarioAtual) { 
@@ -651,81 +532,4 @@ async function carregarMeusGrupos() {
             const horas = Math.floor(tempoRestante / 3600000);
             const minutos = Math.floor((tempoRestante % 3600000) / 60000);
 
-            // ✅ Remove "Aprovado" após primeiro impulso
-            const statusTexto = g.status === "analise" ? "⏳ Em análise" : 
-                                g.status === "aprovado" && !g.jaImpulsionado ? "✅ Aprovado" : 
-                                g.status === "aprovado" && g.jaImpulsionado ? "" : 
-                                "❌ Recusado";
-
-            const statusClasse = g.status === "analise" ? "status-analise" : 
-                                 g.status === "aprovado" ? "status-aprovado" : 
-                                 "status-recusado";
-
-            let botaoImp = "";
-            if (g.status === "aprovado") {
-                if (podeImpulsionar) {
-                    botaoImp = `<button onclick="impulsionarGrupo('${g.id}')" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium">🚀 Impulsionar por 2h</button>`;
-                } else {
-                    botaoImp = `<p class="text-xs text-gray-500 mt-2 text-center">⏳ Disponível em ${horas}h ${minutos}min</p>`;
-                }
-            }
-
-            const card = document.createElement("div");
-            card.className = "bg-white rounded-lg shadow p-5 border fade-in";
-            card.innerHTML = `
-                <div class="flex items-center gap-4 mb-4">
-                    <img src="${g.foto || ''}" alt="${escaparHTML(g.nome)}" class="w-16 h-16 rounded-full object-cover border">
-                    <div>
-                        <h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3>
-                        <p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p>
-                        ${statusTexto ? `<p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p>` : ''}
-                    </div>
-                </div>
-                <p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>
-                ${botaoImp}`;
-            grade.appendChild(card);
-        });
-
-    } catch (err) {
-        console.error("Erro:", err);
-        container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`;
-    }
-}
-
-// ✅ IMPULSÃO SEM CONFIRMAÇÃO
-async function impulsionarGrupo(id) {
-    try {
-        const fim = new Date(Date.now() + TEMPO_IMPULSAO);
-        await db.collection("grupos").doc(id).update({
-            impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim),
-            jaImpulsionado: true
-        });
-        mostrarNotificacao("✅ Grupo impulsionado 🎉");
-        carregarMeusGrupos();
-        carregarGrupos();
-    } catch (err) {
-        mostrarNotificacao("❌ Erro: " + err.message);
-    }
-}
-
-async function enviarDenuncia() {
-    try {
-        const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
-        await db.collection("denuncias").add({ 
-            grupoId: grupoSelecionado.id, 
-            motivo: motivo, 
-            link: grupoSelecionado.link, 
-            data: firebase.firestore.FieldValue.serverTimestamp(),
-            usuarioDenunciante: usuarioAtual.uid
-        });
-        fecharModal("modalDenuncia"); 
-        fecharModal("modalDetalhes"); 
-        mostrarNotificacao("✅ Denúncia enviada!");
-    } catch (err) { 
-        mostrarNotificacao("❌ Não foi possível enviar a denúncia."); 
-    }
-}
-</script>
-
-</body>
-</html>
+            const statusTex
