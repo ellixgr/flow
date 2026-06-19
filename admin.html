@@ -21,17 +21,25 @@
 
 <div id="painel" class="hidden max-w-5xl mx-auto">
     <div class="bg-white rounded shadow p-6 mb-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold">📋 Gerenciar Grupos</h1>
+        <h1 class="text-2xl font-bold">📋 Gerenciar Sistema</h1>
         <button onclick="sair()" class="bg-red-500 text-white px-3 py-1 rounded">Sair</button>
     </div>
 
+    <!-- Abas de navegação -->
     <div class="bg-white rounded shadow p-4 mb-4 flex flex-wrap gap-2">
+        <button onclick="mudarAba('grupos')" id="abaGrupos" class="bg-blue-600 text-white px-3 py-1 rounded">📌 Grupos</button>
+        <button onclick="mudarAba('denuncias')" id="abaDenuncias" class="bg-red-600 text-white px-3 py-1 rounded">🚨 Denúncias</button>
+    </div>
+
+    <!-- Filtros para grupos -->
+    <div id="filtrosGrupos" class="bg-white rounded shadow p-4 mb-4 flex flex-wrap gap-2">
         <button onclick="filtrar('analise')" class="bg-yellow-500 text-white px-3 py-1 rounded">Pendentes / Em Análise</button>
         <button onclick="filtrar('aprovado')" class="bg-green-500 text-white px-3 py-1 rounded">Aprovados</button>
         <button onclick="filtrar('recusado')" class="bg-red-500 text-white px-3 py-1 rounded">Recusados</button>
     </div>
 
-    <div id="listaGrupos" class="space-y-4"></div>
+    <!-- Conteúdo dinâmico -->
+    <div id="listaConteudo" class="space-y-4"></div>
 </div>
 
 <script>
@@ -48,6 +56,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 let filtroAtual = "analise";
+let abaAtual = "grupos";
 
 async function entrar() {
   const email = document.getElementById("email").value.trim();
@@ -58,7 +67,7 @@ async function entrar() {
     await auth.signInWithEmailAndPassword(email, senha);
     document.getElementById("telaLogin").classList.add("hidden");
     document.getElementById("painel").classList.remove("hidden");
-    carregarLista();
+    mudarAba('grupos');
   } catch (erro) {
     console.error("Erro login:", erro);
     document.getElementById("avisoErro").classList.remove("hidden");
@@ -74,13 +83,28 @@ function sair() {
   document.getElementById("senha").value = "";
 }
 
-// ✅ FUNÇÃO CORRIGIDA — NÃO USA ORDENAÇÃO COMPOSTA NO FILTRO DE STATUS
-async function carregarLista() {
-  const container = document.getElementById("listaGrupos");
+function mudarAba(aba) {
+    abaAtual = aba;
+    document.getElementById("abaGrupos").classList.remove("bg-blue-600");
+    document.getElementById("abaDenuncias").classList.remove("bg-red-600");
+    document.getElementById("filtrosGrupos").classList.add("hidden");
+
+    if (aba === "grupos") {
+        document.getElementById("abaGrupos").classList.add("bg-blue-600");
+        document.getElementById("filtrosGrupos").classList.remove("hidden");
+        carregarListaGrupos();
+    } else {
+        document.getElementById("abaDenuncias").classList.add("bg-red-600");
+        carregarListaDenuncias();
+    }
+}
+
+// ✅ CARREGAR GRUPOS
+async function carregarListaGrupos() {
+  const container = document.getElementById("listaConteudo");
   container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
 
   try {
-    // Buscamos apenas pelo status, sem ordenação extra que peça índice novo
     const ref = db.collection("grupos").where("status", "==", filtroAtual);
     const snap = await ref.get();
 
@@ -89,12 +113,11 @@ async function carregarLista() {
       return;
     }
 
-    // Ordenamos por data diretamente no navegador — funciona sem índice
     const grupos = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))
       .sort((a, b) => {
         const dataA = a.dataEnvio?.toDate() || 0;
         const dataB = b.dataEnvio?.toDate() || 0;
-        return dataB - dataA; // Mais novos primeiro
+        return dataB - dataA;
       });
 
     container.innerHTML = "";
@@ -127,7 +150,65 @@ async function carregarLista() {
     });
 
   } catch (erro) {
-    console.error("Erro ao carregar:", erro);
+    console.error("Erro ao carregar grupos:", erro);
+    container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`;
+  }
+}
+
+// ✅ CARREGAR DENÚNCIAS
+async function carregarListaDenuncias() {
+  const container = document.getElementById("listaConteudo");
+  container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando denúncias...</p>`;
+
+  try {
+    const snap = await db.collection("denuncias").orderBy("data", "desc").get();
+
+    if (snap.empty) {
+      container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhuma denúncia recebida.</p>`;
+      return;
+    }
+
+    container.innerHTML = "";
+
+    for (const doc of snap.docs) {
+      const d = { id: doc.id, ...doc.data() };
+      let grupo = null;
+      try {
+        const grupoSnap = await db.collection("grupos").doc(d.grupoId).get();
+        if (grupoSnap.exists) grupo = { id: grupoSnap.id, ...grupoSnap.data() };
+      } catch (e) {}
+
+      const div = document.createElement("div");
+      div.className = "border border-red-200 rounded p-4 bg-red-50 flex flex-col md:flex-row gap-4 justify-between";
+
+      div.innerHTML = `
+        <div class="flex-1">
+          <h4 class="font-bold text-red-700">🚨 Denúncia</h4>
+          <p class="text-sm mt-1"><strong>Motivo:</strong> ${d.motivo.replace("_", " ")}</p>
+          <p class="text-xs text-gray-600 mt-1">Data: ${d.data?.toDate().toLocaleString("pt-BR") || "Não informado"}</p>
+          ${grupo ? `
+            <div class="mt-2 p-2 bg-white rounded border">
+              <p><strong>Grupo:</strong> ${grupo.nome}</p>
+              <p class="text-xs"><strong>Status:</strong> ${grupo.status}</p>
+              <a href="${grupo.link}" target="_blank" class="text-blue-600 text-xs mt-1 inline-block">🔗 Abrir link</a>
+            </div>
+          ` : `<p class="text-xs text-gray-500 mt-2">❌ Grupo não encontrado ou já removido</p>`}
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          ${grupo ? `
+            <button onclick="alterar('${grupo.id}', 'aprovado')" class="bg-green-600 text-white px-2 py-1 rounded text-xs">✅ Aprovar</button>
+            <button onclick="alterar('${grupo.id}', 'recusado')" class="bg-orange-500 text-white px-2 py-1 rounded text-xs">❌ Recusar</button>
+            <button onclick="apagar('${grupo.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-xs">🗑️ Apagar Grupo</button>
+          ` : ''}
+          <button onclick="apagarDenuncia('${d.id}')" class="bg-gray-600 text-white px-2 py-1 rounded text-xs">🗑️ Apagar Denúncia</button>
+        </div>
+      `;
+
+      container.appendChild(div);
+    }
+
+  } catch (erro) {
+    console.error("Erro ao carregar denúncias:", erro);
     container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`;
   }
 }
@@ -138,7 +219,8 @@ async function alterar(id, novoStatus) {
       status: novoStatus,
       dataAlteracao: firebase.firestore.FieldValue.serverTimestamp()
     });
-    carregarLista();
+    if (abaAtual === "grupos") carregarListaGrupos();
+    else carregarListaDenuncias();
     alert(`✅ Grupo alterado para: ${novoStatus}`);
   } catch (erro) {
     console.error("Erro alterar:", erro);
@@ -150,7 +232,8 @@ async function apagar(id) {
   if (!confirm("Tem certeza que quer apagar esse grupo? Essa ação não pode ser desfeita.")) return;
   try {
     await db.collection("grupos").doc(id).delete();
-    carregarLista();
+    if (abaAtual === "grupos") carregarListaGrupos();
+    else carregarListaDenuncias();
     alert("✅ Grupo apagado com sucesso!");
   } catch (erro) {
     console.error("Erro apagar:", erro);
@@ -158,9 +241,20 @@ async function apagar(id) {
   }
 }
 
+async function apagarDenuncia(id) {
+  if (!confirm("Apagar apenas a denúncia?")) return;
+  try {
+    await db.collection("denuncias").doc(id).delete();
+    carregarListaDenuncias();
+    alert("✅ Denúncia removida!");
+  } catch (erro) {
+    alert("❌ Erro ao remover denúncia.");
+  }
+}
+
 function filtrar(tipo) {
   filtroAtual = tipo;
-  carregarLista();
+  carregarListaGrupos();
 }
 </script>
 
