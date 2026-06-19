@@ -92,9 +92,9 @@
             <input type="text" id="nomeGrupo" class="w-full border p-2 rounded" maxlength="50" required>
         </div>
         <div class="mb-3">
-            <label class="block text-gray-700 mb-1">Foto do Grupo (ajustada automaticamente)</label>
+            <label class="block text-gray-700 mb-1">Foto do Grupo (até 70KB) *</label>
             <input type="file" id="fotoGrupo" accept="image/*" class="w-full border p-2 rounded">
-            <p class="text-xs text-gray-500 mt-1">Máximo após ajuste: 100KB</p>
+            <p class="text-xs text-gray-500 mt-1">Escolha uma imagem do seu aparelho</p>
             <div id="previewFoto" class="mt-2 w-20 h-20 rounded-full border mx-auto bg-center bg-cover hidden"></div>
         </div>
         <div class="mb-3">
@@ -108,28 +108,20 @@
             </select>
         </div>
         <div class="mb-4">
-            <label class="block text-gray-700 mb-1">Descrição (máx 30 palavras) *</label>
+            <label class="block text-gray-700 mb-1">Descrição / Regras (máx 30 palavras) *</label>
             <textarea id="descricaoGrupo" class="w-full border p-2 rounded" rows="3" maxlength="200" required></textarea>
             <p id="avisoTexto" class="text-xs mt-1"></p>
         </div>
 
-        <!-- ✅ REGRAS PARA MARCAR -->
-        <div class="mb-4 p-3 bg-gray-50 border border-gray-200 rounded">
-            <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras do Grupo (marque as que se aplicam):</h5>
-            <div class="space-y-2 text-sm">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_links"> Proibido links externos
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_gore"> Proibido conteúdo violento/gore
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_menor18"> Proibido conteúdo para menores de 18
-                </label>
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" name="regra" value="proibido_travas"> Proibido travas/redirecionamentos
-                </label>
-            </div>
+        <!-- ✅ REGRAS DE PROIBIÇÃO ADICIONADAS AQUI -->
+        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+            <h5 class="font-semibold text-red-700 text-sm mb-2">🚫 Regras Obrigatórias:</h5>
+            <ul class="text-xs text-red-800 list-disc list-inside space-y-1">
+                <li>❌ Proibido links de outros sites ou redes sociais</li>
+                <li>❌ Proibido conteúdo violento, gore ou imagens fortes</li>
+                <li>❌ Proibido conteúdo para menores de 18 anos</li>
+                <li>❌ Proibido travas, links curtos ou redirecionamentos</li>
+            </ul>
         </div>
 
         <div class="flex gap-3 justify-end">
@@ -164,6 +156,7 @@
     <div class="modal-content">
         <h4 class="text-lg font-semibold mb-3">Motivo da Denúncia</h4>
         <div class="space-y-2 mb-4">
+            <!-- ✅ APENAS 1 OPÇÃO DE DENÚNCIA -->
             <label class="flex items-center gap-2"><input type="radio" name="motivoDenuncia" value="link_invalido" checked> Link inválido / expirado</label>
         </div>
         <div class="flex gap-3 justify-end">
@@ -177,7 +170,11 @@
     <div class="modal-content">
         <h3 class="text-xl font-bold mb-4 text-gray-800">📄 Termos de Uso</h3>
         <div class="text-gray-700 space-y-3 text-sm">
-            <p>Ao utilizar nossa plataforma, você concorda com as regras estabelecidas.</p>
+            <p>Ao utilizar nossa plataforma, você concorda com as seguintes regras:</p>
+            <p>1. Os grupos cadastrados são de responsabilidade exclusiva de seus administradores. Não nos responsabilizamos por conteúdo, links ou regras dos grupos.</p>
+            <p>2. É proibido compartilhar conteúdo ilegal, ofensivo, discriminatório, violento ou que viole direitos de terceiros.</p>
+            <p>3. Reservamo-nos o direito de remover qualquer grupo ou usuário sem aviso prévio, caso haja violação das regras.</p>
+            <p>4. O serviço é gratuito e disponibilizado sem garantias de funcionamento ininterrupto.</p>
         </div>
         <div class="text-right mt-4">
             <button onclick="fecharModal('modalTermos')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button>
@@ -189,7 +186,11 @@
     <div class="modal-content">
         <h3 class="text-xl font-bold mb-4 text-gray-800">🔒 Política de Privacidade</h3>
         <div class="text-gray-700 space-y-3 text-sm">
-            <p>Coletamos apenas dados necessários para o funcionamento do sistema.</p>
+            <p>Respeitamos sua privacidade e protegemos seus dados:</p>
+            <p>1. Coletamos apenas dados necessários para o funcionamento do sistema: identificador de usuário, dados do grupo enviado e data de envio.</p>
+            <p>2. Não compartilhamos seus dados com terceiros, exceto por ordem judicial.</p>
+            <p>3. As imagens e links enviados são armazenados apenas para exibição na plataforma.</p>
+            <p>4. Você pode solicitar a exclusão de seus dados a qualquer momento.</p>
         </div>
         <div class="text-right mt-4">
             <button onclick="fecharModal('modalPrivacidade')" class="px-4 py-2 bg-gray-300 rounded">Entendi</button>
@@ -211,11 +212,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+// ✅ Login PERSISTENTE: mantém o mesmo ID mesmo recarregando
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-const palavrasProibidas = ["porno", "sexo", "gore", "18+", "adulto", "trava", "encurtador"];
+const palavrasProibidas = ["porra", "caralho", "filho da puta", "puta", "porno", "sexo", "cu", "vadia", "merda", "gore", "18+", "adulto", "trava", "encurtador"];
 const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
-const LIMITE_GRUPOS_DIA = 3;
+const LIMITE_GRUPOS_DIA = 3; // ✅ Limite de 3 por dia
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
 auth.onAuthStateChanged(user => {
@@ -228,31 +230,17 @@ auth.onAuthStateChanged(user => {
     }
 });
 
-// ✅ CONVERSÃO AUTOMÁTICA DA FOTO PARA ATÉ 100KB
 document.getElementById("fotoGrupo").addEventListener("change", function(e) {
     const arquivo = e.target.files[0];
     if (!arquivo) return;
-
+    if (arquivo.size > 70 * 1024) { alert("❌ Imagem maior que 70KB!"); this.value = ""; return; }
     const leitor = new FileReader();
     leitor.onload = function(e) {
-        const img = new Image();
-        img.src = e.target.result;
+        const img = new Image(); img.src = e.target.result;
         img.onload = () => {
-            const canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = 150;
-            canvas.height = 150;
-            ctx.drawImage(img, 0, 0, 150, 150);
-
-            // Ajusta qualidade até ficar abaixo de 100KB
-            let qualidade = 0.8;
-            let tentativa;
-            do {
-                tentativa = canvas.toDataURL("image/jpeg", qualidade);
-                qualidade -= 0.05;
-            } while (tentativa.length > 100 * 1024 * 1.33 && qualidade > 0.2);
-
-            fotoBase64 = tentativa;
+            const canvas = document.createElement("canvas"); const ctx = canvas.getContext("2d");
+            canvas.width = 150; canvas.height = 150; ctx.drawImage(img, 0, 0, 150, 150);
+            fotoBase64 = canvas.toDataURL("image/jpeg", 0.6);
             document.getElementById("previewFoto").style.backgroundImage = `url(${fotoBase64})`;
             document.getElementById("previewFoto").classList.remove("hidden");
         };
@@ -275,7 +263,7 @@ async function carregarGrupos() {
         paginaAtual = 1; mostrarPagina();
     } catch (err) {
         console.error(err);
-        if (err.code === "failed-precondition") alert("⚠️ Índice criando, aguarde 1-2 minutos");
+        if (err.code === "failed-precondition") alert("⚠️ Crie o índice da lista principal pelo link do console.");
         else alert("⚠️ Verifique a conexão.");
     }
 }
@@ -301,10 +289,7 @@ function paginaProxima() { paginaAtual++; mostrarPagina(); }
 
 function abrirDetalhes(g) {
     grupoSelecionado = g;
-    const regrasTexto = g.regrasMarcadas && g.regrasMarcadas.length > 0
-        ? g.regrasMarcadas.map(r => `• ${r.replace("proibido_", "").replace("_", " ")}`).join("<br>")
-        : "Nenhuma regra específica marcada";
-
+    // ✅ REGRAS APARECENDO NA ABA DE DETALHES
     document.getElementById("conteudoDetalhes").innerHTML = `
         <div class="text-center mb-4">
             <img src="${g.foto}" class="w-24 h-24 rounded-full mx-auto mb-3 object-cover">
@@ -316,8 +301,13 @@ function abrirDetalhes(g) {
             <p class="text-gray-700 whitespace-pre-line">${g.descricao}</p>
         </div>
         <div class="p-3 bg-gray-50 rounded border border-gray-200 mt-2">
-            <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras marcadas:</h5>
-            <p class="text-xs text-gray-600">${regrasTexto}</p>
+            <h5 class="font-semibold text-gray-700 text-sm mb-2">📌 Regras da Plataforma:</h5>
+            <ul class="text-xs text-gray-600 list-disc list-inside space-y-1">
+                <li>Proibido conteúdo violento ou explícito</li>
+                <li>Proibido links de redirecionamento</li>
+                <li>Proibido conteúdo impróprio para menores</li>
+                <li>Grupos de responsabilidade de seus administradores</li>
+            </ul>
         </div>
     `;
     document.getElementById("botaoEntrar").onclick = () => window.open(g.link, "_blank");
@@ -337,7 +327,7 @@ async function salvarGrupo() {
     if (contarPalavras(desc) > 30) { aviso.textContent = "❌ Máximo 30 palavras!"; aviso.className = "texto-vermelho"; return; }
     if (temPalavraProibida(desc.toLowerCase())) { aviso.textContent = "❌ Conteúdo não permitido!"; aviso.className = "texto-vermelho"; return; }
 
-    // ✅ Captura regras marcadas
+    // Captura regras marcadas
     const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
@@ -345,16 +335,16 @@ async function salvarGrupo() {
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { aviso.textContent = "❌ Link já cadastrado!"; aviso.className = "texto-vermelho"; return; }
 
-        // Verifica limite de 3 grupos/dia
+        // Verifica limite de 3 grupos por dia
         const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const contagemSnap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
             .where("dataEnvio", ">=", firebase.firestore.Timestamp.fromDate(umDiaAtras))
             .limit(4)
             .get();
-        if (contagemSnap.size >= LIMITE_GRUPOS_DIA) { aviso.textContent = "❌ Limite de 3 grupos/dia atingido!"; aviso.className = "texto-vermelho"; return; }
+        if (contagemSnap.size >= 3) { aviso.textContent = "❌ Limite de 3 grupos por dia atingido!"; aviso.className = "texto-vermelho"; return; }
 
-        // Salva grupo
+        // ✅ SALVAMENTO SIMPLES E SEM ERRO
         await db.collection("grupos").add({
             link: link,
             nome: nome,
@@ -364,8 +354,7 @@ async function salvarGrupo() {
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.FieldValue.serverTimestamp(),
-            impulsionadoAte: null
+            dataEnvio: firebase.firestore.FieldValue.serverTimestamp()
         });
 
         fecharModal("modalEnviar");
@@ -381,10 +370,13 @@ async function salvarGrupo() {
         fotoBase64 = "";
 
     } catch (erro) {
-        console.error(erro);
-        alert("❌ Erro: " + erro.message);
+        console.error("ERRO:", erro);
+        // Mostra exatamente o motivo do erro
+        alert("❌ Detalhe do erro: " + erro.message);
     }
 }
+
+
 
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
