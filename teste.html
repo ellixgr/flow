@@ -332,29 +332,50 @@ async function salvarGrupo() {
     const desc = document.getElementById("descricaoGrupo").value.trim();
     const aviso = document.getElementById("avisoTexto");
 
+    // Validações no lado do cliente
     if (!link || !nome || !cat || !desc || !fotoBase64) return alert("❌ Preencha todos os campos!");
-    if (!link.startsWith("https://chat.whatsapp.com/")) { aviso.textContent = "❌ Apenas links do WhatsApp!"; aviso.className = "texto-vermelho"; return; }
-    if (contarPalavras(desc) > 30) { aviso.textContent = "❌ Máximo 30 palavras!"; aviso.className = "texto-vermelho"; return; }
-    if (temPalavraProibida(desc.toLowerCase())) { aviso.textContent = "❌ Conteúdo não permitido!"; aviso.className = "texto-vermelho"; return; }
+    if (!link.startsWith("https://chat.whatsapp.com/")) { 
+        aviso.textContent = "❌ Apenas links do WhatsApp!"; 
+        aviso.className = "texto-vermelho"; 
+        return; 
+    }
+    if (contarPalavras(desc) > 30) { 
+        aviso.textContent = "❌ Máximo 30 palavras!"; 
+        aviso.className = "texto-vermelho"; 
+        return; 
+    }
+    if (temPalavraProibida(desc.toLowerCase())) { 
+        aviso.textContent = "❌ Conteúdo não permitido!"; 
+        aviso.className = "texto-vermelho"; 
+        return; 
+    }
 
-    // Captura regras marcadas
     const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(el => el.value);
 
     try {
-        // Verifica link duplicado
+        // 🔍 Verifica link duplicado
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
-        if (!linkSnap.empty) { aviso.textContent = "❌ Link já cadastrado!"; aviso.className = "texto-vermelho"; return; }
+        if (!linkSnap.empty) { 
+            aviso.textContent = "❌ Esse link já foi cadastrado!"; 
+            aviso.className = "texto-vermelho"; 
+            return; 
+        }
 
-        // Verifica limite de 3 grupos por dia
+        // 📊 Verifica limite de 3 grupos por dia
         const umDiaAtras = new Date(Date.now() - 24 * 60 * 60 * 1000);
         const contagemSnap = await db.collection("grupos")
             .where("usuarioId", "==", usuarioAtual.uid)
-            .where("dataEnvio", ">=", firebase.firestore.Timestamp.fromDate(umDiaAtras))
+            .where("dataEnvio", ">=", umDiaAtras)
             .limit(4)
             .get();
-        if (contagemSnap.size >= 3) { aviso.textContent = "❌ Limite de 3 grupos por dia atingido!"; aviso.className = "texto-vermelho"; return; }
 
-        // ✅ SALVAMENTO SIMPLES E SEM ERRO
+        if (contagemSnap.size >= 3) { 
+            aviso.textContent = "❌ Você já enviou 3 grupos hoje!"; 
+            aviso.className = "texto-vermelho"; 
+            return; 
+        }
+
+        // ✅ SALVA COM DATA NORMAL (não usa serverTimestamp na criação para evitar conflito)
         await db.collection("grupos").add({
             link: link,
             nome: nome,
@@ -364,11 +385,13 @@ async function salvarGrupo() {
             foto: fotoBase64,
             status: "analise",
             usuarioId: usuarioAtual.uid,
-            dataEnvio: firebase.firestore.FieldValue.serverTimestamp()
+            dataEnvio: new Date(),
+            impulsionadoAte: null
         });
 
         fecharModal("modalEnviar");
         alert("✅ Grupo enviado para análise!");
+
         // Limpa formulário
         document.getElementById("linkGrupo").value = "";
         document.getElementById("nomeGrupo").value = "";
@@ -380,11 +403,11 @@ async function salvarGrupo() {
         fotoBase64 = "";
 
     } catch (erro) {
-        console.error("ERRO:", erro);
-        // Mostra exatamente o motivo do erro
-        alert("❌ Detalhe do erro: " + erro.message);
+        console.error("ERRO COMPLETO:", erro);
+        alert("❌ Detalhe do erro: " + erro.code + " | " + erro.message);
     }
 }
+
 
 
 async function carregarMeusGrupos() {
