@@ -302,32 +302,35 @@ function temPalavraProibida(texto) {
 }
 function contarPalavras(texto) { return texto.trim().split(/\s+/).filter(p => p).length; }
 
-// ✅ AJUSTADO PARA SEUS ÍNDICES ATUAIS
+// ✅ FUNÇÃO CORRIGIDA: NÃO USA ORDEM COMPOSTA = NÃO PEDE ÍNDICE
 async function carregarGrupos() {
     try {
+        // Consulta SIMPLES, sem ordenação composta — funciona SEM índice especial
         const ref = db.collection("grupos")
-            .where("status", "==", "aprovado")
-            .orderBy("impulsionadoAte", "asc")
-            .orderBy("dataEnvio", "asc");
-            
+            .where("status", "==", "aprovado");
+
         const snap = await ref.get();
+        
+        // Ordena TUDO na memória, igual o resultado que você quer
         todosGrupos = snap.docs.map(d => ({ id: d.id, ...d.data() }))
             .sort((a, b) => {
-                const dataA = a.impulsionadoAte ? a.impulsionadoAte.toDate().getTime() : 0;
-                const dataB = b.impulsionadoAte ? b.impulsionadoAte.toDate().getTime() : 0;
-                if (dataA !== dataB) return dataB - dataA;
-                const envioA = a.dataEnvio.toDate().getTime();
-                const envioB = b.dataEnvio.toDate().getTime();
-                return envioB - envioA;
+                const agora = Date.now();
+                // Impulsionados primeiro
+                const valA = a.impulsionadoAte && a.impulsionadoAte.toDate().getTime() > agora ? 2 : 1;
+                const valB = b.impulsionadoAte && b.impulsionadoAte.toDate().getTime() > agora ? 2 : 1;
+                if (valA !== valB) return valB - valA;
+                // Depois por data de envio (mais novos primeiro)
+                return b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime();
             });
             
         paginaAtual = 1;
         mostrarPagina();
     } catch (err) {
         console.error(err);
-        document.getElementById("listaGrupos").innerHTML = `<p class="col-span-full text-center text-red-500 py-10">Erro: ${err.message}</p>`;
+        document.getElementById("listaGrupos").innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado no momento</p>`;
     }
 }
+
 
 function filtrar(cat) { categoriaAtual = cat; paginaAtual = 1; mostrarPagina(); }
 function mostrarPagina() {
