@@ -50,73 +50,132 @@ const auth = firebase.auth();
 let abaAtual = "analise";
 
 async function entrar() {
-  const email = document.getElementById("email").value.trim(); const senha = document.getElementById("senha").value.trim();
-  try { await auth.signInWithEmailAndPassword(email, senha); document.getElementById("telaLogin").classList.add("hidden"); document.getElementById("painel").classList.remove("hidden"); mudarAba('analise'); } 
-  catch (erro) { document.getElementById("avisoErro").classList.remove("hidden"); setTimeout(() => document.getElementById("avisoErro").classList.add("hidden"), 3000); }
+  const email = document.getElementById("email").value.trim(); 
+  const senha = document.getElementById("senha").value.trim();
+  try { 
+    await auth.signInWithEmailAndPassword(email, senha); 
+    document.getElementById("telaLogin").classList.add("hidden"); 
+    document.getElementById("painel").classList.remove("hidden"); 
+    mudarAba('analise'); 
+  } 
+  catch (erro) { 
+    document.getElementById("avisoErro").classList.remove("hidden"); 
+    setTimeout(() => document.getElementById("avisoErro").classList.add("hidden"), 3000); 
+  }
 }
 function sair() { auth.signOut(); document.getElementById("painel").classList.add("hidden"); document.getElementById("telaLogin").classList.remove("hidden"); }
 
 function mudarAba(aba) {
     abaAtual = aba;
-    ["abaAnalise", "abaRecusados", "abaDenuncias"].forEach(id => document.getElementById(id).classList.remove("bg-yellow-600", "bg-orange-600", "bg-red-600"));
-    if (aba === "analise") { document.getElementById("abaAnalise").classList.add("bg-yellow-600"); carregarAnalise(); }
-    else if (aba === "recusados") { document.getElementById("abaRecusados").classList.add("bg-orange-600"); carregarRecusados(); }
-    else { document.getElementById("abaDenuncias").classList.add("bg-red-600"); carregarDenuncias(); }
+    ["abaAnalise", "abaRecusados", "abaDenuncias"].forEach(id => {
+      document.getElementById(id).classList.remove("bg-yellow-600", "bg-orange-600", "bg-red-600");
+    });
+    if (aba === "analise") { 
+      document.getElementById("abaAnalise").classList.add("bg-yellow-600"); 
+      carregarAnalise(); 
+    }
+    else if (aba === "recusados") { 
+      document.getElementById("abaRecusados").classList.add("bg-orange-600"); 
+      carregarRecusados(); 
+    }
+    else { 
+      document.getElementById("abaDenuncias").classList.add("bg-red-600"); 
+      carregarDenuncias(); 
+    }
 }
 
 async function carregarAnalise() {
-  const container = document.getElementById("listaConteudo"); container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
+  const container = document.getElementById("listaConteudo"); 
+  container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
   try {
-    const snap = await db.collection("grupos").where("status", "==", "analise").orderBy("dataEnvio", "desc").get();
-    if (snap.empty) { container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhum grupo em análise.</p>`; return; }
+    // Busca só com ordenação (usa índice que já existe) + filtra no código
+    const snap = await db.collection("grupos").orderBy("dataEnvio", "desc").get();
+    const analise = snap.docs.filter(d => d.data().status === "analise");
+
+    if (analise.length === 0) { 
+      container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhum grupo em análise.</p>`; 
+      return; 
+    }
     container.innerHTML = "";
-    snap.docs.forEach(doc => {
-      const g = { id: doc.id, ...doc.data() }; const div = document.createElement("div"); div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between bg-white";
+    analise.forEach(doc => {
+      const g = { id: doc.id, ...doc.data() }; 
+      const div = document.createElement("div"); 
+      div.className = "border rounded p-4 flex flex-col md:flex-row gap-4 items-center justify-between bg-white";
       div.innerHTML = `<div class="flex items-center gap-4 w-full md:w-auto"><img src="${g.foto || ''}" class="w-16 h-16 rounded-full object-cover border" alt="Grupo"><div class="flex-1"><h3 class="font-bold text-lg">${g.nome || 'Sem nome'}</h3><p class="text-sm text-gray-600">${g.categoria || 'Sem categoria'}</p><a href="${g.link || '#'}" target="_blank" class="text-blue-600 text-xs mt-1 inline-block">🔗 Abrir</a></div></div><div class="flex flex-wrap gap-2 justify-center"><button onclick="aprovar('${g.id}')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">✅ Aprovar</button><button onclick="recusar('${g.id}')" class="bg-orange-600 text-white px-2 py-1 rounded text-sm">❌ Recusar</button></div>`;
       container.appendChild(div);
     });
-  } catch (erro) { container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; }
+  } catch (erro) { 
+    container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; 
+  }
 }
 
 async function carregarRecusados() {
-  const container = document.getElementById("listaConteudo"); container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
+  const container = document.getElementById("listaConteudo"); 
+  container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`;
   try {
-    const snap = await db.collection("grupos").where("status", "in", ["recusado", "denunciado"]).orderBy("dataEnvio", "desc").get();
-    if (snap.empty) { container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhum grupo recusado.</p>`; return; }
+    const snap = await db.collection("grupos").orderBy("dataEnvio", "desc").get();
+    const recusados = snap.docs.filter(d => {
+      const s = d.data().status;
+      return s === "recusado" || s === "denunciado";
+    });
+
+    if (recusados.length === 0) { 
+      container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhum grupo recusado.</p>`; 
+      return; 
+    }
     container.innerHTML = "";
-    snap.docs.forEach(doc => {
-      const g = { id: doc.id, ...doc.data() }; const div = document.createElement("div"); div.className = "border border-orange-200 rounded p-4 bg-orange-50 flex flex-col md:flex-row gap-4 items-center justify-between";
+    recusados.forEach(doc => {
+      const g = { id: doc.id, ...doc.data() }; 
+      const div = document.createElement("div"); 
+      div.className = "border border-orange-200 rounded p-4 bg-orange-50 flex flex-col md:flex-row gap-4 items-center justify-between";
       div.innerHTML = `<div class="flex items-center gap-4 w-full md:w-auto"><img src="${g.foto || ''}" class="w-16 h-16 rounded-full object-cover border" alt="Grupo"><div class="flex-1"><h3 class="font-bold text-lg">${g.nome || 'Sem nome'}</h3><p class="text-sm text-gray-600">${g.categoria || 'Sem categoria'}</p><p class="text-xs text-orange-700">Motivo: ${g.motivoRecusa || 'Não informado'}</p><a href="${g.link || '#'}" target="_blank" class="text-blue-600 text-xs mt-1 inline-block">🔗 Abrir</a></div></div><div class="flex flex-wrap gap-2 justify-center"><button onclick="excluirGrupo('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded text-sm">🗑️ Apagar Definitivamente</button></div>`;
       container.appendChild(div);
     });
-  } catch (erro) { container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; }
+  } catch (erro) { 
+    container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; 
+  }
 }
 
 async function carregarDenuncias() {
-  const container = document.getElementById("listaConteudo"); container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando denúncias...</p>`;
+  const container = document.getElementById("listaConteudo"); 
+  container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando denúncias...</p>`;
   try {
     const snap = await db.collection("denuncias").orderBy("data", "desc").get();
-    if (snap.empty) { container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhuma denúncia recebida.</p>`; return; }
+    if (snap.empty) { 
+      container.innerHTML = `<p class="text-center text-gray-500 py-10">Nenhuma denúncia recebida.</p>`; 
+      return; 
+    }
     container.innerHTML = "";
     for (const doc of snap.docs) {
       const d = { id: doc.id, ...doc.data() };
       const grupoSnap = await db.collection("grupos").doc(d.grupoId).get();
       if (!grupoSnap.exists) { await db.collection("denuncias").doc(d.id).delete(); continue; }
       const g = { id: grupoSnap.id, ...grupoSnap.data() };
-      const div = document.createElement("div"); div.className = "border border-red-200 rounded p-4 bg-red-50 flex flex-col md:flex-row gap-4 justify-between";
+      const div = document.createElement("div"); 
+      div.className = "border border-red-200 rounded p-4 bg-red-50 flex flex-col md:flex-row gap-4 justify-between";
       div.innerHTML = `<div class="flex-1"><h4 class="font-bold text-red-700">🚨 Denúncia</h4><p class="text-sm"><strong>Motivo:</strong> ${d.motivo.replace("_", " ")}</p><p class="text-xs text-gray-600">Data: ${d.data?.toDate().toLocaleString("pt-BR") || "Não informado"}</p><div class="mt-2 p-2 bg-white rounded border"><p><strong>Grupo:</strong> ${g.nome}</p><p class="text-xs">Status atual: <span class="font-semibold ${g.status === 'denunciado' ? 'text-red-600' : 'text-gray-600'}">${g.status}</span></p><a href="${g.link}" target="_blank" class="text-blue-600 text-xs mt-1 inline-block">🔗 Abrir grupo</a></div></div><div class="flex flex-wrap gap-2 items-center"><button onclick="aplicarDenuncia('${g.id}', '${d.motivo}', '${d.id}')" class="bg-red-600 text-white px-2 py-1 rounded text-sm">🚩 Aplicar Denúncia</button><button onclick="retirarDenuncia('${g.id}', '${g.status === 'aprovado' ? 'aprovado' : 'analise'}', '${d.id}')" class="bg-green-600 text-white px-2 py-1 rounded text-sm">✅ Retirar Denúncia</button><button onclick="excluirGrupo('${g.id}')" class="bg-gray-700 text-white px-2 py-1 rounded text-sm">🗑️ Apagar</button></div>`;
       container.appendChild(div);
     }
-  } catch (erro) { container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; }
+  } catch (erro) { 
+    container.innerHTML = `<p class="text-center text-red-500 py-10">❌ Erro: ${erro.message}</p>`; 
+  }
 }
 
 async function aprovar(grupoId) {
-  try { await db.collection("grupos").doc(grupoId).update({ status: "aprovado", statusAnterior: null }); mudarAba("analise"); alert("✅ Grupo aprovado!"); } 
+  try { 
+    await db.collection("grupos").doc(grupoId).update({ status: "aprovado", statusAnterior: null }); 
+    mudarAba("analise"); 
+    alert("✅ Grupo aprovado!"); 
+  } 
   catch (e) { alert("Erro ao aprovar: " + e.message); }
 }
 
 async function recusar(grupoId, motivo = "Não especificado") {
-  try { await db.collection("grupos").doc(grupoId).update({ status: "recusado", motivoRecusa: motivo, statusAnterior: null }); mudarAba("analise"); alert("❌ Grupo recusado!"); } 
+  try { 
+    await db.collection("grupos").doc(grupoId).update({ status: "recusado", motivoRecusa: motivo, statusAnterior: null }); 
+    mudarAba("analise"); 
+    alert("❌ Grupo recusado!"); 
+  } 
   catch (e) { alert("Erro ao recusar: " + e.message); }
 }
 
@@ -126,18 +185,30 @@ async function aplicarDenuncia(grupoId, motivo, denunciaId) {
     const statusAntes = grupo.data().status || "analise";
     await db.collection("grupos").doc(grupoId).update({ status: "denunciado", motivoRecusa: motivo, statusAnterior: statusAntes });
     if (denunciaId) await db.collection("denuncias").doc(denunciaId).delete();
-    mudarAba("denuncias"); alert("🚩 Denúncia aplicada! Grupo movido para recusados.");
+    mudarAba("denuncias"); 
+    alert("🚩 Denúncia aplicada! Grupo movido para recusados.");
   } catch (e) { alert("Erro ao aplicar denúncia: " + e.message); }
 }
 
 async function retirarDenuncia(grupoId, statusOriginal, denunciaId = null) {
-  try { await db.collection("grupos").doc(grupoId).update({ status: statusOriginal, motivoRecusa: null, statusAnterior: null }); if (denunciaId) await db.collection("denuncias").doc(denunciaId).delete(); mudarAba("denuncias"); alert("✅ Denúncia retirada!"); } 
+  try { 
+    await db.collection("grupos").doc(grupoId).update({ status: statusOriginal, motivoRecusa: null, statusAnterior: null }); 
+    if (denunciaId) await db.collection("denuncias").doc(denunciaId).delete(); 
+    mudarAba("denuncias"); 
+    alert("✅ Denúncia retirada!"); 
+  } 
   catch (e) { alert("Erro ao retirar denúncia: " + e.message); }
 }
 
 async function excluirGrupo(grupoId) {
   if (!confirm("⚠️ CERTEZA ABSOLUTA? Isso apaga o grupo de TODOS os lugares, sem volta!")) return;
-  try { await db.collection("grupos").doc(grupoId).delete(); const denuncias = await db.collection("denuncias").where("grupoId", "==", grupoId).get(); denuncias.forEach(d => d.ref.delete()); mudarAba(abaAtual); alert("🗑️ Grupo apagado COMPLETAMENTE!"); } 
+  try { 
+    await db.collection("grupos").doc(grupoId).delete(); 
+    const denuncias = await db.collection("denuncias").where("grupoId", "==", grupoId).get(); 
+    denuncias.forEach(d => d.ref.delete()); 
+    mudarAba(abaAtual); 
+    alert("🗑️ Grupo apagado COMPLETAMENTE!"); 
+  } 
   catch (e) { alert("Erro ao apagar: " + e.message); }
 }
 </script>
