@@ -69,8 +69,7 @@
         .paginacao-container { display: none; }
         .btn-animado { transition: all 0.25s suave; }
         .btn-animado:active { transform: scale(0.96); }
-        .cabecalho-interno { background-color: #075E54; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
-        .cabecalho-interno .logo { width: 42px; height: 42px; }
+        .cabecalho-interno { background-color: #075E54; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1rem; display: flex; align-items: center; justify-content: center; }
         .rodape-fixo { margin-top: auto; }
     </style>
 </head>
@@ -84,7 +83,7 @@
         </div>
         <div class="flex gap-3">
             <button onclick="abrirModal('modalEnviar')" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100 btn-animado active:scale-95">
-                <i class="fa fa-paper-plane mr-1"></i> Enviar Grupo
+                Enviar Grupo
             </button>
             <button onclick="abrirPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-4 py-2 rounded font-medium hover:bg-gray-100 btn-animado active:scale-95">
                 Meus Grupos
@@ -127,9 +126,6 @@
             <img src="https://files.catbox.moe/grr1fk.png" alt="Logo do Site" class="logo" onclick="voltarInicio(); fecharPaginaMeusGrupos();">
             <h2 class="text-xl font-bold">📋 Meus Grupos</h2>
         </div>
-        <button onclick="fecharPaginaMeusGrupos()" class="bg-white text-zapMaisEscuro px-3 py-1 rounded hover:bg-gray-100 btn-animado">
-            <i class="fa fa-arrow-left mr-1"></i> Voltar
-        </button>
     </div>
     <div class="conteudo-tela-cheia flex-grow">
         <div id="conteudoMeusGrupos"><p class="text-center text-gray-500 py-10 text-lg">Carregando seus grupos...</p></div>
