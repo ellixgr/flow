@@ -42,9 +42,15 @@
             scroll-behavior: smooth;
         }
         .grupo-card { 
-            transition: all 0.3s suave; 
+            transition: all 0.4s suave; 
             max-width: 100%;
             overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .grupo-card.visivel {
+            opacity: 1;
+            transform: translateY(0);
         }
         .grupo-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
         .texto-vermelho { color: #dc2626; }
@@ -67,15 +73,20 @@
         .card-desc { font-size: 0.9rem; color: #4b5563; margin-bottom: 0.8rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .card-categoria { font-size: 0.75rem; background: #e5e7eb; padding: 0.25rem 0.6rem; border-radius: 4px; font-weight: 500; text-transform: uppercase; }
         .paginacao-container { display: none; }
-        .btn-animado { transition: all 0.25s suave; }
-        .btn-animado:active { transform: scale(0.96); }
+        .btn-animado { transition: all 0.2s suave; }
+        .btn-animado:active { transform: scale(0.94); }
         .cabecalho-interno { background-color: #075E54; color: white; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); padding: 1rem; display: flex; align-items: center; justify-content: center; }
         .rodape-fixo { margin-top: auto; }
         input, select, textarea { transition: all 0.25s suave; }
         input:focus, select:focus, textarea:focus { outline: none; ring: 2px solid #25D366; border-color: #25D366; }
+        .mensagem-central { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 1.2rem 2rem; border-radius: 0.8rem; box-shadow: 0 8px 20px rgba(0,0,0,0.15); z-index: 99999; opacity: 0; visibility: hidden; transition: all 0.3s suave; font-weight:500; font-size:1.1rem; color:#075E54; text-align:center; min-width:260px; }
+        .mensagem-central.mostrar { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1.05); }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- Mensagem central -->
+<div id="mensagemFlutuante" class="mensagem-central"></div>
 
 <header class="bg-zapMaisEscuro text-white shadow-lg">
     <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
@@ -140,7 +151,7 @@
                 <button onclick="abrirModal('modalPrivacidade')" class="hover:text-white underline btn-animado">Política de Privacidade</button>
             </div>
         </div>
-    </footer>
+    </div>
 </div>
 
 <div id="modalEnviar" class="modal-overlay esconder">
@@ -253,6 +264,13 @@ const TEMPO_IMPULSAO = 2 * 60 * 60 * 1000;
 const LIMITE_GRUPOS_DIA = 3;
 let todosGrupos = [], paginaAtual = 1, itensPorPagina = 20, categoriaAtual = "todos", grupoSelecionado = null, fotoBase64 = "", usuarioAtual = null, usuarioPronto = false;
 
+function mostrarMensagem(texto) {
+    const el = document.getElementById("mensagemFlutuante");
+    el.textContent = texto;
+    el.classList.add("mostrar");
+    setTimeout(() => el.classList.remove("mostrar"), 2200);
+}
+
 function voltarInicio() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
 function abrirPaginaMeusGrupos() { document.getElementById("paginaMeusGrupos").classList.remove("esconder"); carregarMeusGrupos(); }
 function fecharPaginaMeusGrupos() { document.getElementById("paginaMeusGrupos").classList.add("esconder"); }
@@ -310,10 +328,12 @@ function mostrarPagina() {
     const inicio = (paginaAtual - 1) * itensPorPagina; const fim = inicio + itensPorPagina; const pag = lista.slice(inicio, fim);
     const container = document.getElementById("listaGrupos"); container.innerHTML = "";
     if (pag.length === 0) { container.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">Nenhum grupo encontrado.</p>`; return; }
-    pag.forEach(g => {
+    pag.forEach((g, i) => {
         const card = document.createElement("div"); card.className = "grupo-card bg-white rounded-lg shadow cursor-pointer";
+        card.style.transitionDelay = (i * 0.08) + "s";
         card.innerHTML = `<img src="${g.foto}" alt="${escaparHTML(g.nome)}" class="card-img" loading="lazy"><div class="card-body"><h3 class="card-title">${escaparHTML(g.nome)}</h3><p class="card-desc">${escaparHTML(g.descricao)}</p><span class="card-categoria">${escaparHTML(g.categoria.toUpperCase())}</span></div>`;
         card.onclick = () => abrirDetalhes(g); container.appendChild(card);
+        setTimeout(() => card.classList.add("visivel"), 30);
     });
     document.getElementById("paginaAtualTexto").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
     document.getElementById("btnAnterior").disabled = paginaAtual === 1; document.getElementById("btnProxima").disabled = paginaAtual >= totalPaginas;
@@ -329,7 +349,7 @@ function abrirDetalhes(g) {
 }
 
 async function salvarGrupo() {
-    if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
+    if (!usuarioPronto || !usuarioAtual) { mostrarMensagem("⏳ Aguarde..."); return; }
     const link = document.getElementById("linkGrupo").value.trim().toLowerCase(); 
     const nome = document.getElementById("nomeGrupo").value.trim(); 
     const cat = document.getElementById("categoriaGrupo").value; 
@@ -353,14 +373,15 @@ async function salvarGrupo() {
         };
 
         await db.collection("grupos").add(dados);
-        fecharModal("modalEnviar"); alert("✅ Enviado com sucesso!");
+        fecharModal("modalEnviar");
+        mostrarMensagem("Grupo enviado para análise 🎉");
         document.getElementById("linkGrupo").value = ""; document.getElementById("nomeGrupo").value = ""; document.getElementById("categoriaGrupo").value = ""; document.getElementById("descricaoGrupo").value = ""; document.getElementById("fotoGrupo").value = ""; document.getElementById("previewFoto").classList.add("hidden"); fotoBase64 = "";
     } catch (erro) { aviso.textContent = `❌ ${erro.message}`; aviso.className = "texto-vermelho"; }
 }
 
 async function carregarMeusGrupos() {
     const container = document.getElementById("conteudoMeusGrupos");
-    if (!usuarioPronto || !usuarioAtual) { container.innerHTML = `<p class="text-center text-gray-500 py-10">Carregando...</p>`; setTimeout(carregarMeusGrupos, 800); return; }
+    if (!usuarioPronto || !usuarioAtual) { container.innerHTML = `<p class="text-center text-gray-500 py-10 text-lg">Carregando seus grupos...</p>`; setTimeout(carregarMeusGrupos, 800); return; }
     try {
         const snap = await db.collection("grupos").where("usuarioId", "==", usuarioAtual.uid).get();
         const meus = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.dataEnvio.toDate().getTime() - a.dataEnvio.toDate().getTime());
@@ -373,7 +394,7 @@ async function carregarMeusGrupos() {
             const statusClasse = g.status === "analise" ? "status-analise" : g.status === "aprovado" ? "status-aprovado" : "status-recusado";
             let botaoImp = "";
             if (g.status === "aprovado") { if (podeImpulsionar) botaoImp = `<button onclick="impulsionarGrupo('${g.id}')" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium btn-animado">🚀 Impulsionar por 2h</button>`; else botaoImp = `<p class="text-xs text-gray-500 mt-2 text-center">⏳ Disponível em ${horas}h ${minutos}min</p>`; }
-            const card = document.createElement("div"); card.className = "bg-white rounded-lg shadow p-5 border grupo-card";
+            const card = document.createElement("div"); card.className = "bg-white rounded-lg shadow p-5 border grupo-card visivel";
             card.innerHTML = `<div class="flex items-center gap-4 mb-4"><img src="${g.foto || ''}" alt="${escaparHTML(g.nome || 'Sem nome')}" class="w-16 h-16 rounded-full object-cover border"><div><h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3><p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p><p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p></div></div><p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>${botaoImp}`;
             grade.appendChild(card);
         });
@@ -381,16 +402,20 @@ async function carregarMeusGrupos() {
 }
 
 async function impulsionarGrupo(id) {
-    if (!confirm("Impulsionar este grupo por 2 horas?")) return;
-    try { const fim = new Date(Date.now() + TEMPO_IMPULSAO); await db.collection("grupos").doc(id).update({ impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim) }); alert("✅ Grupo impulsionado com sucesso!"); carregarMeusGrupos(); carregarGrupos(); } catch (err) { alert("❌ Erro: " + err.message); }
+    try { 
+        const fim = new Date(Date.now() + TEMPO_IMPULSAO); 
+        await db.collection("grupos").doc(id).update({ impulsionadoAte: firebase.firestore.Timestamp.fromDate(fim) }); 
+        mostrarMensagem("Grupo impulsionado 🎉"); 
+        carregarMeusGrupos(); carregarGrupos(); 
+    } catch (err) { mostrarMensagem("❌ Erro ao impulsionar!"); }
 }
 
 async function enviarDenuncia() {
     try {
         const motivo = document.querySelector('input[name="motivoDenuncia"]:checked').value;
         await db.collection("denuncias").add({ grupoId: grupoSelecionado.id, motivo: motivo, link: grupoSelecionado.link, data: firebase.firestore.FieldValue.serverTimestamp(), usuarioDenunciante: usuarioAtual.uid });
-        fecharModal("modalDenuncia"); fecharModal("modalDetalhes"); alert("✅ Denúncia enviada!");
-    } catch (err) { alert("❌ Não foi possível enviar a denúncia."); }
+        fecharModal("modalDenuncia"); fecharModal("modalDetalhes"); mostrarMensagem("✅ Denúncia enviada!");
+    } catch (err) { mostrarMensagem("❌ Não foi possível enviar a denúncia."); }
 }
 </script>
 
