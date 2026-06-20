@@ -305,13 +305,37 @@ function abrirDetalhes(g) {
 
 async function salvarGrupo() {
     if (!usuarioPronto || !usuarioAtual) { alert("⏳ Aguarde..."); return; }
-    const link = document.getElementById("linkGrupo").value.trim().toLowerCase(); const nome = document.getElementById("nomeGrupo").value.trim(); const cat = document.getElementById("categoriaGrupo").value; const desc = document.getElementById("descricaoGrupo").value.trim(); const aviso = document.getElementById("avisoTexto");
+    const link = document.getElementById("linkGrupo").value.trim().toLowerCase(); 
+    const nome = document.getElementById("nomeGrupo").value.trim(); 
+    const cat = document.getElementById("categoriaGrupo").value; 
+    const desc = document.getElementById("descricaoGrupo").value.trim(); 
+    const aviso = document.getElementById("avisoTexto");
+    const regrasMarcadas = Array.from(document.querySelectorAll('input[name="regra"]:checked')).map(c => c.value);
+
     if (!link || !nome || !cat || !desc || !fotoBase64) { aviso.textContent = "❌ Preencha todos os campos!"; aviso.className = "texto-vermelho"; return; }
     if (!link.startsWith("https://chat.whatsapp.com/")) { aviso.textContent = "❌ Link inválido, use apenas do WhatsApp!"; aviso.className = "texto-vermelho"; return; }
+    if (temPalavraProibida(nome) || temPalavraProibida(desc)) { aviso.textContent = "❌ Contém palavras não permitidas!"; aviso.className = "texto-vermelho"; return; }
+    if (contarPalavras(desc) > 30) { aviso.textContent = "❌ Descrição ultrapassa 30 palavras!"; aviso.className = "texto-vermelho"; return; }
+
     try {
         const linkSnap = await db.collection("grupos").where("link", "==", link).limit(1).get();
         if (!linkSnap.empty) { aviso.textContent = "❌ Esse link já foi cadastrado!"; aviso.className = "texto-vermelho"; return; }
-        const dados = { link, nome, categoria: cat, descricao: desc, foto: fotoBase64, status: "analise", usuarioId: usuarioAtual.uid, dataEnvio: firebase.firestore.Timestamp.now() };
+
+        // ✅ TODOS OS CAMPOS EXATOS QUE A REGRA PEDE
+        const dados = { 
+            link, 
+            nome, 
+            categoria: cat, 
+            descricao: desc, 
+            foto: fotoBase64, 
+            status: "analise", 
+            usuarioId: usuarioAtual.uid, 
+            dataEnvio: firebase.firestore.Timestamp.now(),
+            impulsionadoAte: null,
+            jaImpulsionado: false,
+            regrasMarcadas: regrasMarcadas
+        };
+
         await db.collection("grupos").add(dados);
         fecharModal("modalEnviar"); alert("✅ Enviado com sucesso!");
         document.getElementById("linkGrupo").value = ""; document.getElementById("nomeGrupo").value = ""; document.getElementById("categoriaGrupo").value = ""; document.getElementById("descricaoGrupo").value = ""; document.getElementById("fotoGrupo").value = ""; document.getElementById("previewFoto").classList.add("hidden"); fotoBase64 = "";
@@ -334,7 +358,7 @@ async function carregarMeusGrupos() {
             let botaoImp = "";
             if (g.status === "aprovado") { if (podeImpulsionar) botaoImp = `<button onclick="impulsionarGrupo('${g.id}')" class="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded text-sm font-medium">🚀 Impulsionar por 2h</button>`; else botaoImp = `<p class="text-xs text-gray-500 mt-2 text-center">⏳ Disponível em ${horas}h ${minutos}min</p>`; }
             const card = document.createElement("div"); card.className = "bg-white rounded-lg shadow p-5 border";
-            card.innerHTML = `<div class="flex items-center gap-4 mb-4"><img src="${g.foto || ''}" alt="${escaparHTML(g.nome)}" class="w-16 h-16 rounded-full object-cover border"><div><h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3><p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p><p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p></div></div><p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>${botaoImp}`;
+            card.innerHTML = `<div class="flex items-center gap-4 mb-4"><img src="${g.foto || ''}" alt="${escaparHTML(g.nome || 'Sem nome')}" class="w-16 h-16 rounded-full object-cover border"><div><h3 class="font-bold text-lg">${escaparHTML(g.nome || 'Sem nome')}</h3><p class="text-sm text-gray-500">${escaparHTML(g.categoria || 'Sem categoria')}</p><p class="text-sm mt-1 ${statusClasse}">${statusTexto}</p></div></div><p class="text-gray-700 text-sm mb-3 line-clamp-2">${escaparHTML(g.descricao || '')}</p>${botaoImp}`;
             grade.appendChild(card);
         });
     } catch (err) { container.innerHTML = `<p class="text-center text-red-500 py-10">Erro: ${err.message}</p>`; }
