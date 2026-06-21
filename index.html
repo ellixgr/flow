@@ -39,8 +39,19 @@
         .side-menu.active { right: 0; }
         .side-menu a { display: block; text-decoration: none; color: #000; padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #f0f0f0; font-weight: 600; }
         
-        .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: #000; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 25px; text-decoration: none; font-weight: 900; font-size: 20px; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: #000; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; text-decoration: none; font-weight: 900; font-size: 20px; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
         
+        /* Estilo do texto adicionado */
+        .aviso-btn {
+            width: 92%;
+            max-width: 380px;
+            text-align: center;
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
         .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; position: relative; background: #000; margin-bottom: 25px; }
         .video-container video { width: 100%; height: auto; display: block; }
         
@@ -70,6 +81,9 @@
     <main>
         <h1>Grupos Whatsapp</h1>
         <a href="grupos.html" class="btn-lista-grupos" target="_blank" rel="noopener">VER GRUPOS 💬</a>
+        
+        <!-- Texto adicionado abaixo do botão -->
+        <div class="aviso-btn">se abrir anúncio voltei é clique de novo ⚠️</div>
 
         <div class="video-container">
             <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
