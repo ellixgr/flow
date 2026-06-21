@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lista de Grupos de WhatsApp - Participe de Grupos Ativos</title>
+    <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
+    <link rel="canonical" href="https://ellixgr.github.io/x23wzp/" />
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Grupos whatsapp💬">
+    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
+    <meta property="og:image" content="https://i.postimg.cc/Wp6qCShs/Screenshot-20260617-201719-(1).jpg">
+    <meta name="robots" content="index, follow">
+    <script>if (top !== self) {top.location = self.location;}</script>
+    <style>
+        :root { --primary-green: #25d366; --bg-dark: #12121f; --card-bg: #1e1e2f; --text-color: #ffffff; --btn-orange: #ff9500; }
+        * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
+        
+        html { scroll-behavior: smooth; }
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important; 
+            background-attachment: fixed !important;
+            color: var(--text-color); 
+            display: flex; flex-direction: column; align-items: center; 
+            min-height: 100vh; padding-bottom: 30px; user-select: none; 
+            overflow-x: hidden; padding-top: 60px;
+        }
+
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1; }
+        @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
+        main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 15px; }
+
+        h1 { color: var(--primary-green); margin-bottom: 25px; font-weight: 800; font-size: 26px; text-align: center; }
+        
+        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 2px solid var(--primary-green); color: #000; }
+        
+        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; }
+        .side-menu.active { right: 0; }
+        .side-menu a { display: block; text-decoration: none; color: #000; padding: 15px; margin-bottom: 15px; border-radius: 12px; background: #f0f0f0; font-weight: 600; }
+        
+        /* Estilo do Carrossel com Cards no modelo do print */
+        .carrossel-grupos {
+            width: 100%;
+            max-width: 400px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding: 10px 0 20px;
+            margin-bottom: 25px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            display: block;
+        }
+        .carrossel-grupos::-webkit-scrollbar {
+            display: none;
+        }
+        .card-grupo {
+            display: inline-block;
+            width: 220px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 18px;
+            margin-right: 18px;
+            vertical-align: top;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .card-img {
+            width: 65px;
+            height: 65px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid var(--primary-green);
+            flex-shrink: 0;
+        }
+        .card-nome {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: #fff;
+        }
+        .card-btn {
+            width: 100%;
+            padding: 12px 8px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: block;
+            transition: all 0.2s ease;
+        }
+        .btn-desbloquear {
+            background: linear-gradient(90deg, #ff9500, #ffb726);
+            color: #000;
+        }
+        .btn-desbloquear:hover {
+            background: linear-gradient(90deg, #ffb726, #ff9500);
+        }
+        .btn-entrar {
+            background: var(--primary-green);
+            color: #000;
+        }
+        .btn-entrar:hover {
+            background: #20b858;
+        }
+        
+        .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; position: relative; background: #000; margin-bottom: 25px; }
+        .video-container video { width: 100%; height: auto; display: block; }
+        
+        .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .tiktok-icon { position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; }
+        
+        .ad-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 60px; }
+        .ad-card { width: 92%; max-width: 380px; background: #fff; border-radius: 20px; padding: 10px; }
+        .ad-card img { width: 100%; height: auto; border-radius: 15px; display: block; }
+        
+        footer { margin-top: auto; padding-bottom: 20px; color: #fff; font-size: 11px; text-align: center; width: 100%; }
+        footer a { color: #128c7e; text-decoration: underline; cursor: pointer; margin: 0 5px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; max-width: 400px; width: 100%; color: #000; }
+    </style>
+</head>
+<body id="page-body"> 
+    <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
+    <div class="side-menu" id="sideMenu">
+        <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
+        <a href="https://wa.me/5521988666115?text=Olá,%20quero%20enviar%20meu%20grupo!" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+        <a href="https://ellixgr.github.io/x23wzp/ads">🇺🇸 Números Virtuais 🇧🇷</a>
+        <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
+    </div>
+
+    <main>
+        <h1>Grupos WhatsApp</h1>
+
+        <!-- Carrossel de Grupos com Sistema de Desbloqueio -->
+        <div class="carrossel-grupos">
+            <!-- Grupo 1 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1012245?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kwcgsx.jpg" alt="Ícone do Grupo Flow" class="card-img">
+                    <h3 class="card-nome">FLOW💬</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 2 -->
+            <div class="card-grupo" data-link="https://chat.whatsapp.com/Hd9O412BAdA5f6KKZHrWse">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/1jirk4.jpg" alt="Ícone do Grupo DEVZONE" class="card-img">
+                    <h3 class="card-nome">🌎 DEVZONE • Amizades, Games, Música & Bots 🚀</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 3 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1006416?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Grifinoria" class="card-img">
+                    <h3 class="card-nome">Grifinoria🔥💛🚩</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 4 -->
+            <div class="card-grupo" data-link="https://chat.whatsapp.com/HovCzcW6tnT9NR2DIGSY4m?s=cl&p=a&ilr=1">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/owjfk8.png" alt="Ícone do Grupo NEXUS" class="card-img">
+                    <h3 class="card-nome">NEXUS💬🔥</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 5 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1049506?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Amizades 2026" class="card-img">
+                    <h3 class="card-nome">AMIZADES 2026</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 6 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1021095?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Ellixz" class="card-img">
+                    <h3 class="card-nome">☆•°𝐄𝐋𝐋𝐈𝐗𝐙✦×</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 7 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1103469?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Rebe" class="card-img">
+                    <h3 class="card-nome">☆×𝐑𝐄𝙱𝗘 𝙻 𝔻ᴇ 𝐒☆×</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 8 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1012244?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Tropa 10k" class="card-img">
+                    <h3 class="card-nome">❦✰𝗧𝗥𝗢𝗣𝗔 10𝗞✰☙</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 9 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1006351?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Grifinoria 2" class="card-img">
+                    <h3 class="card-nome">𝐆𝖗𝖎𝖋𝖎𝖓𝖔𝖗𝖎𝖆🔥💛🚩</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 10 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1021097?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo Los Angeles" class="card-img">
+                    <h3 class="card-nome">⏤͟͟͞͞𝐋𝚯𝐒 𝐀𝐍𝐆𝚵𝐋𝚵𝐒𖥨🔥💛🚩</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 11 -->
+            <div class="card-grupo" data-link="https://gruposwhats.app/group/1008529?ref=social">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kkx8w4.png" alt="Ícone do Grupo TDH" class="card-img">
+                    <h3 class="card-nome">T D H 🤡</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+
+            <!-- Grupo 12 (Novo adicionado) -->
+            <div class="card-grupo" data-link="https://chat.whatsapp.com/Dtii1j00EqFLjzr2Hs9Hkj">
+                <div class="card-header">
+                    <img src="https://files.catbox.moe/kwcgsx.jpg" alt="Ícone do Grupo Novo" class="card-img">
+                    <h3 class="card-nome">NOVO GRUPO 💬</h3>
+                </div>
+                <button class="card-btn btn-desbloquear" onclick="desbloquearGrupo(this)">🔓 Ver anúncio para desbloquear</button>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
+            <video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
+                <source src="https://github.com/ellixgr/x23wzp/raw/main/kxapvc.mp4" type="video/mp4">
+            </video>
+            <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
+        </div>
+
+        <div class="ad-wrapper">
+            <div class="ad-card"><a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener"><img src="https://files.catbox.moe/eognmj.png" alt="Sou Popular" width="300" height="250"></a></div>
+            <div class="ad-card"><a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener"><img src="https://files.catbox.moe/d0otxm.png" alt="Anúncio TikTok" width="300" height="250"></a></div>
+        </div>
+    </main>
+
+    <footer>
+    © 2020 - 2026 X23WZP. Todos os direitos reservados.<br>
+    <a href="termos.html" onclick="showModal('termos'); return false;">Termos de Uso</a> | 
+    <a href="privacidade.html" onclick="showModal('privacidade'); return false;">Privacidade</a>
+</footer>
+
+
+    <div id="modal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="modalTitle"></h2>
+            <div id="modalBody"></div>
+            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:#128c7e; color:white; border:none; border-radius:12px; cursor:pointer;">FECHAR</button>
+        </div>
+    </div>
+
+    <script>
+        // LINK DO ANÚNCIO DA ADSTERRA - SUBSTITUA PELO SEU LINK REAL
+        const LINK_ADSTERRA = "https://www.adsterra.com/pt/";
+
+        function desbloquearGrupo(botao) {
+            const card = botao.closest('.card-grupo');
+            const linkGrupo = card.getAttribute('data-link');
+            
+            // Abre o anúncio em nova aba
+            window.open(LINK_ADSTERRA, '_blank');
+            
+            // Altera o botão para "Entrar no Grupo" após clicar
+            botao.outerHTML = `<a href="${linkGrupo}" target="_blank" class="card-btn btn-entrar">✅ Entrar no Grupo</a>`;
+        }
+
+        function toggleMenu(event) { if (event) event.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
+        const video = document.getElementById('meuVideo');
+        const muteIcon = document.getElementById('muteIcon');
+        function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
+        function showModal(type) { 
+            history.pushState(null, null, '#' + type);     
+            const modal = document.getElementById('modal'); 
+            const title = document.getElementById('modalTitle'); 
+            const body = document.getElementById('modalBody');     
+            if(type === 'termos') { 
+                title.innerText = "Termos de Uso"; 
+                body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; 
+            } else { 
+                title.innerText = "Privacidade"; 
+                body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; 
+            } 
+            modal.style.display = 'flex'; 
+        }
+
+        function closeModal() { 
+            document.getElementById('modal').style.display = 'none'; 
+            history.pushState('', document.title, window.location.pathname); 
+        }
+    </script>
+    
+    <script src="https://pl28642215.effectivecpmnetwork.com/b9/7f/04/b97f0402af5fa803ef8d137e4050caf4.js"></script>
+    <script>
+        document.addEventListener('click', function(e) { window.focus(); });
+    </script>
+</body>
+</html>
