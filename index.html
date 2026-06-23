@@ -35,27 +35,66 @@
         
         .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 2px solid #25d366; color: #000; }
         
-        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; }
+        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; }
         .side-menu.active { right: 0; }
-        .side-menu a { 
+        .side-menu a, .side-menu .dropdown-btn { 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             text-align: center;
             text-decoration: none; 
             color: #000; 
-            padding: 12px; 
-            margin-bottom: 15px; 
+            padding: 14px; 
+            margin-bottom: 18px; 
             border-radius: 12px; 
             background: #f0f0f0; 
             font-weight: 600; 
             gap: 6px;
+            border: none;
+            width: 100%;
+            font-size: inherit;
+            cursor: pointer;
         }
         .mini-img {
             width: 100%;
             max-width: 200px;
             height: auto;
             border-radius: 8px;
+        }
+
+        /* Estilo Dropdown Telas */
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: #f9f9f9;
+            border-radius: 12px;
+            margin-bottom: 18px;
+            padding: 0 14px;
+        }
+        .dropdown-content.active {
+            max-height: 420px;
+            padding: 14px;
+            border: 1px solid #eee;
+        }
+        .servico-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #eee;
+        }
+        .servico-item:last-child {
+            border-bottom: none;
+            padding-bottom: 10px;
+        }
+        .btn-contato {
+            margin-top: 15px;
+            background: var(--primary-green) !important;
+            color: white !important;
+            padding: 10px !important;
+            font-size: 14px !important;
+            font-weight: bold;
         }
         
         .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: #000; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; text-decoration: none; font-weight: 900; font-size: 20px; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
@@ -147,14 +186,25 @@
         <a href="https://wa.me/5521988666115?text=Olá,%20quero%20enviar%20meu%20grupo!" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
         <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
         <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
+        <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
+        <div class="dropdown-content" id="telasDropdown">
+            <div class="servico-item"><span>NETFLIX</span><span>11,00</span></div>
+            <div class="servico-item"><span>GLOBO PLAY</span><span>5,50</span></div>
+            <div class="servico-item"><span>DISNEY PLUS</span><span>8,00</span></div>
+            <div class="servico-item"><span>STAR+</span><span>8,00</span></div>
+            <div class="servico-item"><span>TELECINE</span><span>5,00</span></div>
+            <div class="servico-item"><span>PRIME VIDEO</span><span>6,00</span></div>
+            <div class="servico-item"><span>CRUNCHYROLL</span><span>5,00</span></div>
+            <div class="servico-item"><span>SPOTIFY</span><span>9,00</span></div>
+            <div class="servico-item"><span>YOUTUBE INDIVIDUAL</span><span>5,00</span></div>
+            <a href="https://wa.me/5521988666115?text=Olá,%20tenho%20interesse%20nas%20telas!" class="btn-contato" target="_blank" rel="noopener">📲 CONTATO</a>
+        </div>
 
-        <!-- Sou Popular com imagem original em cima -->
         <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">
             <img src="https://files.catbox.moe/eognmj.png" alt="Sou Popular" class="mini-img">
             📈 Serviços Redes Sociais
         </a>
 
-        <!-- TikTok Lite com imagem original em cima -->
         <a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener">
             <img src="https://files.catbox.moe/d0otxm.png" alt="TikTok Lite" class="mini-img">
             🎁 Ganhe 20,00 🎉 Baixe tiktok
@@ -266,6 +316,20 @@
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
+
+        // Função para abrir/fechar lista de telas com troca de seta
+        function toggleDropdown() {
+            const dropdown = document.getElementById('telasDropdown');
+            const btn = document.getElementById('btnTelas');
+            dropdown.classList.toggle('active');
+            
+            if (dropdown.classList.contains('active')) {
+                btn.innerHTML = '📺 Telas ↑';
+            } else {
+                btn.innerHTML = '📺 Telas ↓';
+            }
+        }
+
         function showModal(type) { 
             history.pushState(null, null, '#' + type);     
             const modal = document.getElementById('modal'); 
