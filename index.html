@@ -62,7 +62,6 @@
             border-radius: 8px;
         }
 
-        /* Estilo Dropdown Telas */
         .dropdown-content {
             max-height: 0;
             overflow: hidden;
@@ -115,7 +114,6 @@
         .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .tiktok-icon { position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; }
 
-        /* Estilos da Lista de Grupos */
         .lista-container {
             width: 100%;
             max-width: 400px;
@@ -317,7 +315,6 @@
         const muteIcon = document.getElementById('muteIcon');
         function toggleMute(event) { if (event) { event.preventDefault(); event.stopPropagation(); } video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
 
-        // Função para abrir/fechar lista de telas com troca de seta
         function toggleDropdown() {
             const dropdown = document.getElementById('telasDropdown');
             const btn = document.getElementById('btnTelas');
