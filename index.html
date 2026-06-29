@@ -127,6 +127,7 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             margin-bottom: 30px;
+            padding: 0 8px;
         }
         .card-grupo {
             background: rgba(255,255,255,0.08);
@@ -141,14 +142,16 @@
             gap: 8px;
             border: 1px solid rgba(255,255,255,0.12);
             transition: transform 0.2s ease;
+            min-height: 160px;
+            justify-content: space-between;
         }
         .card-grupo:hover {
             transform: translateY(-3px);
             border-color: var(--primary-green);
         }
         .card-grupo img {
-            width: 55px;
-            height: 55px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary-green);
@@ -158,18 +161,17 @@
             font-weight: 600;
             text-align: center;
             line-height: 1.3;
-            max-height: 36px;
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
+            min-height: 34px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .btn-ver {
             background: var(--primary-green);
             color: #000;
             font-size: 12px;
             font-weight: bold;
-            padding: 5px 10px;
+            padding: 6px 10px;
             border-radius: 10px;
             text-align: center;
             width: 100%;
@@ -228,7 +230,7 @@
         </div>
         <div class="lista-container" id="lista-grupos">
          
-            <a href="https://gruposwhats.app/group/1111542?ref=social"card-grupo" target="_blank" rel="noopener">
+            <a href="https://gruposwhats.app/group/1111542?ref=social" class="card-grupo" target="_blank" rel="noopener">
                 <img src="https://files.catbox.moe/nb4h77.png" alt="Ícone do Grupo Flow">
                 <div class="nome">💬𝘾𝙝𝙖𝙩 |🌬️🇫 🇱 🇴 🇼࿐</div>
                 <div class="btn-ver">Ver Grupo</div>
