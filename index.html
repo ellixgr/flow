@@ -18,7 +18,14 @@
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
     <style>
-        :root { --primary-green: #25d366; --dark-green: #128c7e; --bg-soft: #f4f7f6; --text-color: #2d3436; }
+        :root { 
+            --primary-green: #25d366; 
+            --dark-green: #128c7e; 
+            --bg-soft: #f4f7f6; 
+            --text-color: #ffffff; 
+            --card-bg: rgba(255,255,255,0.08);
+            --card-border: rgba(255,255,255,0.12);
+        }
         * {box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
         
         html { scroll-behavior: smooth; }
@@ -26,132 +33,150 @@
             font-family: 'Segoe UI', Roboto, sans-serif; 
             background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%) !important; 
             background-attachment: fixed !important;
-            color: #ffffff; 
+            color: var(--text-color); 
             display: flex; flex-direction: column; align-items: center; 
             min-height: 100vh; padding-bottom: 30px; user-select: none; 
-            overflow-x: hidden; padding-top: 60px;
+            overflow-x: hidden; padding-top: 80px;
         }
 
-
-        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: url('https://www.transparenttextures.com/patterns/stardust.png'); animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1; }
+        body::before { 
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: url('https://www.transparenttextures.com/patterns/stardust.png'); 
+            animation: stars 20s linear infinite; pointer-events: none; opacity: 0.4; z-index: -1; 
+        }
         @keyframes stars { from { background-position: 0 0; } to { background-position: 1000px 1000px; } }
-        main { width: 100%; display: flex; flex-direction: column; align-items: center; padding: 0 10px; }
+        
+        main { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 12px; }
 
-        h1 { color: #128c7e; margin-bottom: 20px; font-weight: 800; font-size: 24px; }
+        /* ========== PERFIL NO TOPO ========== */
+        .perfil-topo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            gap: 10px;
+        }
+        .foto-perfil {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-green);
+            object-fit: cover;
+            box-shadow: 0 0 15px rgba(37, 211, 102, 0.3);
+        }
+        .nome-time {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary-green);
+            letter-spacing: 0.5px;
+        }
+
+        /* ========== MENU ========== */
+        .menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; 
+            border: 2px solid var(--primary-green); color: #000; 
+        }
         
-        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 24px; background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; border: 2px solid #25d366; color: #000; }
-        
-        .side-menu { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: #ffffff; padding: 60px 20px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; }
+        .side-menu { 
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
+            background: #ffffff; padding: 60px 20px; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
+        }
         .side-menu.active { right: 0; }
         .side-menu a, .side-menu .dropdown-btn { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            text-align: center;
-            text-decoration: none; 
-            color: #000; 
-            padding: 14px; 
-            margin-bottom: 18px; 
-            border-radius: 12px; 
-            background: #f0f0f0; 
-            font-weight: 600; 
-            gap: 6px;
-            border: none;
-            width: 100%;
-            font-size: inherit;
-            cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            text-decoration: none; color: #000; padding: 14px; margin-bottom: 18px; 
+            border-radius: 12px; background: #f0f0f0; font-weight: 600; gap: 6px;
+            border: none; width: 100%; font-size: inherit; cursor: pointer;
         }
         .mini-img {
-            width: 100%;
-            max-width: 200px;
-            height: auto;
-            border-radius: 8px;
+            width: 100%; max-width: 200px; height: auto; border-radius: 8px;
         }
-
         .dropdown-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.4s ease;
-            background: #f9f9f9;
-            border-radius: 12px;
-            margin-bottom: 18px;
-            padding: 0 14px;
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+            background: #f9f9f9; border-radius: 12px; margin-bottom: 18px; padding: 0 14px;
         }
         .dropdown-content.active {
-            max-height: 420px;
-            padding: 14px;
-            border: 1px solid #eee;
+            max-height: 420px; padding: 14px; border: 1px solid #eee;
         }
         .servico-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; padding: 8px 0;
+            font-size: 14px; border-bottom: 1px solid #eee;
         }
-        .servico-item:last-child {
-            border-bottom: none;
-            padding-bottom: 10px;
-        }
+        .servico-item:last-child { border-bottom: none; padding-bottom: 10px; }
         .btn-contato {
-            margin-top: 15px;
-            background: var(--primary-green) !important;
-            color: white !important;
-            padding: 10px !important;
-            font-size: 14px !important;
-            font-weight: bold;
-        }
-        
-        .btn-lista-grupos { width: 92%; max-width: 380px; height: 120px; background: var(--primary-green); color: #000; border-radius: 25px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; text-decoration: none; font-weight: 900; font-size: 20px; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        
-        .aviso-btn {
-            width: 92%;
-            max-width: 380px;
-            text-align: center;
-            font-size: 14px;
-            color: #fff;
-            margin-bottom: 25px;
-            opacity: 0.9;
+            margin-top: 15px; background: var(--primary-green) !important;
+            color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
 
-        .video-container { width: 92%; max-width: 380px; border-radius: 20px; overflow: hidden; position: relative; background: #000; margin-bottom: 30px; }
+        .aviso-btn {
+            width: 100%; text-align: center; font-size: 14px;
+            color: #fff; margin-bottom: 25px; opacity: 0.9;
+        }
+
+        .video-container { 
+            width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
+            background: #000; margin-bottom: 35px;
+        }
         .video-container video { width: 100%; height: auto; display: block; }
         
-        .mute-btn { position: absolute; top: 15px; left: 15px; z-index: 15; background: rgba(255, 255, 255, 0.3); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .tiktok-icon { position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; }
+        .mute-btn { 
+            position: absolute; top: 15px; left: 15px; z-index: 15; 
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%; 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer;
+        }
+        .tiktok-icon { 
+            position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
+            background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
+        }
+
+        /* ========== SEÇÕES E CARDS ========== */
+        .titulo-secao {
+            width: 100%;
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+            margin: 10px 0 18px;
+            padding-left: 4px;
+            border-left: 3px solid var(--primary-green);
+        }
 
         .lista-container {
-            width: 100%;
-            max-width: 400px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 30px;
-            padding: 0 8px;
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 14px !important;
+            margin-bottom: 35px !important;
         }
+
         .card-grupo {
-            background: rgba(255,255,255,0.08);
-            backdrop-filter: blur(8px);
-            border-radius: 16px;
-            padding: 12px;
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 18px;
+            padding: 15px 12px;
             text-decoration: none;
             color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            border: 1px solid rgba(255,255,255,0.12);
-            transition: transform 0.2s ease;
-            min-height: 160px;
+            gap: 10px;
+            border: 1px solid var(--card-border);
+            transition: all 0.25s ease;
+            min-height: 170px;
             justify-content: space-between;
         }
         .card-grupo:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             border-color: var(--primary-green);
+            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.15);
         }
         .card-grupo img {
-            width: 80px;
-            height: 80px;
+            width: 82px;
+            height: 82px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary-green);
@@ -160,8 +185,8 @@
             font-size: 13px;
             font-weight: 600;
             text-align: center;
-            line-height: 1.3;
-            min-height: 34px;
+            line-height: 1.35;
+            min-height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,17 +196,32 @@
             color: #000;
             font-size: 12px;
             font-weight: bold;
-            padding: 6px 10px;
-            border-radius: 10px;
+            padding: 7px 12px;
+            border-radius: 12px;
             text-align: center;
             width: 100%;
+            transition: background 0.2s;
+        }
+        .btn-ver:hover {
+            background: #20bd5a;
         }
         
-        footer { margin-top: auto; padding-bottom: 20px; color: #fff; font-size: 11px; text-align: center; width: 100%; }
-        footer a { color: #128c7e; text-decoration: underline; cursor: pointer; margin: 0 5px; }
+        footer { 
+            margin-top: auto; padding: 25px 0 20px; color: #ccc; 
+            font-size: 11px; text-align: center; width: 100%; 
+        }
+        footer a { color: var(--dark-green); text-decoration: none; font-weight: 500; margin: 0 5px; }
+        footer a:hover { text-decoration: underline; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999999; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; max-width: 400px; width: 100%; color: #000; }
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); z-index: 999999; align-items: center; 
+            justify-content: center; padding: 20px; 
+        }
+        .modal-content { 
+            background: #fff; padding: 28px; border-radius: 20px; 
+            max-width: 400px; width: 100%; color: #222; 
+        }
     </style>
 </head>
 <body id="page-body"> 
@@ -218,8 +258,13 @@
     </div>
 
     <main>
-        <h1>Grupos Whatsapp</h1>       
-        <div class="aviso-btn">se abrir anúncio voltei é clique de novo ⚠️</div>
+        <!-- Perfil do Topo -->
+        <div class="perfil-topo">
+            <img src="https://files.catbox.moe/0aa6f2.png" alt="Logo Team Flow" class="foto-perfil">
+            <div class="nome-time">Team Flow</div>
+        </div>
+       
+        <div class="aviso-btn">se abrir anúncio, volte e clique novamente ⚠️</div>
 
         <div class="video-container">
             <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
@@ -228,23 +273,28 @@
             </video>
             <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
         </div>
+
+        <!-- Seção Grupos -->
+        <h2 class="titulo-secao">💬 Grupos</h2>
         <div class="lista-container" id="lista-grupos">
-         
             <a href="https://gruposwhats.app/group/1112077?ref=social" class="card-grupo" target="_blank" rel="noopener">
                 <img src="https://files.catbox.moe/nb4h77.png" alt="Ícone do Grupo Flow">
                 <div class="nome">💬𝘾𝙝𝙖𝙩 |🌬️🇫 🇱 🇴 🇼࿐</div>
                 <div class="btn-ver">Ver Grupo</div>
             </a>
+            <!-- add grupos  -->
+        </div>
 
-<a href="https://gruposwhats.app/group/1111454?ref=social" class="card-grupo" target="_blank" rel="noopener">
-                <img src="https://files.catbox.moe/237suo.jpg" alt="Ícone do Grupo Flow">
+        <!-- Seção Canais -->
+        <h2 class="titulo-secao">📢 Canais</h2>
+        <div class="lista-container" id="lista-canais">
+            <a href="https://gruposwhats.app/group/1111454?ref=social" class="card-grupo" target="_blank" rel="noopener">
+                <img src="https://files.catbox.moe/237suo.jpg" alt="Ícone do Canal">
                 <div class="nome">🌬️FIGURINHAS TOP🥇࿐</div>
-                <div class="btn-ver">Ver canal</div>
+                <div class="btn-ver">Ver Canal</div>
             </a>
-
-            
             <a href="https://gruposwhats.app/group/1112296?ref=social" class="card-grupo" target="_blank" rel="noopener">
-                <img src="https://files.catbox.moe/4lykf3.png" alt="Ícone do Grupo Grifinoria">
+                <img src="https://files.catbox.moe/4lykf3.png" alt="Ícone do Canal">
                 <div class="nome">༺FIGURINHAS 🔥💬༻</div>
                 <div class="btn-ver">Ver Canal</div>
             </a>
@@ -252,16 +302,16 @@
     </main>
 
     <footer>
-    © 2020 - 2026 FLOW. Todos os direitos reservados.<br>
-    <a href="termos.html" onclick="showModal('termos'); return false;">Termos de Uso</a> | 
-    <a href="privacidade.html" onclick="showModal('privacidade'); return false;">Privacidade</a>
-</footer>
+        © 2020 - 2026 FLOW. Todos os direitos reservados.<br>
+        <a href="#" onclick="showModal('termos'); return false;">Termos de Uso</a> | 
+        <a href="#" onclick="showModal('privacidade'); return false;">Política de Privacidade</a>
+    </footer>
 
     <div id="modal" class="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 id="modalTitle"></h2>
-            <div id="modalBody"></div>
-            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:#128c7e; color:white; border:none; border-radius:12px; cursor:pointer;">FECHAR</button>
+            <div id="modalBody" style="margin-top:15px; line-height:1.6;"></div>
+            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; background:var(--dark-green); color:white; border:none; border-radius:12px; cursor:pointer; font-weight:600;">FECHAR</button>
         </div>
     </div>
 
@@ -275,12 +325,7 @@
             const dropdown = document.getElementById('telasDropdown');
             const btn = document.getElementById('btnTelas');
             dropdown.classList.toggle('active');
-            
-            if (dropdown.classList.contains('active')) {
-                btn.innerHTML = '📺 Telas ↑';
-            } else {
-                btn.innerHTML = '📺 Telas ↓';
-            }
+            btn.innerHTML = dropdown.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
         }
 
         function showModal(type) { 
@@ -292,7 +337,7 @@
                 title.innerText = "Termos de Uso"; 
                 body.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; 
             } else { 
-                title.innerText = "Privacidade"; 
+                title.innerText = "Política de Privacidade"; 
                 body.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; 
             } 
             modal.style.display = 'flex'; 
@@ -301,11 +346,16 @@
             document.getElementById('modal').style.display = 'none'; 
             history.pushState('', document.title, window.location.pathname); 
         }
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('sideMenu');
+            const btn = document.querySelector('.menu-btn');
+            if (menu.classList.contains('active') && !menu.contains(e.target) && !btn.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+            window.focus();
+        });
     </script>
 
     <script src="https://pl28642215.effectivecpmnetwork.com/b9/7f/04/b97f0402af5fa803ef8d137e4050caf4.js"></script>
-    <script>
-        document.addEventListener('click', function(e) { window.focus(); });
-    </script>
 </body>
 </html>
