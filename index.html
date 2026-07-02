@@ -48,7 +48,7 @@
         
         main { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; padding: 0 12px; }
 
-        /* ========== PERFIL NO TOPO ========== */
+        
         .perfil-topo {
             display: flex;
             flex-direction: column;
@@ -71,7 +71,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* ========== MENU ========== */
         .menu-btn { 
             position: fixed; top: 15px; right: 15px; font-size: 24px; 
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
@@ -134,7 +133,6 @@
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
 
-        /* ========== SEÇÕES E CARDS ========== */
         .titulo-secao {
             width: 100%;
             font-size: 20px;
@@ -147,17 +145,17 @@
 
         .lista-container {
             width: 100% !important;
-            display: flex !important;         /* Muda para flex para ficarem lado a lado */
-            flex-direction: row !important;    /* Força a linha horizontal */
-            overflow-x: auto !important;       /* Permite a rolagem lateral */
-            gap: 14px !important;              /* Espaço entre os cards */
-            padding: 10px 0 20px 0 !important; /* Espaço para o efeito de sombra não cortar */
+            display: flex !important;         
+            flex-direction: row !important;   
+            overflow-x: auto !important;      
+            gap: 14px !important;       
+            padding: 10px 0 20px 0 !important; 
             margin-bottom: 35px !important;
-            scroll-snap-type: x mandatory;     /* Opcional: faz o card "travar" na posição */
-            -webkit-overflow-scrolling: touch; /* Suavidade no iOS */
+            scroll-snap-type: x mandatory;    
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Esconde a barra de rolagem (opcional) */
+    
         .lista-container::-webkit-scrollbar {
             display: none;
         }
@@ -174,16 +172,15 @@
             object-fit: cover;
             border: 2px solid var(--primary-green);
         }
-        /* Ajuste no card para garantir que o clique não vaze */
+        
         .card-grupo {
             flex: 0 0 160px !important;
             width: 160px !important;
             min-height: 170px;
             justify-content: space-between;
-            text-decoration: none !important; /* Remove qualquer sublinhado do card */
+            text-decoration: none !important;
         }
 
-        /* Força o nome a não ter comportamento de link e manter a cor */
         .card-grupo .nome {
             font-size: 13px;
             font-weight: 600;
@@ -193,12 +190,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;      /* Garante a cor branca */
-            text-decoration: none !important; /* Remove qualquer sublinhado */
-            pointer-events: none; /* Impede que o clique no nome dispare o link */
+            color: #ffffff;      
+            text-decoration: none !important; 
+            pointer-events: none; 
         }
 
-        /* Remove a linha debaixo do botão e garante o estilo */
         .btn-ver {
             background: var(--primary-green);
             color: #000;
@@ -209,13 +205,13 @@
             text-align: center;
             width: 100%;
             transition: background 0.2s;
-            text-decoration: none !important; /* ISSO TIRA A LINHA ABAIXO */
+            text-decoration: none !important; 
             display: block;
         }
 
         .btn-ver:hover {
             background: #20bd5a;
-            text-decoration: none !important; /* Garante que no hover continue sem linha */
+            text-decoration: none !important; 
         }
 
         
@@ -271,7 +267,7 @@
     </div>
 
     <main>
-        <!-- Perfil do Topo -->
+        <!-- Perfil Grupos -->
         <div class="perfil-topo">
             <img src="https://files.catbox.moe/0aa6f2.png" alt="Logo Team Flow" class="foto-perfil">
             <div class="nome-time">Team Flow</div>
