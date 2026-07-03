@@ -160,11 +160,12 @@
             display: none;
         }
 
-        .card-grupo:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary-green);
-            box-shadow: 0 8px 20px rgba(37, 211, 102, 0.15);
-        }
+.card-grupo:hover {
+    transform: translateY(-4px);
+    border-color: #ffaa00; /* Dourado mais intenso ao passar o mouse */
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
         .card-grupo img {
             width: 82px;
             height: 82px;
@@ -173,14 +174,20 @@
             border: 2px solid var(--primary-green);
         }
         
-        .card-grupo {
-            flex: 0 0 160px !important;
-            width: 160px !important;
-            min-height: 170px;
-            justify-content: space-between;
-            text-decoration: none !important;
-        }
-
+.card-grupo {
+    flex: 0 0 160px !important;
+    width: 160px !important;
+    min-height: 170px;
+    justify-content: space-between;
+    text-decoration: none !important;
+    /* Código da Borda Dourada */
+    border: 2px solid #ffd700; 
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 5px rgba(255, 215, 0, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
         .card-grupo .nome {
             font-size: 13px;
             font-weight: 600;
