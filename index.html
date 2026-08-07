@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Lista de Grupos de WhatsApp - Participe de Grupos Ativos</title>
+    <title>Lista de Grupos de WhatsApp - FLOW</title>
     <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
     <link rel="canonical" href="https://ellixgr.github.io/flow/" />
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ellixgr.github.io/flow/">
-    <meta property="og:title" content="Grupos whatsapp💬">
+    <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
     <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
     <meta property="og:image" content="https://files.catbox.moe/0aa6f2.png">
     <meta property="og:image:width" content="1200">
@@ -114,12 +114,7 @@
             padding-left: 4px; border-left: 3px solid var(--primary-green);
         }
         .lista-container {
-            width: 100% !important; 
-            display: flex !important; 
-            flex-direction: column !important;   
-            gap: 14px !important; 
-            padding: 0 !important; 
-            margin-bottom: 35px !important;
+            width: 100%; display: flex; flex-direction: column; gap: 14px; margin-bottom: 35px;
         }
         .card-grupo:hover {
             transform: translateY(-4px); border-color: #ffaa00;
@@ -130,8 +125,7 @@
             object-fit: cover; border: 2px solid var(--primary-green);
         }
         .card-grupo {
-            width: 100% !important; min-height: auto;
-            display: flex !important; align-items: center !important; gap: 12px !important;
+            width: 100%; display: flex; align-items: center; gap: 12px;
             justify-content: space-between; text-decoration: none; position: relative;
             border: 2px solid #ffd700; border-radius: 15px; padding: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 5px rgba(255, 215, 0, 0.1);
@@ -163,6 +157,9 @@
             position: absolute; top: 8px; right: 8px; background: transparent;
             border: none; color: #888; font-size: 13px; cursor: pointer;
             z-index: 10; padding: 0; line-height: 1;
+        }
+        .vazio {
+            text-align: center; color: #aaa; padding: 30px 20px; font-size: 15px;
         }
         footer { 
             margin-top: auto; padding: 25px 0 20px; color: #ccc; 
@@ -250,24 +247,10 @@
             <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
         </div>
 
-        <!-- SEÇÃO GRUPOS — LISTA VAZIA, SÓ APARECE QUEM ENVIAR -->
+        <!-- SEÇÃO GRUPOS — SEM JINJA, USA JS -->
         <h2 class="titulo-secao">💬 Grupos</h2>
         <div class="lista-container" id="lista-grupos">
-            {% for grupo in grupos %}
-            <div class="card-grupo {% if grupo.vip %}vip-destaque{% endif %}">
-                <button class="btn-denunciar" onclick="abrirDenuncia('{{ grupo._id }}', event)">🚩</button>
-                <img src="{{ grupo.foto }}" alt="Ícone do Grupo">
-                <div class="info-grupo">
-                    <div class="nome">
-                        {% if grupo.vip %}🥇 {% endif %}{{ grupo.nome }}
-                    </div>
-                    <div class="cliques-info">👆 <span class="cli-{{ grupo._id }}">{{ grupo.cliques }}</span> cliques</div>
-                </div>
-                <a href="{{ grupo.link }}" target="_blank" rel="noopener" class="btn-ver" onclick="registrarClique('{{ grupo._id }}')">Entrar</a>
-            </div>
-            {% else %}
-            <p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>
-            {% endfor %}
+            <!-- GRUPOS VÃO AQUI -->
         </div>
 
         <!-- RODAPÉ -->
@@ -336,7 +319,33 @@
     <script>
         let grupoAtualDenunciar = null;
 
-        // MENU
+        // ✅ DADOS DOS GRUPOS — VAZIO = NENHUM APARECE
+        const grupos = [];
+
+        // ✅ RENDERIZA A LISTA SEM JINJA
+        const lista = document.getElementById('lista-grupos');
+        if (grupos.length === 0) {
+            lista.innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
+        } else {
+            grupos.forEach(grupo => {
+                const card = document.createElement('div');
+                card.className = `card-grupo ${grupo.vip ? 'vip-destaque' : ''}`;
+                card.innerHTML = `
+                    <button class="btn-denunciar" onclick="abrirDenuncia('${grupo.id||''}', event)">🚩</button>
+                    <img src="${grupo.foto||'https://files.catbox.moe/0aa6f2.png'}" alt="Ícone do Grupo">
+                    <div class="info-grupo">
+                        <div class="nome">
+                            ${grupo.vip ? '🥇 ' : ''}${grupo.nome}
+                        </div>
+                        <div class="cliques-info">👆 <span>${grupo.cliques||0}</span> cliques</div>
+                    </div>
+                    <a href="${grupo.link}" target="_blank" rel="noopener" class="btn-ver">Entrar</a>
+                `;
+                lista.appendChild(card);
+            });
+        }
+
+        // MENU — VOLTOU TUDO!
         function toggleMenu(event) { 
             if (event) event.stopPropagation(); 
             document.getElementById('sideMenu').classList.toggle('active'); 
@@ -355,7 +364,7 @@
             btn.innerHTML = dropdown.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
         }
 
-        // ✅ FORMULÁRIO CORRIGIDO — ABRE PAGAMENTO
+        // FORMULÁRIO
         function abrirFormulario() { 
             document.getElementById('formModal').style.display = 'flex'; 
             document.getElementById('avisoPix').style.display = 'none';
@@ -390,12 +399,10 @@
 
                 if (res.erro) {
                     respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-                } 
-                else if (res.sucesso && !res.pagamento_url) {
+                } else if (res.sucesso && !res.pagamento_url) {
                     respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
                     setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
-                } 
-                else if (res.pagamento_url) {
+                } else if (res.pagamento_url) {
                     avisoPix.style.display = 'block';
                     respDiv.innerHTML = `<span class="sucesso">✅ Abrindo pagamento...</span>`;
                     setTimeout(()=>{ 
@@ -409,15 +416,7 @@
             }
         }
 
-        // ✅ CONTADOR DE CLIQUES ÚNICOS — 1 CLIQUE POR PESSOA
-        async function registrarClique(grupoId) {
-            const resp = await fetch(`/visualizar/${grupoId}`, {method: 'POST'});
-            const dados = await resp.json();
-            const el = document.querySelector(`.cli-${grupoId}`);
-            if (el) el.textContent = dados.total;
-        }
-
-        // 🚩 DENÚNCIA
+        // DENÚNCIA
         function abrirDenuncia(grupoId, event) {
             event.preventDefault(); event.stopPropagation();
             grupoAtualDenunciar = grupoId;
