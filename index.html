@@ -114,24 +114,26 @@
             padding-left: 4px; border-left: 3px solid var(--primary-green);
         }
         .lista-container {
-            width: 100% !important; display: flex !important; flex-direction: row !important;   
-            overflow-x: auto !important; gap: 14px !important; padding: 10px 0 20px 0 !important; 
-            margin-bottom: 35px !important; scroll-snap-type: x mandatory;    
-            -webkit-overflow-scrolling: touch;
+            width: 100% !important; 
+            display: flex !important; 
+            flex-direction: column !important;   
+            gap: 14px !important; 
+            padding: 0 !important; 
+            margin-bottom: 35px !important;
         }
-        .lista-container::-webkit-scrollbar { display: none; }
         .card-grupo:hover {
             transform: translateY(-4px); border-color: #ffaa00;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
         .card-grupo img {
-            width: 82px; height: 82px; border-radius: 50%;
+            width: 70px; height: 70px; border-radius: 50%;
             object-fit: cover; border: 2px solid var(--primary-green);
         }
         .card-grupo {
-            flex: 0 0 160px !important; width: 160px !important; min-height: 190px;
+            width: 100% !important; min-height: auto;
+            display: flex !important; align-items: center !important; gap: 12px !important;
             justify-content: space-between; text-decoration: none; position: relative;
-            border: 2px solid #ffd700; border-radius: 15px; padding: 10px;
+            border: 2px solid #ffd700; border-radius: 15px; padding: 12px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 5px rgba(255, 215, 0, 0.1);
             background: rgba(255, 255, 255, 0.05);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -140,26 +142,27 @@
             border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
             background: rgba(255, 215, 0, 0.08);
         }
+        .card-grupo .info-grupo {
+            flex: 1; display: flex; flex-direction: column; gap: 4px;
+        }
         .card-grupo .nome {
-            font-size: 13px; font-weight: 600; text-align: center;
-            line-height: 1.35; min-height: 36px; display: flex;
-            align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 600;
             color: #ffffff; text-decoration: none;
+        }
+        .cliques-info {
+            font-size: 11px; color: #aaa;
         }
         .btn-ver {
             background: var(--primary-green); color: #000;
-            font-size: 12px; font-weight: bold; padding: 7px 12px;
-            border-radius: 12px; text-align: center; width: 100%;
+            font-size: 12px; font-weight: bold; padding: 8px 14px;
+            border-radius: 12px; text-align: center; white-space: nowrap;
             transition: background 0.2s; text-decoration: none; display: block; border: none; cursor: pointer;
         }
         .btn-ver:hover { background: #20bd5a; }
         .btn-denunciar {
-            position: absolute; top: 5px; right: 5px; background: transparent;
-            border: none; color: #888; font-size: 14px; cursor: pointer;
-            z-index: 10;
-        }
-        .vis-info {
-            font-size: 11px; color: #aaa; margin: 6px 0; text-align: center;
+            position: absolute; top: 8px; right: 8px; background: transparent;
+            border: none; color: #888; font-size: 13px; cursor: pointer;
+            z-index: 10; padding: 0; line-height: 1;
         }
         footer { 
             margin-top: auto; padding: 25px 0 20px; color: #ccc; 
@@ -193,6 +196,10 @@
         .resposta { margin-top: 12px; font-weight: bold; text-align: center; font-size: 14px; }
         .erro { color: red; }
         .sucesso { color: green; }
+        .aviso-pix {
+            background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; 
+            margin-top: 10px; font-size: 13px; display: none;
+        }
     </style>
 </head>
 <body id="page-body"> 
@@ -243,40 +250,24 @@
             <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
         </div>
 
-        <!-- SEÇÃO GRUPOS -->
+        <!-- SEÇÃO GRUPOS — LISTA VAZIA, SÓ APARECE QUEM ENVIAR -->
         <h2 class="titulo-secao">💬 Grupos</h2>
         <div class="lista-container" id="lista-grupos">
             {% for grupo in grupos %}
             <div class="card-grupo {% if grupo.vip %}vip-destaque{% endif %}">
                 <button class="btn-denunciar" onclick="abrirDenuncia('{{ grupo._id }}', event)">🚩</button>
                 <img src="{{ grupo.foto }}" alt="Ícone do Grupo">
-                <div class="nome">
-                    {% if grupo.vip %}🥇 {% endif %}{{ grupo.nome }}
+                <div class="info-grupo">
+                    <div class="nome">
+                        {% if grupo.vip %}🥇 {% endif %}{{ grupo.nome }}
+                    </div>
+                    <div class="cliques-info">👆 <span class="cli-{{ grupo._id }}">{{ grupo.cliques }}</span> cliques</div>
                 </div>
-                <div class="vis-info">👁️ <span class="vis-{{ grupo._id }}">{{ grupo.visualizacoes }}</span> visualizações</div>
-                <a href="{{ grupo.link }}" target="_blank" rel="noopener" class="btn-ver" onclick="registrarVisita('{{ grupo._id }}')">Entrar</a>
+                <a href="{{ grupo.link }}" target="_blank" rel="noopener" class="btn-ver" onclick="registrarClique('{{ grupo._id }}')">Entrar</a>
             </div>
+            {% else %}
+            <p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>
             {% endfor %}
-        </div>
-
-        <!-- SEÇÃO CANAIS -->
-        <h2 class="titulo-secao">📢 Canais</h2>
-        <div class="lista-container" id="lista-canais">    
-            <div class="card-grupo">
-                <img src="https://files.catbox.moe/dz237u.jpg" alt="Ícone do Canal">
-                <div class="nome">💗𝘛𝘐𝘕𝘋𝘌𝘙🔥</div>
-                <a href="https://gruposwhats.app/group/1114521?ref=social" class="btn-ver" target="_blank" rel="noopener">Ver Canal</a>
-            </div>
-            <div class="card-grupo">
-                <img src="https://files.catbox.moe/237suo.jpg" alt="Ícone do Canal">
-                <div class="nome">🌬️FIGURINHAS TOP🥇࿐</div>
-                <a href="https://gruposwhats.app/group/1111454?ref=social" class="btn-ver" target="_blank" rel="noopener">Ver Canal</a>
-            </div>
-            <div class="card-grupo">
-                <img src="https://files.catbox.moe/4lykf3.png" alt="Ícone do Canal">
-                <div class="nome">༺FIGURINHAS 🔥💬༻</div>
-                <a href="https://gruposwhats.app/group/1112296?ref=social" class="btn-ver" target="_blank" rel="noopener">Ver Canal</a>
-            </div>
         </div>
 
         <!-- RODAPÉ -->
@@ -309,6 +300,7 @@
             <label>🔑 Código VIP (se tiver):</label>
             <input type="text" id="inpCodigo" placeholder="Digite o código para enviar GRÁTIS">
             
+            <div id="avisoPix" class="aviso-pix">✅ Grupo salvo! Você será redirecionado para o pagamento 👇</div>
             <div id="respForm" class="resposta"></div>
             
             <button class="btn-enviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
@@ -363,15 +355,23 @@
             btn.innerHTML = dropdown.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
         }
 
-        // FORMULÁRIO ENVIAR GRUPO
-        function abrirFormulario() { document.getElementById('formModal').style.display = 'flex'; }
+        // ✅ FORMULÁRIO CORRIGIDO — ABRE PAGAMENTO
+        function abrirFormulario() { 
+            document.getElementById('formModal').style.display = 'flex'; 
+            document.getElementById('avisoPix').style.display = 'none';
+            document.getElementById('respForm').innerHTML = '';
+        }
         function fecharFormulario() { 
             document.getElementById('formModal').style.display = 'none';
+            document.getElementById('avisoPix').style.display = 'none';
             document.getElementById('respForm').innerHTML = '';
         }
         async function enviarGrupo() {
             const respDiv = document.getElementById('respForm');
+            const avisoPix = document.getElementById('avisoPix');
             respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
+            avisoPix.style.display = 'none';
+
             const dados = new URLSearchParams({
                 link: document.getElementById('inpLink').value.trim(),
                 nome: document.getElementById('inpNome').value.trim(),
@@ -379,28 +379,41 @@
                 plano: document.getElementById('inpPlano').value,
                 codigo_adm: document.getElementById('inpCodigo').value.trim()
             });
-            const resp = await fetch('/enviar-grupo', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: dados
-            });
-            const res = await resp.json();
-            if (res.erro) {
-                respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-            } else if (res.sucesso && !res.pagamento_url) {
-                respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
-                setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
-            } else if (res.pagamento_url) {
-                respDiv.innerHTML = `<span class="sucesso">✅ Grupo salvo! Abrindo pagamento...</span>`;
-                setTimeout(()=>{ window.open(res.pagamento_url, '_blank'); fecharFormulario(); }, 1500);
+
+            try {
+                const resp = await fetch('/enviar-grupo', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: dados
+                });
+                const res = await resp.json();
+
+                if (res.erro) {
+                    respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
+                } 
+                else if (res.sucesso && !res.pagamento_url) {
+                    respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                    setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
+                } 
+                else if (res.pagamento_url) {
+                    avisoPix.style.display = 'block';
+                    respDiv.innerHTML = `<span class="sucesso">✅ Abrindo pagamento...</span>`;
+                    setTimeout(()=>{ 
+                        window.open(res.pagamento_url, '_blank'); 
+                        fecharFormulario(); 
+                        location.reload();
+                    }, 1500);
+                }
+            } catch (e) {
+                respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
             }
         }
 
-        // 👁️ CONTADOR DE VISUALIZAÇÕES
-        async function registrarVisita(grupoId) {
+        // ✅ CONTADOR DE CLIQUES ÚNICOS — 1 CLIQUE POR PESSOA
+        async function registrarClique(grupoId) {
             const resp = await fetch(`/visualizar/${grupoId}`, {method: 'POST'});
             const dados = await resp.json();
-            const el = document.querySelector(`.vis-${grupoId}`);
+            const el = document.querySelector(`.cli-${grupoId}`);
             if (el) el.textContent = dados.total;
         }
 
