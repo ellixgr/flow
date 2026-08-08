@@ -16,8 +16,9 @@ client = MongoClient(MONGO_URI)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
-codigos_vip_col = db["codigos_vip"]
 
+# ✅ PEGA O CÓDIGO DIRETO DAS VARIÁVEIS DO RENDER — NÃO USA MAIS O BANCO!
+CODIGO_VIP_SECRETO = os.getenv("HAVE_ADM", "labareta444")
 SENHA_ADM = "admin123"
 
 @app.route("/")
@@ -60,10 +61,9 @@ def enviar_grupo():
     if not link or not nome:
         return jsonify({"erro": "Preencha link e nome!"}), 400
 
+    # ✅ USA A VARIÁVEL DO RENDER — SÓ QUEM SOUBER O CÓDIGO CONSEGUE ENVIAR GRÁTIS!
     if codigo:
-        codigo_ok = codigos_vip_col.find_one({"codigo": codigo, "usado": False})
-        if codigo_ok:
-            codigos_vip_col.update_one({"_id": codigo_ok["_id"]}, {"$set": {"usado": True}})
+        if codigo.strip() == CODIGO_VIP_SECRETO:
             novo_grupo = {
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
                 "usuario_id": uid, "cliques": 0, "ativo": True, "vip": True,
