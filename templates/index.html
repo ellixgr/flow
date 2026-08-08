@@ -17,9 +17,6 @@
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
     
-    <!-- ✅ ANÚNCIO ADSTERRA -->
-    <script async="async" data-cfasync="false" src="https://pl28627138.effectivecpmnetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js"></script>
-    
     <style>
         :root { 
             --primary-green: #25d366; --dark-green: #128c7e;
@@ -66,7 +63,7 @@
             padding: 12px;
             margin: 12px 0;
             text-align: center;
-            min-height: 100px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -208,6 +205,21 @@
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
+    <!-- ✅ SEU ANÚNCIO ADSTERRA 320×50 -->
+    <div class="anuncio-box">
+        <div class="anuncio-rotulo">🔞</div>
+        <script>
+          atOptions = {
+            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script src="https://www.highperformanceformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
+    </div>
+
     <div class="abas" id="abas">
         <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
         <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
@@ -216,33 +228,17 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- ✅ ANÚNCIO ALEATÓRIO EM CIMA DOS GRUPOS -->
-    <div id="anuncio-topo" class="anuncio-box" style="display:none;">
-        <div>
-            <div class="anuncio-rotulo">ANÚNCIO</div>
-            <div id="container-topo"></div>
-        </div>
-    </div>
-
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando...</p>
     </div>
-
-    <!-- ✅ ANÚNCIO ALEATÓRIO EMBAIXO DOS GRUPOS -->
-    <div id="anuncio-embaixo" class="anuncio-box" style="display:none;">
-        <div>
-            <div class="anuncio-rotulo">ANÚNCIO</div>
-            <div id="container-embaixo"></div>
-        </div>
-    </div>
 </main>
 
-<!-- ✅ RODAPÉ COM LINK DE ANÚNCIO -->
+<!-- ✅ RODAPÉ -->
 <footer>
     © 2020-2026 FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a> |
-    <a href="https://www.effectivecpmnetwork.com/y99yjf7v3y?key=5f6de430d75a855ddff7717775ff4ae3" target="_blank" rel="noopener">Anúncios</a>
+    <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">Parceiros</a>
     <a href="#" class="btn-adm" onclick="abrirPainelAdm(); return false;">⚙️</a>
 </footer>
 
@@ -362,19 +358,6 @@ let fotoBase64 = "";
 let categoriaAtual = "Todos";
 let senhaAdm = "";
 let grupoDenunciadoId = "";
-
-// ✅ ANÚNCIOS ALEATÓRIOS AO CARREGAR
-window.onload = function() {
-    const mostrarTopo = Math.random() < 0.7;   // 70% de chance de aparecer em cima
-    const mostrarBaixo = Math.random() < 0.7;  // 70% de chance de aparecer embaixo
-    
-    if (mostrarTopo) {
-        document.getElementById("anuncio-topo").style.display = "block";
-    }
-    if (mostrarBaixo) {
-        document.getElementById("anuncio-embaixo").style.display = "block";
-    }
-};
 
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
