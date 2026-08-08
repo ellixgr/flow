@@ -4,6 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Lista de Grupos de WhatsApp - FLOW</title>
+    <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
+    <link rel="canonical" href="https://ellixgr.github.io/flow/" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ellixgr.github.io/flow/">
+    <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
+    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
+    <meta property="og:image" content="https://files.catbox.moe/0aa6f2.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta name="robots" content="index, follow">
+    <script>if (top !== self) {top.location = self.location;}</script>
     <style>
         :root { 
             --primary-green: #25d366; --dark-green: #128c7e;
@@ -26,6 +38,61 @@
         .foto-perfil {width:80px; height:80px; border-radius:50%; border:3px solid #25d366;}
         .nome-time {font-size:20px; font-weight:800; color:#25d366; margin-top:8px;}
         
+        /* VIDEO TIKTOK */
+        .video-container { 
+            width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
+            background: #000; margin-bottom: 25px;
+        }
+        .video-container video { width: 100%; height: auto; display: block; }
+        .mute-btn { 
+            position: absolute; top: 15px; left: 15px; z-index: 15; 
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%; 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer;
+        }
+        .tiktok-icon { 
+            position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
+            background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
+        }
+        
+        /* MENU LATERAL */
+        .menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; 
+            border: 2px solid var(--primary-green); color: #000; 
+        }
+        .side-menu { 
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
+            background: #ffffff; padding: 60px 20px; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
+        }
+        .side-menu.active { right: 0; }
+        .side-menu a, .side-menu .dropdown-btn { 
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            text-decoration: none; color: #000; padding: 14px; margin-bottom: 18px; 
+            border-radius: 12px; background: #f0f0f0; font-weight: 600; gap: 6px;
+            border: none; width: 100%; font-size: inherit; cursor: pointer;
+        }
+        .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; }
+        .dropdown-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+            background: #f9f9f9; border-radius: 12px; margin-bottom: 18px; padding: 0 14px;
+        }
+        .dropdown-content.active {
+            max-height: 420px; padding: 14px; border: 1px solid #eee;
+        }
+        .servico-item {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            font-size: 14px; border-bottom: 1px solid #eee;
+        }
+        .servico-item:last-child { border-bottom: none; padding-bottom: 10px; }
+        .btn-contato {
+            margin-top: 15px; background: var(--primary-green) !important;
+            color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
+        }
+        
         /* ABA CATEGORIAS */
         .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin:15px 0;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
@@ -33,7 +100,6 @@
         
         /* BOTÃO MEUS GRUPOS */
         .btn-meus {position:fixed; top:15px; left:15px; background:#ffd700; color:#000; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer; z-index:100;}
-        .btn-menu {position:fixed; top:15px; right:15px; font-size:24px; background:rgba(255,255,255,0.9); padding:6px 10px; border-radius:10px; cursor:pointer; z-index:100;}
         
         /* CARDS */
         .lista {display:flex; flex-direction:column; gap:12px;}
@@ -68,17 +134,62 @@
         .area-pix {margin-top:15px; padding:12px; background:#f0fdf4; border-radius:10px; display:none;}
         .codigo-pix {width:100%; height:80px; padding:8px; border-radius:6px; border:1px solid #ccc; margin:8px 0; font-size:11px;}
         .vazio {text-align:center; color:#aaa; padding:30px;}
+        .aviso-btn {
+            width: 100%; text-align: center; font-size: 14px;
+            color: #fff; margin-bottom: 15px; opacity: 0.9;
+        }
     </style>
 </head>
 <body>
 
 <button class="btn-meus" onclick="abrirMeusGrupos()">👤 Meus Grupos</button>
-<button class="btn-menu" onclick="abrirFormulario()">➕</button>
+<div class="menu-btn" onclick="toggleMenu(event)">☰</div>
+
+<!-- MENU LATERAL -->
+<div class="side-menu" id="sideMenu">
+    <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
+    
+    <a href="#" onclick="abrirFormulario(); return false;" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+    <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
+    <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
+    <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
+    <div class="dropdown-content" id="telasDropdown">
+        <div class="servico-item"><span>NETFLIX</span><span>11,00</span></div>
+        <div class="servico-item"><span>GLOBO PLAY</span><span>5,50</span></div>
+        <div class="servico-item"><span>DISNEY PLUS</span><span>8,00</span></div>
+        <div class="servico-item"><span>STAR+</span><span>8,00</span></div>
+        <div class="servico-item"><span>TELECINE</span><span>5,00</span></div>
+        <div class="servico-item"><span>PRIME VIDEO</span><span>6,00</span></div>
+        <div class="servico-item"><span>CRUNCHYROLL</span><span>5,00</span></div>
+        <div class="servico-item"><span>SPOTIFY</span><span>9,00</span></div>
+        <div class="servico-item"><span>YOUTUBE INDIVIDUAL</span><span>5,00</span></div>
+        <a href="https://wa.me/5521977231625?text=Olá,%20tenho%20interesse%20nas%20telas!" class="btn-contato" target="_blank" rel="noopener">📲 CONTATO</a>
+    </div>
+    <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">
+        <img src="https://files.catbox.moe/eognmj.png" alt="Sou Popular" class="mini-img">
+        📈 Serviços Redes Sociais
+    </a>
+    <a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener">
+        <img src="https://files.catbox.moe/d0otxm.png" alt="TikTok Lite" class="mini-img">
+        🎁 Ganhe 20,00 🎉 Baixe tiktok
+    </a>
+</div>
 
 <main>
     <div class="perfil-topo">
-        <img src="https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg" class="foto-perfil" alt="Logo">
+        <img src="https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg" class="foto-perfil" alt="Logo Team Flow">
         <div class="nome-time">Team Flow</div>
+    </div>
+
+    <div class="aviso-btn">se abrir anúncio, volte e clique novamente ⚠️</div>
+
+    <!-- VÍDEO TIKTOK -->
+    <div class="video-container">
+        <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
+        <video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
+            <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
+        </video>
+        <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
     <!-- ABAS CATEGORIAS -->
@@ -95,11 +206,10 @@
     </div>
 </main>
 
-<!-- RODAPÉ FIXO -->
+<!-- RODAPÉ FIXO — SEM AVISO DUPLICADO -->
 <footer>
     © 2020-2026 FLOW — <a href="#" onclick="mostrarTermos()">Termos de Uso</a> | 
-    <a href="#" onclick="mostrarPrivacidade()">Coleta de Dados</a><br>
-    ⚠️ Imagens +18 NÃO são permitidas. Se denunciado, grupo será apagado SEM reembolso.
+    <a href="#" onclick="mostrarPrivacidade()">Coleta de Dados</a>
 </footer>
 
 <!-- FORMULÁRIO ENVIAR GRUPO -->
@@ -169,7 +279,9 @@
 </div>
 
 <script>
-const API_URL = window.location.origin;
+// ✅ CORRIGIDO — API URL CERTA
+const API_URL = 'https://flow-mohn.onrender.com';
+
 let usuarioId = localStorage.getItem("flow_usuario_id");
 if (!usuarioId) {
     usuarioId = crypto.randomUUID();
@@ -177,6 +289,22 @@ if (!usuarioId) {
 }
 let fotoBase64 = "";
 let categoriaAtual = "Todos";
+
+// 🎥 CONTROLE DE ÁUDIO DO VÍDEO
+const video = document.getElementById('meuVideo');
+const muteIcon = document.getElementById('muteIcon');
+function toggleMute(e) { e && (e.preventDefault(), e.stopPropagation()); video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
+
+// ☰ MENU LATERAL
+function toggleMenu(e) { e && e.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
+function toggleDropdown() {
+    const d = document.getElementById('telasDropdown'), b = document.getElementById('btnTelas');
+    d.classList.toggle('active'); b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
+}
+document.addEventListener('click', e => {
+    const m = document.getElementById('sideMenu'), b = document.querySelector('.menu-btn');
+    if (m.classList.contains('active') && !m.contains(e.target) && !b.contains(e.target)) m.classList.remove('active');
+});
 
 // 🖼️ PROCESSAR FOTO
 function processarFoto(e) {
@@ -209,57 +337,67 @@ function trocarCategoria(cat) {
 
 // 📋 CARREGAR GRUPOS
 async function carregarGrupos() {
-    const resp = await fetch(`${API_URL}/grupos-dados?categoria=${encodeURIComponent(categoriaAtual)}`);
-    const grupos = await resp.json();
-    const lista = document.getElementById("lista-grupos");
-    if (!grupos.length) { lista.innerHTML = "<p class='vazio'>Nenhum grupo encontrado.</p>"; return; }
-    lista.innerHTML = "";
-    grupos.forEach(g => {
-        const card = document.createElement("div");
-        card.className = `card ${g.vip ? "vip" : ""}`;
-        card.innerHTML = `
-            <img src="${g.foto}" alt="Foto">
-            <div class="card-info">
-                <div class="card-nome">${g.vip ? "🥇 " : ""}${g.nome}</div>
-                <div class="card-cat">${g.categoria || "Outros"}</div>
-                <div class="card-cliques">👆 ${g.cliques || 0} cliques</div>
-            </div>
-            <a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a>
-        `;
-        lista.appendChild(card);
-    });
+    try {
+        const resp = await fetch(`${API_URL}/grupos-dados?categoria=${encodeURIComponent(categoriaAtual)}`);
+        if (!resp.ok) throw new Error("Erro na resposta");
+        const grupos = await resp.json();
+        const lista = document.getElementById("lista-grupos");
+        if (!grupos.length) { lista.innerHTML = "<p class='vazio'>Nenhum grupo encontrado.</p>"; return; }
+        lista.innerHTML = "";
+        grupos.forEach(g => {
+            const card = document.createElement("div");
+            card.className = `card ${g.vip ? "vip" : ""}`;
+            card.innerHTML = `
+                <img src="${g.foto}" alt="Foto">
+                <div class="card-info">
+                    <div class="card-nome">${g.vip ? "🥇 " : ""}${g.nome}</div>
+                    <div class="card-cat">${g.categoria || "Outros"}</div>
+                    <div class="card-cliques">👆 ${g.cliques || 0} cliques</div>
+                </div>
+                <a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a>
+            `;
+            lista.appendChild(card);
+        });
+    } catch (erro) {
+        document.getElementById("lista-grupos").innerHTML = `<p class='vazio'>❌ Erro ao carregar: ${erro.message}<br>Verifique se o Render está rodando.</p>`;
+    }
 }
 
 // 👤 MEUS GRUPOS
 async function abrirMeusGrupos() {
     document.getElementById("meusModal").style.display = "flex";
-    const resp = await fetch(`${API_URL}/meus-grupos`, {headers: {"X-Usuario-ID": usuarioId}});
-    const grupos = await resp.json();
-    const lista = document.getElementById("lista-meus");
-    if (!grupos.length) { lista.innerHTML = "<p class='vazio'>Você ainda não enviou nenhum grupo.</p>"; return; }
-    lista.innerHTML = "";
-    grupos.forEach(g => {
-        let botaoImpulsar = "";
-        let cron = "";
-        if (g.pode_impulsionar) {
-            botaoImpulsar = `<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
-        } else {
-            const prox = new Date(g.proximo_impulso);
-            cron = `<div class="cronometro">⏰ Próximo impulso: ${prox.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>`;
-            botaoImpulsar = `<button class="btn-impulsionar" disabled>⏳ Em espera</button>`;
-        }
-        lista.innerHTML += `
-            <div class="card" style="margin-bottom:10px;">
-                <img src="${g.foto}" style="width:50px;height:50px;">
-                <div class="card-info">
-                    <div class="card-nome">${g.nome}</div>
-                    <div class="card-cliques">👆 ${g.cliques||0} cliques</div>
-                    ${cron}
-                    ${botaoImpulsar}
-                    <button class="btn-apagar" onclick="apagarMeuGrupo('${g._id}')">🗑️ Apagar</button>
-                </div>
-            </div>`;
-    });
+    try {
+        const resp = await fetch(`${API_URL}/meus-grupos`, {headers: {"X-Usuario-ID": usuarioId}});
+        if (!resp.ok) throw new Error("Erro");
+        const grupos = await resp.json();
+        const lista = document.getElementById("lista-meus");
+        if (!grupos.length) { lista.innerHTML = "<p class='vazio'>Você ainda não enviou nenhum grupo.</p>"; return; }
+        lista.innerHTML = "";
+        grupos.forEach(g => {
+            let botaoImpulsar = "";
+            let cron = "";
+            if (g.pode_impulsionar) {
+                botaoImpulsar = `<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
+            } else {
+                const prox = new Date(g.proximo_impulso);
+                cron = `<div class="cronometro">⏰ Próximo impulso: ${prox.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'})}</div>`;
+                botaoImpulsar = `<button class="btn-impulsionar" disabled>⏳ Em espera</button>`;
+            }
+            lista.innerHTML += `
+                <div class="card" style="margin-bottom:10px;">
+                    <img src="${g.foto}" style="width:50px;height:50px;">
+                    <div class="card-info">
+                        <div class="card-nome">${g.nome}</div>
+                        <div class="card-cliques">👆 ${g.cliques||0} cliques</div>
+                        ${cron}
+                        ${botaoImpulsar}
+                        <button class="btn-apagar" onclick="apagarMeuGrupo('${g._id}')">🗑️ Apagar</button>
+                    </div>
+                </div>`;
+        });
+    } catch (erro) {
+        document.getElementById("lista-meus").innerHTML = `<p class='vazio'>❌ Erro: ${erro.message}</p>`;
+    }
 }
 
 async function impulsionarGrupo(id) {
