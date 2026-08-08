@@ -317,13 +317,34 @@ function processarFoto(e){const arq=e.target.files[0];if(!arq)return;const leito
 
 function trocarCategoria(cat){categoriaAtual=cat;document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));document.querySelector(`[data-cat="${cat}"]`).classList.add("ativa");carregarGrupos();}
 
+// ✅ FUNÇÃO AUXILIAR — TRATA ERRO DE HTML
+async function requisionar(caminho, opcoes={}){
+  try {
+    const resp = await fetch(`${API_URL}${caminho}`, {
+      ...opcoes,
+      headers: {
+        ...(opcoes.headers||{}),
+        "X-Usuario-ID": usuarioId
+      }
+    });
+    const texto = await resp.text();
+    
+    // Se começar com < é página de erro
+    if(texto.trim().startsWith('<')){
+      throw new Error("Servidor retornou erro — Render pode estar dormindo ou CORS faltando");
+    }
+    
+    return JSON.parse(texto);
+  } catch(erro){
+    throw erro;
+  }
+}
+
 // ✅ CARREGA GRUPOS PÚBLICOS
 async function carregarGrupos(){
     try{
-        const resp=await fetch(`${API_URL}/grupos-dados`);
-        if(!resp.ok) throw new Error("Erro na resposta");
-        const grupos=await resp.json();
-        const lista=document.getElementById("lista-grupos");
+        const grupos = await requisionar('/grupos-dados');
+        const lista = document.getElementById("lista-grupos");
         if(!grupos.length){
             lista.innerHTML="<p class='vazio'>Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>";
             return;
@@ -336,7 +357,7 @@ async function carregarGrupos(){
             lista.appendChild(card);
         });
     }catch(erro){
-        document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro ao carregar: ${erro.message}</p>`;
+        document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro ao carregar: ${erro.message}<br>⚠️ Acesse o Render primeiro para acordar!</p>`;
     }
 }
 
@@ -363,26 +384,24 @@ async function enviarDenuncia(){
     const respDiv = document.getElementById("respDenuncia");
     respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
     try {
-        const resp = await fetch(`${API_URL}/denunciar/${grupoDenunciadoId}`, {
+        const res = await requisionar(`/denunciar/${grupoDenunciadoId}`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({motivo: motivo, outros_motivos: outros})
+            body: JSON.stringify({motivo, outros_motivos: outros})
         });
-        const res = await resp.json();
         respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ ${res.sucesso}</span>`;
         if(!res.erro) setTimeout(fecharDenuncia, 1500);
-    } catch { respDiv.innerHTML = `<span class="erro">❌ Erro de conexão</span>`; }
+    } catch(erro) { 
+        respDiv.innerHTML = `<span class="erro">❌ ${erro.message}</span>`; 
+    }
 }
 
-// ✅ MEUS GRUPOS — AGORA FUNCIONANDO!
+// ✅ MEUS GRUPOS — CORRIGIDO
 async function abrirMeusGrupos(){
     document.getElementById("meusModal").style.display="flex";
     document.getElementById("lista-meus").innerHTML = "<p class='vazio'>⏳ Carregando...</p>";
     try {
-        const resp = await fetch(`${API_URL}/meus-grupos`, {
-            headers: {"X-Usuario-ID": usuarioId}
-        });
-        const grupos = await resp.json();
+        const grupos = await requisionar('/meus-grupos');
         const lista = document.getElementById("lista-meus");
         if(!grupos.length){
             lista.innerHTML = "<p class='vazio'>Você ainda não enviou nenhum grupo.</p>";
@@ -407,61 +426,59 @@ function fecharMeusGrupos(){ document.getElementById("meusModal").style.display=
 
 // ✅ IMPULSIONAR GRÁTIS
 async function impulsionarGrupo(id){
-    const resp = await fetch(`${API_URL}/impulsionar/${id}`, {
-        method: "POST", headers: {"Content-Type": "application/json", "X-Usuario-ID": usuarioId}
-    });
-    const res = await resp.json();
+  try {
+    const res = await requisionar(`/impulsionar/${id}`, {method: "POST"});
     alert(res.sucesso || res.erro);
     abrirMeusGrupos();
     carregarGrupos();
+  } catch(e){ alert("❌ " + e.message); }
 }
 
 // ✅ APAGAR MEU GRUPO
 async function apagarMeuGrupo(id){
-    if(!confirm("Apagar esse grupo?")) return;
-    const resp = await fetch(`${API_URL}/apagar-meu-grupo/${id}`, {
-        method: "POST", headers: {"Content-Type": "application/json", "X-Usuario-ID": usuarioId}
-    });
-    const res = await resp.json();
+  if(!confirm("Apagar esse grupo?")) return;
+  try {
+    const res = await requisionar(`/apagar-meu-grupo/${id}`, {method: "POST"});
     alert(res.sucesso || res.erro);
     abrirMeusGrupos();
     carregarGrupos();
+  } catch(e){ alert("❌ " + e.message); }
 }
 
 // ✅ ENVIAR GRUPO
 async function enviarGrupo(){
-    const codigo = document.getElementById("inpCodigo").value.trim();
-    const dados = new URLSearchParams({
-        link: document.getElementById("inpLink").value.trim(),
-        nome: document.getElementById("inpNome").value.trim(),
-        categoria: document.getElementById("inpCat").value,
-        foto: fotoBase64,
-        plano: document.getElementById("inpPlano").value,
-        codigo_adm: codigo
+  const codigo = document.getElementById("inpCodigo").value.trim();
+  const dados = new URLSearchParams({
+    link: document.getElementById("inpLink").value.trim(),
+    nome: document.getElementById("inpNome").value.trim(),
+    categoria: document.getElementById("inpCat").value,
+    foto: fotoBase64,
+    plano: document.getElementById("inpPlano").value,
+    codigo_adm: codigo
+  });
+  document.getElementById("respForm").innerHTML = "";
+  document.getElementById("areaPix").style.display = "none";
+  document.getElementById("btnEnviar").style.display = "";
+  try {
+    const res = await requisionar('/enviar-grupo', {
+      method: "POST",
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: dados
     });
-    document.getElementById("respForm").innerHTML = "";
-    document.getElementById("areaPix").style.display = "none";
-    document.getElementById("btnEnviar").style.display = "";
-    try {
-        const resp = await fetch(`${API_URL}/enviar-grupo`, {
-            method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded", "X-Usuario-ID": usuarioId},
-            body: dados
-        });
-        const res = await resp.json();
-        if(res.erro){
-            document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${res.erro}</span>`;
-        } else if(res.sucesso && res.sem_pix){
-            document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ ${res.sucesso}</span>`;
-            setTimeout(()=>{ fecharFormulario(); carregarGrupos(); }, 2000);
-        } else if(res.codigo_pix){
-            document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ PIX gerado!</span>`;
-            document.getElementById("codigoPix").value = res.codigo_pix;
-            document.getElementById("areaPix").style.display = "block";
-            document.getElementById("btnEnviar").style.display = "none";
-        }
-    } catch {
-        document.getElementById("respForm").innerHTML = `<span class='erro'>❌ Erro de conexão</span>`;
+    if(res.erro){
+      document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${res.erro}</span>`;
+    } else if(res.sucesso && res.sem_pix){
+      document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ ${res.sucesso}</span>`;
+      setTimeout(()=>{ fecharFormulario(); carregarGrupos(); }, 2000);
+    } else if(res.codigo_pix){
+      document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ PIX gerado!</span>`;
+      document.getElementById("codigoPix").value = res.codigo_pix;
+      document.getElementById("areaPix").style.display = "block";
+      document.getElementById("btnEnviar").style.display = "none";
     }
+  } catch(e){
+    document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${e.message}</span>`;
+  }
 }
 
 function copiarPix(){document.getElementById("codigoPix").select();document.execCommand("copy");alert("✅ Copiado!");}
@@ -471,79 +488,91 @@ function mostrarTermos(){document.getElementById("termosModal").style.display="f
 function fecharTermos(){document.getElementById("termosModal").style.display="none";}
 function mostrarPrivacidade(){alert("Armazenamos: link, nome, foto e identificador anônimo.");}
 
-// ✅ PAINEL ADM — SENHA ERRADA = NÃO ENTRA!
+// ✅ PAINEL ADM — CORRIGIDO
 async function abrirPainelAdm(){
-    const senha = prompt("Digite a SENHA DE ADMINISTRADOR:");
-    if(!senha || senha.trim() === "") return;
+  const senha = prompt("Digite a SENHA DE ADMINISTRADOR:");
+  if(!senha || senha.trim() === "") return;
 
-    document.getElementById("admModal").style.display = "flex";
-    document.getElementById("admConteudo").innerHTML = "<p style='text-align:center'>⏳ Verificando senha...</p>";
+  document.getElementById("admModal").style.display = "flex";
+  document.getElementById("admConteudo").innerHTML = "<p style='text-align:center'>⏳ Verificando senha...</p>";
 
-    const resp = await fetch(`${API_URL}/verificar-senha-adm`, {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: new URLSearchParams({senha: senha.trim()})
+  try {
+    const res = await requisionar('/verificar-senha-adm', {
+      method: "POST",
+      headers: {"Content-Type": "application/x-www-form-urlencoded"},
+      body: new URLSearchParams({senha: senha.trim()})
     });
-    const res = await resp.json();
 
-    if(resp.status === 403 || res.erro){
-        alert("❌ SENHA INCORRETA! Acesso NEGADO!");
-        fecharPainelAdm();
-        return;
+    if(res.erro){
+      alert("❌ " + res.erro);
+      fecharPainelAdm();
+      return;
     }
 
     senhaAdm = senha.trim();
     admVerGrupos();
+
+  } catch(erro){
+    alert("❌ Erro: " + erro.message + "\n⚠️ Acesse o Render primeiro para acordar o servidor!");
+    fecharPainelAdm();
+  }
 }
 function fecharPainelAdm(){document.getElementById("admModal").style.display="none";document.getElementById("admConteudo").innerHTML="";senhaAdm="";}
 
 // ✅ LISTA GRUPOS ADM
 async function admVerGrupos(){
-    const resp = await fetch(`${API_URL}/admin/grupos?senha=${encodeURIComponent(senhaAdm)}`);
-    if(resp.status === 403){ alert("❌ Acesso negado!"); fecharPainelAdm(); return; }
-    const grupos = await resp.json();
+  try {
+    const res = await requisionar(`/admin/grupos?senha=${encodeURIComponent(senhaAdm)}`);
+    if(res.erro){ alert("❌ " + res.erro); fecharPainelAdm(); return; }
+    const grupos = res;
     let html = "<b>📋 Grupos Cadastrados:</b><br><br>";
     if(!grupos.length){ html += "<p>Nenhum grupo cadastrado.</p>"; }
     grupos.forEach(g=>{
-        html += `<div class="painel-adm-item">
-            <b>${g.nome}</b><br>
-            ${g.categoria} | ${g.ativo?"✅ ATIVO":"❌ DESATIVADO"} | 👆 ${g.cliques||0} cliques<br>
-            <a href="${g.link}" target="_blank" style="font-size:12px; color:#25d366;">${g.link}</a><br>
-            <button onclick="admApagarGrupo('${g._id}')" style="padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; margin-top:6px; cursor:pointer;">🗑️ APAGAR</button>
-        </div>`;
+      html += `<div class="painel-adm-item">
+        <b>${g.nome||"Sem nome"}</b><br>
+        ${g.categoria||"Outros"} | ${g.ativo?"✅ ATIVO":"❌ DESATIVADO"} | 👆 ${g.cliques||0} cliques<br>
+        <a href="${g.link}" target="_blank" style="font-size:12px; color:#25d366;">${g.link}</a><br>
+        <button onclick="admApagarGrupo('${g._id}')" style="padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; margin-top:6px; cursor:pointer;">🗑️ APAGAR</button>
+      </div>`;
     });
     document.getElementById("admConteudo").innerHTML = html;
+  } catch(erro){
+    document.getElementById("admConteudo").innerHTML = `<p class='vazio'>❌ Erro: ${erro.message}</p>`;
+  }
 }
 
 // ✅ APAGAR GRUPO ADM
 async function admApagarGrupo(id){
-    if(!confirm("APAGAR esse grupo?")) return;
-    const resp = await fetch(`${API_URL}/admin/apagar-grupo/${id}?senha=${encodeURIComponent(senhaAdm)}`, {method:"POST"});
-    const res = await resp.json();
+  if(!confirm("APAGAR esse grupo?")) return;
+  try {
+    const res = await requisionar(`/admin/apagar-grupo/${id}?senha=${encodeURIComponent(senhaAdm)}`, {method:"POST"});
     alert(res.sucesso || res.erro);
     admVerGrupos();
+  } catch(e){ alert("❌ " + e.message); }
 }
 
-// ✅ LISTA DENÚNCIAS ADM
+// ✅ DENÚNCIAS ADM
 async function admVerDenuncias(){
-    const resp = await fetch(`${API_URL}/admin/denuncias?senha=${encodeURIComponent(senhaAdm)}`);
-    if(resp.status === 403){ alert("❌ Acesso negado!"); fecharPainelAdm(); return; }
-    const denuncias = await resp.json();
+  try {
+    const res = await requisionar(`/admin/denuncias?senha=${encodeURIComponent(senhaAdm)}`);
+    if(res.erro){ alert("❌ " + res.erro); fecharPainelAdm(); return; }
+    const denuncias = res;
     let html = "<b>⚠️ Denúncias:</b><br><br>";
     if(!denuncias.length){ html += "<p>Nenhuma denúncia.</p>"; }
     denuncias.forEach(d=>{
-        const motivoTexto = {
-            "link_invalido": "🔗 Link Inválido", "conteudo_improprio": "⚠️ Conteúdo Impróprio",
-            "spam": "📧 Spam", "outro": "❌ Outro"
-        }[d.motivo] || d.motivo;
-        html += `<div class="painel-adm-item">
-            <b>Grupo ID:</b> ${d.grupo_id}<br>
-            <b>Motivo:</b> ${motivoTexto}<br>
-            ${d.outros_motivos ? `<b>Detalhes:</b> ${d.outros_motivos}<br>` : ""}
-            <b>Data:</b> ${new Date(d.data).toLocaleString('pt-BR')}
-        </div>`;
+      const motivoTexto = {
+        "link_invalido": "🔗 Link Inválido", "conteudo_improprio": "⚠️ Conteúdo Impróprio",
+        "spam": "📧 Spam", "outro": "❌ Outro"
+      }[d.motivo] || d.motivo;
+      html += `<div class="painel-adm-item">
+        <b>Grupo ID:</b> ${d.grupo_id}<br>
+        <b>Motivo:</b> ${motivoTexto}<br>
+        ${d.outros_motivos ? `<b>Detalhes:</b> ${d.outros_motivos}<br>` : ""}
+        <b>Data:</b> ${new Date(d.data).toLocaleString('pt-BR')}
+      </div>`;
     });
     document.getElementById("admConteudo").innerHTML = html;
+  } catch(e){ alert("❌ " + e.message); }
 }
 
 carregarGrupos();
