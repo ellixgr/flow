@@ -8,11 +8,17 @@ import os
 app = Flask(__name__)
 
 # ==============================================
-# 🔑 CONFIGURAÇÕES — SÓ PEGA DO RENDER, SEM VALOR FALSO!
+# 🔑 PEGA EXCLUSIVAMENTE DAS VARIÁVEIS DO RENDER
 # ==============================================
 
 MONGO_URI = os.getenv("MONGO_URI")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+
+# ✅ VERIFICA SE EXISTE
+if not MONGO_URI:
+    raise Exception("❌ VARIÁVEL MONGO_URI NÃO CONFIGURADA NO RENDER!")
+if not MP_ACCESS_TOKEN:
+    raise Exception("❌ VARIÁVEL MP_ACCESS_TOKEN NÃO CONFIGURADA NO RENDER!")
 
 # ==============================================
 # NÃO MEXE DAQUI PRA BAIXO
@@ -21,10 +27,15 @@ MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
 # CONEXÃO COM BANCO
-client = MongoClient(MONGO_URI)
-db = client.flow
-grupos_col = db.grupos
-codigos_col = db.codigos_vip
+try:
+    client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
+    db = client.flow
+    grupos_col = db.grupos
+    codigos_col = db.codigos_vip
+    print("✅ CONECTADO AO MONGODB COM SUCESSO!")
+except Exception as e:
+    print(f"❌ ERRO AO CONECTAR NO BANCO: {e}")
+    raise
 
 # ✅ CÓDIGO VIP VÁLIDO?
 def codigo_valido(codigo):
