@@ -390,7 +390,7 @@
             });
 
             try {
-                const resp = await fetch('/enviar-grupo', {
+                const resp = await fetch('https://flow-mohn.onrender.com/enviar-grupo', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: dados
@@ -429,7 +429,7 @@
         async function enviarDenuncia() {
             const respDiv = document.getElementById('respDenuncia');
             respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
-            const resp = await fetch(`/denunciar/${grupoAtualDenunciar}`, {
+            const resp = await fetch(`https://flow-mohn.onrender.com/denunciar/${grupoAtualDenunciar}`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({motivo: document.getElementById('inpMotivo').value})
