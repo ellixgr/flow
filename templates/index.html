@@ -98,10 +98,6 @@
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
             cursor: pointer;
         }
-        .tiktok-icon { 
-            position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
-            background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
-        }
         .titulo-secao {
             width: 100%; font-size: 20px; font-weight: 700;
             color: #fff; margin: 10px 0 18px;
@@ -174,6 +170,18 @@
         .aviso-pix {
             background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; 
             margin-top: 10px; font-size: 13px; display: none;
+        }
+        .area-pix {
+            display: none; margin-top:15px; padding:15px; background:#f0fdf4; 
+            border-radius:12px; border:2px solid #25d366;
+        }
+        .codigo-pix {
+            width:100%; height:100px; padding:10px; border-radius:8px; 
+            border:1px solid #ccc; font-size:12px; resize:none; margin:10px 0;
+        }
+        .btn-copiar-pix {
+            width:100%; padding:12px; background:#25d366; color:white; 
+            border:none; border-radius:8px; font-weight:bold; cursor:pointer;
         }
     </style>
 </head>
@@ -269,8 +277,15 @@
             <label>🔑 Código VIP (se tiver):</label>
             <input type="text" id="inpCodigo" placeholder="Digite o código para enviar GRÁTIS">
             
-            <div id="avisoPix" class="aviso-pix">✅ Grupo salvo! Você será redirecionado para o pagamento 👇</div>
             <div id="respForm" class="resposta"></div>
+            
+            <!-- ÁREA DO PIX QUE APARECE APÓS ENVIAR -->
+            <div id="areaPix" class="area-pix">
+                <p style="font-weight:bold; color:#166534;">💳 CÓDIGO PIX — COPIA E COLA NO SEU BANKO:</p>
+                <textarea id="codigoPix" readonly class="codigo-pix"></textarea>
+                <button class="btn-copiar-pix" onclick="copiarPix()">📋 COPIAR CÓDIGO PIX</button>
+                <p style="font-size:12px; color:#166534; margin-top:8px;">✅ Após pagar, o VIP é ativado automaticamente em até 1 minuto!</p>
+            </div>
             
             <button class="btn-enviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
             <button class="btn-cancelar" onclick="fecharFormulario()">❌ CANCELAR</button>
@@ -311,17 +326,21 @@
         // FORMULÁRIO
         function abrirFormulario() { 
             document.getElementById('formModal').style.display = 'flex'; 
-            document.getElementById('avisoPix').style.display = 'none';
             document.getElementById('respForm').innerHTML = '';
+            document.getElementById('areaPix').style.display = 'none';
+            document.getElementById('codigoPix').value = '';
         }
         function fecharFormulario() { 
             document.getElementById('formModal').style.display = 'none';
         }
+
         async function enviarGrupo() {
             const respDiv = document.getElementById('respForm');
-            const avisoPix = document.getElementById('avisoPix');
-            respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
-            avisoPix.style.display = 'none';
+            const areaPix = document.getElementById('areaPix');
+            const campoPix = document.getElementById('codigoPix');
+            
+            respDiv.innerHTML = '<span style="color:blue">⏳ Gerando código PIX...</span>';
+            areaPix.style.display = 'none';
 
             const dados = new URLSearchParams({
                 link: document.getElementById('inpLink').value.trim(),
@@ -341,21 +360,25 @@
 
                 if (res.erro) {
                     respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-                } else if (res.sucesso && !res.pagamento_url) {
+                } else if (res.sucesso && !res.codigo_pix) {
                     respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
                     setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
-                } else if (res.pagamento_url) {
-                    avisoPix.style.display = 'block';
-                    respDiv.innerHTML = `<span class="sucesso">✅ Abrindo pagamento...</span>`;
-                    setTimeout(()=>{ 
-                        window.open(res.pagamento_url, '_blank'); 
-                        fecharFormulario(); 
-                        location.reload();
-                    }, 1500);
+                } else if (res.codigo_pix) {
+                    respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                    campoPix.value = res.codigo_pix;
+                    areaPix.style.display = 'block';
                 }
             } catch (e) {
                 respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
             }
+        }
+
+        // COPIAR PIX
+        function copiarPix() {
+            const campo = document.getElementById('codigoPix');
+            campo.select();
+            document.execCommand('copy');
+            alert('✅ Código PIX copiado! Agora é só colar no app do seu banco!');
         }
 
         // DENÚNCIA
