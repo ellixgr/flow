@@ -106,7 +106,6 @@
         .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
         .card-cliques {font-size:11px; color:#aaa; margin-top:4px;}
         
-        /* ✅ BOTÕES MAIORES — MEUS GRUPOS */
         .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
         .btn-denunciar {background:#ff4444; color:#fff; border:none; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:4px; font-weight:bold;}
         .btn-apagar {background:#ff4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:6px; font-weight:bold; width:100%;}
@@ -117,7 +116,6 @@
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         .btn-adm {font-size:10px; opacity:0.3; margin-left:8px; color:#888; text-decoration:none;}
         
-        /* ✅ CAIXA IGUAL A TERMOS DE USO */
         .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
         .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
         .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
@@ -136,31 +134,6 @@
         .painel-adm-item b {display:block; margin-bottom:6px; font-size:15px;}
         .outro-motivo {margin-top:10px; display:none;}
         .outro-motivo.visivel {display:block;}
-        
-        /* ✅ MEUS GRUPOS — MELHORADO */
-        .meus-grupo-card {
-            background: rgba(255,255,255,0.05);
-            border: 2px solid #ffd700;
-            border-radius: 15px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        .meus-grupo-nome {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        .meus-grupo-info {
-            font-size: 13px;
-            color: #ccc;
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-        .meus-botoes {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
     </style>
 </head>
 <body>
@@ -229,7 +202,6 @@
     <a href="#" class="btn-adm" onclick="abrirPainelAdm(); return false;">⚙️</a>
 </footer>
 
-<!-- FORM ENVIAR GRUPO -->
 <div id="formModal" class="modal" onclick="fecharFormulario()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📤 Enviar Grupo</h2>
@@ -266,7 +238,6 @@
     </div>
 </div>
 
-<!-- MEUS GRUPOS -->
 <div id="meusModal" class="modal" onclick="fecharMeusGrupos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>👤 Meus Grupos</h2>
@@ -275,41 +246,31 @@
     </div>
 </div>
 
-<!-- ✅ PRIVACIDADE — CAIXA IGUAL A TERMOS DE USO -->
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
         <p style="font-size:14px; line-height:1.7; color:#333;">
             🔒 <strong>Seus dados estão protegidos!</strong><br><br>
-            📋 <strong>O que armazenamos:</strong><br>
-            • Link do grupo enviado<br>
-            • Nome do grupo<br>
-            • Foto enviada por você<br>
-            • Identificador anônimo (não revela seus dados)<br><br>
-            ❌ <strong>NÃO armazenamos:</strong><br>
-            • Seu nome verdadeiro<br>
-            • Seu telefone ou e-mail<br>
-            • Mensagens ou conversas privadas<br><br>
-            🛡️ Seus dados são usados <strong>apenas</strong> para exibir os grupos e gerenciar denúncias. Nunca compartilhamos com terceiros.
+            📋 <strong>O que armazenamos:</strong><br>• Link do grupo enviado<br>• Nome do grupo<br>• Foto enviada por você<br>• Identificador anônimo<br><br>
+            ❌ <strong>NÃO armazenamos:</strong><br>• Seu nome verdadeiro<br>• Seu telefone ou e-mail<br>• Mensagens ou conversas privadas<br><br>
+            🛡️ Seus dados são usados <strong>apenas</strong> para exibir os grupos e gerenciar denúncias.
         </p>
         <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
 
-<!-- TERMOS -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
         <p style="font-size:14px; line-height:1.7; color:#333;">
             ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
-            ⚠️ Se você enviar um grupo com imagem imprópria e alguém denunciar, o grupo será APAGADO imediatamente e NÃO haverá reembolso do valor pago.<br><br>
-            📋 Dados que armazenamos: link do grupo, nome, foto enviada e identificador anônimo de quem enviou — apenas para gerenciar os grupos e denúncias.
+            ⚠️ Se você enviar um grupo com imagem imprópria e alguém denunciar, o grupo será APAGADO imediatamente e NÃO haverá reembolso.<br><br>
+            📋 Dados: link, nome, foto e identificador anônimo — apenas para gerenciar os grupos.
         </p>
         <button class="btn-enviar" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
 
-<!-- PAINEL ADM -->
 <div id="admModal" class="modal" onclick="fecharPainelAdm()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔐 Painel Administrativo</h2>
@@ -319,27 +280,6 @@
         </div>
         <div id="admConteudo"></div>
         <button class="btn-cancelar" onclick="fecharPainelAdm()">FECHAR</button>
-    </div>
-</div>
-
-<!-- DENUNCIAR -->
-<div id="denunciaModal" class="modal" onclick="fecharDenuncia()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>🚩 Denunciar Grupo</h2>
-        <label>Motivo da Denúncia:</label>
-        <select id="selMotivo" onchange="trocarMotivo()">
-            <option value="link_invalido">🔗 Link inválido / Não funciona</option>
-            <option value="conteudo_improprio">⚠️ Conteúdo impróprio</option>
-            <option value="spam">📧 Spam / Divulgação abusiva</option>
-            <option value="outro">❌ Outro motivo</option>
-        </select>
-        <div id="divOutroMotivo" class="outro-motivo">
-            <label>Escreva o motivo:</label>
-            <input type="text" id="inpOutroMotivo" placeholder="Descreva o motivo">
-        </div>
-        <div id="respDenuncia" class="resposta"></div>
-        <button class="btn-enviar" onclick="enviarDenuncia()">🚩 ENVIAR DENÚNCIA</button>
-        <button class="btn-cancelar" onclick="fecharDenuncia()">❌ CANCELAR</button>
     </div>
 </div>
 
@@ -375,26 +315,17 @@ async function requisionar(caminho, opcoes={}){
         "X-Usuario-ID": usuarioId
       }
     });
-
-    if (!resp.ok) {
-      throw new Error(`Servidor retornou erro ${resp.status} — Acesse o Render primeiro!`);
-    }
-
+    if (!resp.ok) throw new Error(`Erro ${resp.status}`);
     const texto = await resp.text();
-    if(texto.trim().startsWith('<')){
-      throw new Error("Servidor dormindo — acesse o link do Render primeiro!");
-    }
+    if(texto.trim().startsWith('<')) throw new Error("Servidor dormindo — acesse o Render primeiro!");
     return JSON.parse(texto);
-  } catch(erro){
-    throw erro;
-  }
+  } catch(erro) { throw erro; }
 }
 
 async function carregarGrupos(){
     try{
         const grupos = await requisionar('/grupos-dados');
         const lista = document.getElementById("lista-grupos");
-        
         let gruposFiltrados = grupos;
         if(categoriaAtual !== "Todos"){
             gruposFiltrados = grupos.filter(g => {
@@ -402,22 +333,26 @@ async function carregarGrupos(){
                 return catGrupo === categoriaAtual;
             });
         }
-
         if(!gruposFiltrados.length){
             lista.innerHTML=`<p class='vazio'>Nenhum grupo em ${categoriaAtual} ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
             return;
         }
-        
         lista.innerHTML="";
         gruposFiltrados.forEach(g=>{
             const card=document.createElement("div");
             card.className=`card ${g.vip?"vip":""}`;
-            card.innerHTML=`<img src="${g.foto}" alt="Foto do Grupo"><div class="card-info"><div class="card-nome">${g.vip?"🥇 ":""}${g.nome}</div><div class="card-cat">${g.categoria||"Outros"}</div><div class="card-cliques">👆 ${g.cliques||0} cliques</div></div><div style="display:flex; flex-direction:column; gap:4px;"><a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a><button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">⚠️ Denunciar</button></div>`;
+            card.innerHTML=`<img src="${g.foto}" alt="Foto"><div class="card-info"><div class="card-nome">${g.vip?"🥇 ":""}${g.nome}</div><div class="card-cat">${g.categoria||"Outros"}</div><div class="card-cliques">👆 ${g.cliques||0} cliques</div></div><div style="display:flex; flex-direction:column; gap:4px;"><a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a><button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">⚠️ Denunciar</button></div>`;
             lista.appendChild(card);
         });
     }catch(erro){
         document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro: ${erro.message}<br>👉 Acesse primeiro: <a href="${API_URL}" target="_blank" style="color:#25d366">${API_URL}</a></p>`;
     }
+}
+
+async function registrarClique(grupoId){
+    try{
+        await requisionar(`/clicar/${grupoId}`, {method:"POST"});
+    }catch(e){}
 }
 
 async function abrirDenuncia(grupoId){
@@ -450,4 +385,137 @@ async function enviarDenuncia(){
         respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ ${res.sucesso}</span>`;
         if(!res.erro) setTimeout(fecharDenuncia, 1500);
     } catch(erro) { 
-        respDiv.innerHTML = `<span class="erro">❌ ${erro.message
+        respDiv.innerHTML = `<span class="erro">❌ ${erro.message}</span>`;
+    }
+}
+
+async function abrirMeusGrupos(){
+    document.getElementById("meusModal").style.display="flex";
+    try{
+        const grupos = await requisionar('/meus-grupos');
+        const lista=document.getElementById("lista-meus");
+        if(!grupos.length){
+            lista.innerHTML="<p class='vazio'>Você ainda não enviou nenhum grupo.</p>";
+            return;
+        }
+        lista.innerHTML="";
+        grupos.forEach(g=>{
+            let botaoImpulsar="",cron="";
+            if(g.pode_impulsionar){
+                botaoImpulsar=`<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
+            }else{
+                const prox=new Date(g.proximo_impulso);
+                cron=`<div style="font-size:11px; color:#ffd700; margin-top:4px;">⏰ Aguarde 1h</div>`;
+                botaoImpulsar=`<button class="btn-impulsionar" disabled>⏳ Em espera</button>`;
+            }
+            lista.innerHTML+=`<div style="background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding:12px; margin-bottom:12px;"><div style="display:flex; gap:10px; align-items:flex-start;"><img src="${g.foto}" style="width:50px; height:50px; border-radius:50%; border:2px solid #25d366;"><div style="flex:1;"><div style="font-weight:bold; font-size:15px;">${g.nome}</div><div style="font-size:12px; color:#aaa;">👆 ${g.cliques||0} cliques</div>${cron}${botaoImpulsar}<button class="btn-apagar" onclick="apagarMeuGrupo('${g._id}')">🗑️ Apagar</button></div></div></div>`;
+        });
+    }catch(erro){
+        document.getElementById("lista-meus").innerHTML=`<p class='vazio'>❌ Erro: ${erro.message}</p>`;
+    }
+}
+
+async function impulsionarGrupo(id){
+    const res = await requisionar(`/impulsionar/${id}`, {method:"POST"});
+    alert(res.sucesso||res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
+}
+
+async function apagarMeuGrupo(id){
+    if(!confirm("Apagar esse grupo?")) return;
+    const res = await requisionar(`/apagar-grupo/${id}`, {method:"POST"});
+    alert(res.sucesso||res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
+}
+
+async function enviarGrupo(){
+    const codigo=document.getElementById("inpCodigo").value.trim();
+    const dados=new URLSearchParams({
+        link:document.getElementById("inpLink").value.trim(),
+        nome:document.getElementById("inpNome").value.trim(),
+        categoria:document.getElementById("inpCat").value,
+        foto_base64:fotoBase64,
+        plano:document.getElementById("inpPlano").value,
+        codigo_adm:codigo
+    });
+    document.getElementById("respForm").innerHTML="";
+    document.getElementById("areaPix").style.display="none";
+    document.getElementById("btnEnviar").style.display="";
+    try{
+        const res=await requisionar('/enviar-grupo',{
+            method:"POST",
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+            body:dados
+        });
+        if(res.erro){
+            document.getElementById("respForm").innerHTML=`<span class='erro'>❌ ${res.erro}</span>`;
+        }else if(res.sucesso&&res.sem_pix){
+            document.getElementById("respForm").innerHTML=`<span class='sucesso'>✅ ${res.sucesso}</span>`;
+            setTimeout(()=>{fecharFormulario();carregarGrupos();},2000);
+        }else if(res.codigo_pix){
+            document.getElementById("respForm").innerHTML=`<span class='sucesso'>✅ PIX gerado!</span>`;
+            document.getElementById("codigoPix").value=res.codigo_pix;
+            document.getElementById("areaPix").style.display="block";
+            document.getElementById("btnEnviar").style.display="none";
+        }
+    }catch(erro){
+        document.getElementById("respForm").innerHTML=`<span class='erro'>❌ ${erro.message}</span>`;
+    }
+}
+
+function copiarPix(){document.getElementById("codigoPix").select();document.execCommand("copy");alert("✅ Copiado!");}
+function fecharFormulario(){document.getElementById("formModal").style.display="none";document.getElementById("areaPix").style.display="none";document.getElementById("btnEnviar").style.display="";document.getElementById("respForm").innerHTML="";}
+function fecharMeusGrupos(){document.getElementById("meusModal").style.display="none";}
+function mostrarTermos(){document.getElementById("termosModal").style.display="flex";}
+function fecharTermos(){document.getElementById("termosModal").style.display="none";}
+function mostrarPrivacidade(){document.getElementById("privacidadeModal").style.display="flex";}
+function fecharPrivacidade(){document.getElementById("privacidadeModal").style.display="none";}
+
+function abrirPainelAdm(){senhaAdm=prompt("Digite a SENHA DE ADMINISTRADOR:");if(!senhaAdm)return;document.getElementById("admModal").style.display="flex";admVerGrupos();}
+function fecharPainelAdm(){document.getElementById("admModal").style.display="none";document.getElementById("admConteudo").innerHTML="";}
+
+async function admVerGrupos(){
+    try{
+        const resp = await fetch(`${API_URL}/adm/grupos`,{headers:{"X-Adm-Senha":senhaAdm}});
+        if(resp.status===403){alert("❌ SENHA ERRADA!");fecharPainelAdm();return;}
+        const grupos=await resp.json();
+        let html="<b>📋 Grupos Cadastrados:</b><br><br>";
+        if(!grupos.length){html+="Nenhum grupo.";}
+        grupos.forEach(g=>{html+=`<div style="padding:8px 0; border-bottom:1px solid #eee;"><b>${g.nome}</b><br>${g.categoria} | ${g.ativo?"✅ ATIVO":"❌ DESATIVADO"} | 👆 ${g.cliques||0} cliques<br><button onclick="admDesativarGrupo('${g._id}')" style="padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; margin-top:4px;">${g.ativo?"Desativar":"Já desativado"}</button></div>`;});
+        document.getElementById("admConteudo").innerHTML=html;
+    }catch(e){alert("Erro: "+e.message);}
+}
+
+async function admVerDenuncias(){
+    try{
+        const resp = await fetch(`${API_URL}/adm/denuncias`,{headers:{"X-Adm-Senha":senhaAdm}});
+        if(resp.status===403){alert("❌ SENHA ERRADA!");fecharPainelAdm();return;}
+        const denuncias=await resp.json();
+        let html="<b>⚠️ Denúncias:</b><br><br>";
+        if(!denuncias.length){html+="Nenhuma denúncia nova.";}
+        denuncias.forEach(d=>{html+=`<div style="padding:8px 0; border-bottom:1px solid #eee;">Grupo ID: ${d.grupo_id}<br>Motivo: ${d.motivo}<br>Data: ${new Date(d.denunciado_em).toLocaleString('pt-BR')}<br><button onclick="admMarcarLida('${d._id}')" style="padding:4px 8px; background:#25d366; color:white; border:none; border-radius:4px; margin-top:4px;">✅ Marcar lida</button></div>`;});
+        document.getElementById("admConteudo").innerHTML=html;
+    }catch(e){alert("Erro: "+e.message);}
+}
+
+async function admDesativarGrupo(id){
+    if(!confirm("Desativar esse grupo?"))return;
+    const resp=await fetch(`${API_URL}/adm/desativar/${id}`,{method:"POST",headers:{"X-Adm-Senha":senhaAdm}});
+    const res=await resp.json();
+    alert(res.sucesso||res.erro);
+    admVerGrupos();
+}
+
+async function admMarcarLida(id){
+    const resp=await fetch(`${API_URL}/adm/marcar-lida/${id}`,{method:"POST",headers:{"X-Adm-Senha":senhaAdm}});
+    const res=await resp.json();
+    alert(res.sucesso||res.erro);
+    admVerDenuncias();
+}
+
+carregarGrupos();
+</script>
+</body>
+</html>
