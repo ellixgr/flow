@@ -1,55 +1,61 @@
 from flask import Flask, render_template, request, jsonify
-from flask_cors import CORS  # ✅ ADICIONADO: Resolve o erro de conexão!
+from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import mercadopago
-from datetime import datetime, timedelta, UTC  # ✅ Corrige o aviso de data
+from datetime import datetime, timedelta, UTC
 import os
 
 app = Flask(__name__)
-CORS(app)  # ✅ LIBERA ACESSO DO SEU SITE (resolve o "Erro de conexão")
+CORS(app)
 
 # ==============================================
-# 🔑 PEGA EXCLUSIVAMENTE DAS VARIÁVEIS DO RENDER
+# 🔑 PEGA DAS VARIÁVEIS DO RENDER
 # ==============================================
-
 MONGO_URI = os.getenv("MONGO_URI")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+CHAVE_ADM = os.getenv("CHAVE_ADM", "").strip()
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 
-# ✅ VERIFICA SE EXISTE
 if not MONGO_URI:
-    raise Exception("❌ VARIÁVEL MONGO_URI NÃO CONFIGURADA NO RENDER!")
+    raise Exception("❌ VARIÁVEL MONGO_URI NÃO CONFIGURADA!")
 if not MP_ACCESS_TOKEN:
-    raise Exception("❌ VARIÁVEL MP_ACCESS_TOKEN NÃO CONFIGURADA NO RENDER!")
+    raise Exception("❌ VARIÁVEL MP_ACCESS_TOKEN NÃO CONFIGURADA!")
 
 # ==============================================
-# NÃO MEXE DAQUI PRA BAIXO
+# CONEXÃO BANCO
 # ==============================================
-
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
-# CONEXÃO COM BANCO
 try:
     client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
     db = client.flow
     grupos_col = db.grupos
     codigos_col = db.codigos_vip
-    print("✅ CONECTADO AO MONGODB COM SUCESSO!")
+    print("✅ CONECTADO AO MONGODB!")
 except Exception as e:
-    print(f"❌ ERRO AO CONECTAR NO BANCO: {e}")
+    print(f"❌ ERRO BANCO: {e}")
     raise
 
-# ✅ CÓDIGO VIP VÁLIDO?
+# ✅ CORRIGIDO: ACEITA CÓDIGO DAS VARIÁVEIS + DO BANCO!
 def codigo_valido(codigo):
     if not codigo:
         return False
+    codigo = codigo.strip()
+    # ✅ ACEITA CHAVE_ADM OU SECRET_KEY DIRETO DO RENDER!
+    if codigo == CHAVE_ADM or codigo == SECRET_KEY:
+        return True
+    # ✅ TAMBÉM ACEITA CÓDIGOS CADASTRADOS NO BANCO!
     return codigos_col.find_one({"codigo": codigo, "usado": False}) is not None
 
-# ✅ MARCA CÓDIGO COMO USADO
+# ✅ NÃO MARCA CHAVE_ADM/SECRET_KEY COMO USADA (PODE USAR VÁRIAS VEZES!)
 def marcar_codigo_usado(codigo):
+    codigo = codigo.strip()
+    if codigo == CHAVE_ADM or codigo == SECRET_KEY:
+        return  # ✅ NÃO MARCA COMO USADO! FUNCIONA SEMPRE!
     codigos_col.update_one(
         {"codigo": codigo},
-        {"$set": {"usado": True, "usado_em": datetime.now(UTC)}}  # ✅ Data corrigida
+        {"$set": {"usado": True, "usado_em": datetime.now(UTC)}}
     )
 
 # ✅ GERA PIX
@@ -75,9 +81,9 @@ def gerar_pix(valor, descricao):
     except Exception as e:
         return {"erro": str(e)}
 
-# ✅ SALVA GRUPO NO BANCO
+# ✅ SALVA GRUPO
 def salvar_grupo(dados, dias_vip):
-    expira_em = datetime.now(UTC) + timedelta(days=dias_vip)  # ✅ Data corrigida
+    expira_em = datetime.now(UTC) + timedelta(days=dias_vip)
     grupo = {
         "link": dados["link"],
         "nome": dados["nome"],
@@ -86,7 +92,7 @@ def salvar_grupo(dados, dias_vip):
         "dias_vip": dias_vip,
         "expira_em": expira_em,
         "cliques": 0,
-        "criado_em": datetime.now(UTC),  # ✅ Data corrigida
+        "criado_em": datetime.now(UTC),
         "ativo": True
     }
     return grupos_col.insert_one(grupo)
@@ -94,7 +100,7 @@ def salvar_grupo(dados, dias_vip):
 # 🌐 PÁGINA PRINCIPAL
 @app.route("/")
 def index():
-    agora = datetime.now(UTC)  # ✅ Data corrigida
+    agora = datetime.now(UTC)
     lista = list(grupos_col.find({
         "ativo": True,
         "expira_em": {"$gte": agora}
@@ -104,7 +110,7 @@ def index():
         g["_id"] = str(g["_id"])
     return render_template("index.html", grupos=lista)
 
-# 📤 ENVIAR GRUPO → SÓ GERA PIX, NÃO SALVA ANTES DE PAGAR!
+# 📤 ENVIAR GRUPO
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     link = request.form.get("link", "").strip()
@@ -118,14 +124,14 @@ def enviar_grupo():
     if not link.startswith("https://chat.whatsapp.com/"):
         return jsonify({"erro": "Link inválido! Use link do WhatsApp"})
 
-    # ✅ CÓDIGO VIP → SALVA DIRETO GRÁTIS
+    # ✅ CÓDIGO ACEITO → SALVA DIRETO GRÁTIS!
     if codigo_adm and codigo_valido(codigo_adm):
         dias = 1 if plano == "5" else 2
         salvar_grupo({"link": link, "nome": nome, "foto": foto}, dias)
         marcar_codigo_usado(codigo_adm)
         return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS! Ativado!"})
 
-    # ✅ SEM CÓDIGO → GERA PIX, NÃO SALVA NADA AINDA
+    # ✅ SEM CÓDIGO OU INVÁLIDO → GERA PIX
     valor = 5.00 if plano == "5" else 10.00
     dias = 1 if plano == "5" else 2
     pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
@@ -143,10 +149,10 @@ def enviar_grupo():
         "foto_grupo": foto
     })
 
-# 📋 JSON DOS GRUPOS
+# 📋 JSON GRUPOS
 @app.route("/grupos-dados")
 def grupos_dados():
-    agora = datetime.now(UTC)  # ✅ Data corrigida
+    agora = datetime.now(UTC)
     lista = list(grupos_col.find({
         "ativo": True,
         "expira_em": {"$gte": agora}
