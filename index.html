@@ -743,9 +743,15 @@ async function admVerDenuncias() {
         const res = await fetch(`${API_URL}/adm/denuncias`, {
             headers: { "X-Adm-Senha": senhaAdm }
         });
-        if(res.status === 403) { cont.innerHTML = "<p style='color:red;'>❌ SENHA ERRADA!</p>"; return; }
+        if(res.status === 403) { 
+            cont.innerHTML = "<p style='color:red;'>❌ SENHA ERRADA!</p>"; 
+            return; 
+        }
         const den = await res.json();
-        if(!den.length) { cont.innerHTML = "<p>✅ Sem denúncias novas</p>"; return; }
+        if(!den.length) { 
+            cont.innerHTML = "<p>✅ Sem denúncias novas</p>"; 
+            return; 
+        }
         cont.innerHTML = den.map(d => `
             <div class="painel-adm-item">
                 <b>Grupo: ${d.grupo_nome || d.grupo_id}</b><br>
@@ -753,4 +759,31 @@ async function admVerDenuncias() {
                 Data: ${new Date(d.data).toLocaleString('pt-BR')}
             </div>
         `).join("");
-    } catch(e
+    } catch(e) { 
+        cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
+    }
+}
+
+// ✅ FUNÇÃO DESATIVAR GRUPO
+async function admDesativar(id) {
+    if(!confirm("Tem certeza que quer DESATIVAR este grupo?")) return;
+    try {
+        const res = await fetch(`${API_URL}/adm/desativar/${id}`, {
+            method: "POST",
+            headers: { "X-Adm-Senha": senhaAdm }
+        });
+        const dados = await res.json();
+        if(dados.erro) { alert(dados.erro); return; }
+        alert("✅ Desativado!");
+        admVerGrupos(); // Recarrega lista
+    } catch(e) { alert("❌ Erro: " + e.message); }
+}
+
+// ✅ CARREGA GRUPOS AO ABRIR A PÁGINA
+document.addEventListener("DOMContentLoaded", function() {
+    carregarGrupos();
+});
+
+</script>
+</body>
+</html>
