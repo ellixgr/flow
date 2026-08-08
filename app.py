@@ -23,7 +23,7 @@ CORS(app, resources={r"/*": {"origins": [
 def liberar_cors(resposta):
     resposta.headers["Access-Control-Allow-Origin"] = "*"
     resposta.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    resposta.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Usuario-ID"
+    resposta.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Usuario-ID, X-Adm-Senha"
     return resposta
 
 # ==============================================
@@ -77,16 +77,14 @@ def comprimir_foto(base64_imagem, largura_max=300):
         print("Erro comprimir:", e)
         return None
 
-# ✅ CÓDIGO VIP — CORRIGIDO
+# ✅ CÓDIGO VIP — VALIDAÇÃO CORRIGIDA
 def codigo_valido(codigo):
     if not codigo or len(codigo.strip()) < 2:
         return False
     codigo = codigo.strip().upper()
-    # Tenta código EXATO primeiro
     res = codigos_col.find_one({"codigo": codigo, "usado": False})
     if res:
         return True
-    # Tenta sem diferenciar maiúsculas/minúsculas
     res = codigos_col.find_one({"codigo": {"$regex": f"^{codigo}$", "$options": "i"}, "usado": False})
     return res is not None
 
@@ -142,7 +140,6 @@ def salvar_grupo(dados, dias_vip, usuario_id):
 def index():
     return render_template("index.html", categorias=CATEGORIAS)
 
-# ✅ CORRIGIDA — ERRO NA RESPOSTA TAVA AQUI!
 @app.route("/grupos-dados")
 def grupos_dados():
     try:
@@ -162,7 +159,7 @@ def grupos_dados():
         print("ERRO grupos-dados:", e)
         return jsonify({"erro": str(e)}), 500
 
-# ✅ CORRIGIDA — ENVIAR GRUPO
+# ✅ ENVIAR GRUPO — SE CÓDIGO FOR VÁLIDO → SALVA DIRETO SEM PIX
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -188,33 +185,84 @@ def enviar_grupo():
                 foto_final = comprimida
 
         dados_grupo = {"link": link, "nome": nome, "foto": foto_final, "categoria": categoria}
+        dias = 1 if plano == "5" else 2
 
-        # ✅ SE CÓDIGO FOR VÁLIDO → SALVA DIRETO, SEM GERAR PIX!
+        # ✅ CÓDIGO VÁLIDO → SALVA DIRETO, SEM PIX!
         if codigo_adm and codigo_valido(codigo_adm):
-            dias = 1 if plano == "5" else 2
             salvar_grupo(dados_grupo, dias, usuario_id)
             marcar_codigo_usado(codigo_adm)
-            return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS!", "usuario_id": usuario_id})
+            return jsonify({"sucesso": "✅ Grupo enviado com CÓDIGO! Sem PIX!", "sem_pix": True})
 
-        # ❌ SEM CÓDIGO VÁLIDO → GERA PIX
+        # ❌ SEM CÓDIGO → GERA PIX
         valor = 5.00 if plano == "5" else 10.00
-        dias = 1 if plano == "5" else 2
         pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
         if "erro" in pix:
             return jsonify({"erro": pix["erro"]})
-
         return jsonify({
-            "sucesso": "✅ PIX gerado! Pague e o grupo aparecerá!",
+            "sucesso": "PIX gerado!",
             "codigo_pix": pix["codigo_pix"],
-            "id_pagamento": pix["id_pagamento"],
-            "dias_vip": dias,
-            "dados_grupo": dados_grupo,
-            "usuario_id": usuario_id
+            "id_pagamento": pix["id_pagamento"]
         })
     except Exception as e:
         print("ERRO enviar-grupo:", e)
         return jsonify({"erro": str(e)}), 500
 
+# ✅ DENUNCIAR GRUPO
+@app.route("/denunciar/<grupo_id>", methods=["POST"])
+def denunciar(grupo_id):
+    try:
+        usuario_id = obter_usuario(request)
+        dados = request.get_json()
+        motivo = dados.get("motivo", "Não informado")
+        denuncias_col.insert_one({
+            "grupo_id": grupo_id,
+            "usuario_id": usuario_id,
+            "motivo": motivo,
+            "denunciado_em": datetime.utcnow(),
+            "lida": False
+        })
+        return jsonify({"sucesso": "✅ Denúncia enviada! Obrigado!"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+# ✅ PAINEL ADMINISTRATIVO
+@app.route("/adm/grupos", methods=["GET"])
+def adm_grupos():
+    if request.headers.get("X-Adm-Senha") != ADMIN_SENHA:
+        return jsonify({"erro": "Sem permissão"}), 403
+    lista = list(grupos_col.find().sort("criado_em", -1))
+    res = []
+    for g in lista:
+        g["_id"] = str(g["_id"])
+        res.append(g)
+    return jsonify(res)
+
+@app.route("/adm/desativar/<grupo_id>", methods=["POST"])
+def adm_desativar(grupo_id):
+    if request.headers.get("X-Adm-Senha") != ADMIN_SENHA:
+        return jsonify({"erro": "Sem permissão"}), 403
+    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ativo": False}})
+    return jsonify({"sucesso": "✅ Grupo desativado!"})
+
+@app.route("/adm/denuncias", methods=["GET"])
+def adm_denuncias():
+    if request.headers.get("X-Adm-Senha") != ADMIN_SENHA:
+        return jsonify({"erro": "Sem permissão"}), 403
+    lista = list(denuncias_col.find({"lida": False}).sort("denunciado_em", -1))
+    res = []
+    for d in lista:
+        d["_id"] = str(d["_id"])
+        res.append(d)
+    return jsonify(res)
+
+@app.route("/adm/marcar-lida/<denuncia_id>", methods=["POST"])
+def adm_marcar_lida(denuncia_id):
+    if request.headers.get("X-Adm-Senha") != ADMIN_SENHA:
+        return jsonify({"erro": "Sem permissão"}), 403
+    denuncias_col.update_one({"_id": ObjectId(denuncia_id)}, {"$set": {"lida": True}})
+    return jsonify({"sucesso": "✅ Denúncia marcada como lida!"})
+
+# RESTO DAS ROTAS
 @app.route("/meus-grupos")
 def meus_grupos():
     try:
