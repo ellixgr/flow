@@ -8,7 +8,7 @@ import os
 
 app = Flask(__name__)
 
-# ✅ CORS LIBERADO TOTALMENTE PARA SEU SITE
+# ✅ CORS LIBERADO COMPLETAMENTE
 CORS(app, resources={r"/*": {
     "origins": [
         "https://ellixgr.github.io",
@@ -16,8 +16,16 @@ CORS(app, resources={r"/*": {
         "https://ellixgr.github.io/flow/"
     ],
     "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    "allow_headers": ["Content-Type", "X-Usuario-ID"]
+    "allow_headers": ["Content-Type", "X-Usuario-ID"],
+    "expose_headers": ["Content-Type"],
+    "supports_credentials": True
 }})
+
+# ✅ RESPOSTA AUTOMÁTICA PARA OPTIONS (obrigatório pro navegador)
+@app.before_request
+def tratar_options():
+    if request.method == "OPTIONS":
+        return "", 200
 
 # ==============================================
 # 🔑 VARIÁVEIS DO RENDER
@@ -168,12 +176,12 @@ def enviar_grupo():
     })
 
 # ==============================================
-# 👤 MEUS GRUPOS — ✅ CORRIGIDA E FUNCIONANDO
+# 👤 MEUS GRUPOS
 # ==============================================
-@app.route("/meus-grupos", methods=["GET", "OPTIONS"])
+@app.route("/meus-grupos", methods=["GET"])
 def meus_grupos():
     usuario_id = request.headers.get("X-Usuario-ID", "").strip()
-    print(f"📤 Requisição /meus-grupos de: {usuario_id}")  # Log pra debug
+    print(f"📤 Requisição /meus-grupos de: {usuario_id}")
     if not usuario_id:
         return jsonify({"erro": "Sem identificador"}), 400
     agora = datetime.now(UTC)
@@ -190,7 +198,7 @@ def meus_grupos():
 # ==============================================
 # 🚀 IMPULSIONAR GRÁTIS
 # ==============================================
-@app.route("/impulsionar/<grupo_id>", methods=["POST", "OPTIONS"])
+@app.route("/impulsionar/<grupo_id>", methods=["POST"])
 def impulsionar(grupo_id):
     usuario_id = request.headers.get("X-Usuario-ID", "").strip()
     if not usuario_id:
@@ -212,7 +220,7 @@ def impulsionar(grupo_id):
 # ==============================================
 # 🗑️ APAGAR MEU GRUPO
 # ==============================================
-@app.route("/apagar-meu-grupo/<grupo_id>", methods=["POST", "OPTIONS"])
+@app.route("/apagar-meu-grupo/<grupo_id>", methods=["POST"])
 def apagar_meu_grupo(grupo_id):
     usuario_id = request.headers.get("X-Usuario-ID", "").strip()
     res = grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": usuario_id})
@@ -257,26 +265,34 @@ def admin_denuncias():
     return jsonify(lista)
 
 # ==============================================
-# 🚩 DENUNCIAR
+# 🚩 DENUNCIAR — ✅ CORRIGIDA!
 # ==============================================
-@app.route("/denunciar/<grupo_id>", methods=["POST", "OPTIONS"])
+@app.route("/denunciar/<grupo_id>", methods=["POST"])
 def denunciar(grupo_id):
-    dados = request.get_json() or {}
-    motivo = dados.get("motivo", "outro")
-    outros = dados.get("outros_motivos", "").strip()
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"denuncias": 1}})
-    denuncias_col.insert_one({
-        "grupo_id": grupo_id,
-        "motivo": motivo,
-        "outros_motivos": outros,
-        "data": datetime.now(UTC)
-    })
-    return jsonify({"sucesso": "✅ Denúncia enviada!"})
+    try:
+        dados = request.get_json(force=True, silent=True) or {}
+        motivo = dados.get("motivo", "outro")
+        outros = dados.get("outros_motivos", "").strip()
+        
+        # ✅ INCREMENTA CONTAGEM DE DENÚNCIAS
+        grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"denuncias": 1}})
+        
+        # ✅ SALVA DENÚNCIA COMPLETA
+        denuncias_col.insert_one({
+            "grupo_id": grupo_id,
+            "motivo": motivo,
+            "outros_motivos": outros,
+            "data": datetime.now(UTC)
+        })
+        return jsonify({"sucesso": "Denúncia enviada com sucesso!"})
+    except Exception as e:
+        print(f"❌ ERRO DENÚNCIA: {e}")
+        return jsonify({"erro": str(e)}), 500
 
 # ==============================================
 # 👆 CLIQUES
 # ==============================================
-@app.route("/clicar/<grupo_id>", methods=["POST", "OPTIONS"])
+@app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
     return jsonify({"ok": True})
