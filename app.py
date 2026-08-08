@@ -18,7 +18,8 @@ grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 
 CODIGO_VIP_SECRETO = os.getenv("HAVE_ADM", "labareta444")
-SENHA_ADM = "admin123"
+# ✅ SENHA AGORA VEM DO RENDER — NÃO FICA NO GIT!
+SENHA_ADM = os.getenv("SENHA_ADM", "admin123")
 
 @app.route("/")
 def index():
@@ -47,7 +48,6 @@ def clicar(grupo_id):
     
     try:
         chave_clique = f"clique:{uid}:{grupo_id}"
-        # ✅ NÃO TRAVA MAIS SE a coleção não existir
         ja_contado = db.cliques.find_one({"_id": chave_clique})
         if ja_contado:
             return jsonify({"sucesso": "Contado anteriormente"})
@@ -55,7 +55,6 @@ def clicar(grupo_id):
         grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
         return jsonify({"sucesso": True})
     except Exception as e:
-        # ✅ Se der erro, pelo menos o site NÃO TRAVA
         grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
         return jsonify({"sucesso": True, "aviso": "Clique contado"})
 
@@ -126,23 +125,30 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": "✅ Denunciado!"})
 
+def verificar_senha_adm():
+    senha_recebida = (request.headers.get("X-Adm-Senha") or "").strip()
+    return senha_recebida == SENHA_ADM
+
 @app.route("/adm/grupos")
 def adm_grupos():
-    if request.headers.get("X-Adm-Senha") != SENHA_ADM: return jsonify({}), 403
+    if not verificar_senha_adm():
+        return jsonify({"erro": "SENHA ERRADA"}), 403
     todos = list(grupos_col.find().sort("criado_em", -1))
     for g in todos: g["_id"] = str(g["_id"]); g["ativo"] = g.get("ativo", True)
     return jsonify(todos)
 
 @app.route("/adm/denuncias")
 def adm_denuncias():
-    if request.headers.get("X-Adm-Senha") != SENHA_ADM: return jsonify({}), 403
+    if not verificar_senha_adm():
+        return jsonify({"erro": "SENHA ERRADA"}), 403
     den = list(denuncias_col.find({"lida": False}).sort("denunciado_em", -1))
     for d in den: d["_id"] = str(d["_id"])
     return jsonify(den)
 
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
-    if request.headers.get("X-Adm-Senha") != SENHA_ADM: return jsonify({}), 403
+    if not verificar_senha_adm():
+        return jsonify({"erro": "SENHA ERRADA"}), 403
     if not ObjectId.is_valid(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ativo": False}})
@@ -150,7 +156,8 @@ def adm_desativar(grupo_id):
 
 @app.route("/adm/marcar-lida/<denuncia_id>", methods=["POST"])
 def adm_marcar_lida(denuncia_id):
-    if request.headers.get("X-Adm-Senha") != SENHA_ADM: return jsonify({}), 403
+    if not verificar_senha_adm():
+        return jsonify({"erro": "SENHA ERRADA"}), 403
     if not ObjectId.is_valid(denuncia_id):
         return jsonify({"erro": "ID inválido"}), 400
     denuncias_col.update_one({"_id": ObjectId(denuncia_id)}, {"$set": {"lida": True}})
