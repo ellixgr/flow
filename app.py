@@ -27,6 +27,7 @@ TEMPO_VIP = timedelta(hours=24)
 def index():
     return render_template("index.html")
 
+# ✅ CORRIGIDA: SEMPRE RETORNA LISTA, NÃO OBJETO DE ERRO
 @app.route("/grupos-dados")
 def grupos_dados():
     try:
@@ -44,8 +45,13 @@ def grupos_dados():
         agora = datetime.utcnow()
         for g in grupos:
             g["_id"] = str(g["_id"])
-            if g.get("vip_ate") and agora > g["vip_ate"]:
-                g["vip"] = False
+            # ✅ Define vip_ativo corretamente
+            if g.get("vip_ate") and agora < g["vip_ate"]:
+                g["vip_ativo"] = True
+            else:
+                g["vip_ativo"] = False
+                g["vip"] = False  # Garante que está desativado
+            
             ultimo = g.get("ultimo_impulso")
             if ultimo:
                 proximo = ultimo + TEMPO_IMPULSIONAR
@@ -54,18 +60,17 @@ def grupos_dados():
             else:
                 g["pode_impulsionar"] = True
                 g["tempo_restante_impulso"] = 0
+            
             vip_ate = g.get("vip_ate")
             if vip_ate:
                 g["tempo_restante_vip"] = int((vip_ate - agora).total_seconds())
-                g["vip_ativo"] = agora < vip_ate
             else:
                 g["tempo_restante_vip"] = 0
-                g["vip_ativo"] = False
         
         return jsonify(grupos)
     except Exception as e:
         print("ERRO grupos-dados:", str(e))
-        return jsonify({"erro": str(e)}), 500
+        return jsonify([]), 200  # ✅ RETORNA LISTA VAZIA, NÃO OBJETO!
 
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
@@ -138,19 +143,27 @@ def enviar_grupo():
         print("ERRO enviar-grupo:", str(e))
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
+# ✅ CORRIGIDA: SEMPRE RETORNA LISTA + vip_ativo
 @app.route("/meus-grupos")
 def meus_grupos():
     uid = request.headers.get("X-Usuario-ID", "")
     if not uid:
-        return jsonify({"erro": "Sem identificador"}), 400
+        return jsonify([]), 200  # ✅ NÃO RETORNA OBJETO DE ERRO!
     try:
         agora = datetime.utcnow()
         grupos = list(grupos_col.find({"usuario_id": uid}).sort("ultimo_impulso", -1))
         
         for g in grupos:
             g["_id"] = str(g["_id"])
-            if g.get("vip_ate") and agora > g["vip_ate"]:
+            # ✅ Define vip_ativo IGUAL ao frontend
+            if g.get("vip_ate") and agora < g["vip_ate"]:
+                g["vip_ativo"] = True
+                g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
+            else:
+                g["vip_ativo"] = False
+                g["vip_restante_segundos"] = 0
                 g["vip"] = False
+
             ultimo = g.get("ultimo_impulso")
             if ultimo:
                 proximo = ultimo + TEMPO_IMPULSIONAR
@@ -159,15 +172,11 @@ def meus_grupos():
                     g["proximo_impulso_segundos"] = int((proximo - agora).total_seconds())
             else:
                 g["pode_impulsionar"] = True
-            if g.get("vip_ate") and g.get("vip", False):
-                g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
-            else:
-                g["vip_restante_segundos"] = 0
         
         return jsonify(grupos)
     except Exception as e:
         print("ERRO meus-grupos:", str(e))
-        return jsonify({"erro": str(e)}), 500
+        return jsonify([]), 200  # ✅ EM ERRO, RETORNA []
 
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
 def impulsionar(grupo_id):
@@ -194,7 +203,6 @@ def impulsionar(grupo_id):
     )
     return jsonify({"sucesso": "✅ Impulsionado! ⬆️ Grupo foi pro TOPO!"})
 
-# ✅ ROTA IMPULSIONAR VIP — CORRIGIDA PARA O FRONTEND
 @app.route("/impulsionar-vip/<grupo_id>", methods=["POST"])
 def impulsionar_vip(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
