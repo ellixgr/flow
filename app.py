@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS  # ✅ ADICIONADO: Resolve o erro de conexão!
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import mercadopago
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC  # ✅ Corrige o aviso de data
 import os
 
 app = Flask(__name__)
+CORS(app)  # ✅ LIBERA ACESSO DO SEU SITE (resolve o "Erro de conexão")
 
 # ==============================================
 # 🔑 PEGA EXCLUSIVAMENTE DAS VARIÁVEIS DO RENDER
@@ -45,7 +47,10 @@ def codigo_valido(codigo):
 
 # ✅ MARCA CÓDIGO COMO USADO
 def marcar_codigo_usado(codigo):
-    codigos_col.update_one({"codigo": codigo}, {"$set": {"usado": True, "usado_em": datetime.utcnow()}})
+    codigos_col.update_one(
+        {"codigo": codigo},
+        {"$set": {"usado": True, "usado_em": datetime.now(UTC)}}  # ✅ Data corrigida
+    )
 
 # ✅ GERA PIX
 def gerar_pix(valor, descricao):
@@ -72,7 +77,7 @@ def gerar_pix(valor, descricao):
 
 # ✅ SALVA GRUPO NO BANCO
 def salvar_grupo(dados, dias_vip):
-    expira_em = datetime.utcnow() + timedelta(days=dias_vip)
+    expira_em = datetime.now(UTC) + timedelta(days=dias_vip)  # ✅ Data corrigida
     grupo = {
         "link": dados["link"],
         "nome": dados["nome"],
@@ -81,7 +86,7 @@ def salvar_grupo(dados, dias_vip):
         "dias_vip": dias_vip,
         "expira_em": expira_em,
         "cliques": 0,
-        "criado_em": datetime.utcnow(),
+        "criado_em": datetime.now(UTC),  # ✅ Data corrigida
         "ativo": True
     }
     return grupos_col.insert_one(grupo)
@@ -89,7 +94,7 @@ def salvar_grupo(dados, dias_vip):
 # 🌐 PÁGINA PRINCIPAL
 @app.route("/")
 def index():
-    agora = datetime.utcnow()
+    agora = datetime.now(UTC)  # ✅ Data corrigida
     lista = list(grupos_col.find({
         "ativo": True,
         "expira_em": {"$gte": agora}
@@ -141,7 +146,7 @@ def enviar_grupo():
 # 📋 JSON DOS GRUPOS
 @app.route("/grupos-dados")
 def grupos_dados():
-    agora = datetime.utcnow()
+    agora = datetime.now(UTC)  # ✅ Data corrigida
     lista = list(grupos_col.find({
         "ativo": True,
         "expira_em": {"$gte": agora}
