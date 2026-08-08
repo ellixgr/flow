@@ -202,6 +202,7 @@
     <a href="#" class="btn-adm" onclick="abrirPainelAdm(); return false;">⚙️</a>
 </footer>
 
+<!-- FORM ENVIAR GRUPO -->
 <div id="formModal" class="modal" onclick="fecharFormulario()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📤 Enviar Grupo</h2>
@@ -238,6 +239,7 @@
     </div>
 </div>
 
+<!-- MEUS GRUPOS -->
 <div id="meusModal" class="modal" onclick="fecharMeusGrupos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>👤 Meus Grupos</h2>
@@ -246,6 +248,28 @@
     </div>
 </div>
 
+<!-- ✅ DENÚNCIA — FALTAVA ISSO! -->
+<div id="denunciaModal" class="modal" onclick="fecharDenuncia()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>🚩 Denunciar Grupo</h2>
+        <label>Motivo da Denúncia:</label>
+        <select id="selMotivo" onchange="trocarMotivo()">
+            <option value="link_invalido">🔗 Link inválido / Não funciona</option>
+            <option value="conteudo_improprio">⚠️ Conteúdo impróprio</option>
+            <option value="spam">📧 Spam / Divulgação abusiva</option>
+            <option value="outro">❌ Outro motivo</option>
+        </select>
+        <div id="divOutroMotivo" class="outro-motivo">
+            <label>Escreva o motivo:</label>
+            <input type="text" id="inpOutroMotivo" placeholder="Descreva o motivo">
+        </div>
+        <div id="respDenuncia" style="margin-top:15px;"></div>
+        <button class="btn-enviar" onclick="enviarDenuncia()">🚩 ENVIAR DENÚNCIA</button>
+        <button class="btn-cancelar" onclick="fecharDenuncia()">❌ CANCELAR</button>
+    </div>
+</div>
+
+<!-- PRIVACIDADE -->
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
@@ -259,6 +283,7 @@
     </div>
 </div>
 
+<!-- TERMOS -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
@@ -271,6 +296,7 @@
     </div>
 </div>
 
+<!-- PAINEL ADM -->
 <div id="admModal" class="modal" onclick="fecharPainelAdm()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔐 Painel Administrativo</h2>
@@ -355,7 +381,8 @@ async function registrarClique(grupoId){
     }catch(e){}
 }
 
-async function abrirDenuncia(grupoId){
+// ✅ DENÚNCIA — AGORA FUNCIONA!
+function abrirDenuncia(grupoId){
     grupoDenunciadoId = grupoId;
     document.getElementById("denunciaModal").style.display="flex";
     document.getElementById("respDenuncia").innerHTML="";
@@ -382,7 +409,7 @@ async function enviarDenuncia(){
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({motivo, outros_motivos: outros})
         });
-        respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ ${res.sucesso}</span>`;
+        respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ Denunciado!</span>`;
         if(!res.erro) setTimeout(fecharDenuncia, 1500);
     } catch(erro) { 
         respDiv.innerHTML = `<span class="erro">❌ ${erro.message}</span>`;
@@ -404,7 +431,6 @@ async function abrirMeusGrupos(){
             if(g.pode_impulsionar){
                 botaoImpulsar=`<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
             }else{
-                const prox=new Date(g.proximo_impulso);
                 cron=`<div style="font-size:11px; color:#ffd700; margin-top:4px;">⏰ Aguarde 1h</div>`;
                 botaoImpulsar=`<button class="btn-impulsionar" disabled>⏳ Em espera</button>`;
             }
