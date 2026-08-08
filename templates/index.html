@@ -1,7 +1,19 @@
-<!-- ... (todo o resto do HTML continua IGUAL) ... -->
-
 <script>
 const API_URL = window.location.origin;
+
+// ✅ CAIXA DE AVISO PERSONALIZADA
+function mostrarCaixa(titulo, texto, tipo = "sucesso") {
+    const cor = tipo === "sucesso" ? "#4ade80" : "#f87171";
+    const fundo = document.createElement("div");
+    fundo.style = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;z-index:9999;`;
+    fundo.innerHTML = `
+        <div style="background:#2a2a2a;padding:30px 25px;border-radius:14px;max-width:320px;width:90%;text-align:center;box-shadow:0 0 30px rgba(0,0,0,0.6);border:1px solid #444;">
+            <h3 style="color:${cor};margin-bottom:12px;">${titulo}</h3>
+            <p style="color:#ddd;margin-bottom:20px;font-size:15px;">${texto}</p>
+            <button onclick="this.closest('div[style]').parentElement.remove()" style="background:#22c55e;color:white;border:none;padding:10px 25px;border-radius:8px;font-weight:bold;cursor:pointer;">OK</button>
+        </div>`;
+    document.body.appendChild(fundo);
+}
 
 // CARREGA GRUPOS
 async function carregarGrupos() {
@@ -37,13 +49,14 @@ function renderizarGrupos(grupos) {
     });
 }
 
-// ENVIAR GRUPO — AGORA SÓ GERA PIX, NÃO SALVA ANTES DE PAGAR!
+// ✅ ENVIAR GRUPO — COM TODAS AS REGRAS!
 async function enviarGrupo() {
     const respDiv = document.getElementById('respForm');
     const areaPix = document.getElementById('areaPix');
     const campoPix = document.getElementById('codigoPix');
-    
-    respDiv.innerHTML = '<span style="color:blue">⏳ Gerando...</span>';
+    const btnEnviar = document.querySelector('button[onclick="enviarGrupo()"]'); // BOTÃO ENVIAR
+
+    respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
     areaPix.style.display = 'none';
 
     const dados = new URLSearchParams({
@@ -62,13 +75,47 @@ async function enviarGrupo() {
         });
         const res = await resp.json();
 
+        // ❌ CÓDIGO INVÁLIDO
         if (res.erro) {
             respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-        } else if (res.codigo_pix) {
-            // ✅ PIX GERADO — MOSTRA NA TELA!
+            if (res.erro.includes("inválido") || res.erro.includes("Código")) {
+                mostrarCaixa("❌ Código Inválido", "Esse código VIP não existe ou já foi usado!", "erro");
+            }
+            return;
+        }
+
+        // ✅ CÓDIGO VIP CERTO → SALVA DIRETO
+        if (res.sucesso && !res.codigo_pix) {
+            respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+            mostrarCaixa("✅ Grupo Enviado!", "Seu grupo foi salvo com sucesso! Aparecerá em breve na lista!");
+            setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
+            return;
+        }
+
+        // ✅ SEM CÓDIGO → GERA PIX + ESCONDE BOTÃO ENVIAR
+        if (res.codigo_pix) {
             respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
             campoPix.value = res.codigo_pix;
             areaPix.style.display = 'block';
+            
+            // ✅ ESCONDE O BOTÃO ENVIAR
+            if (btnEnviar) btnEnviar.style.display = 'none';
+
+            // ✅ MOSTRA VALOR E VALIDADE
+            const valorTexto = res.dias_vip === 1 ? "R$ 5,00" : "R$ 10,00";
+            const diasTexto = res.dias_vip === 1 ? "1 Dia" : "2 Dias";
+            respDiv.innerHTML += `<div style="margin-top:10px; font-size:14px; color:#94e2d5;">💰 Valor: ${valorTexto} | ⏳ Válido por: ${diasTexto}</div>`;
+
+            // ✅ BOTÃO COPIAR PIX COM CAIXA PERSONALIZADA
+            const btnCopiar = document.createElement("button");
+            btnCopiar.textContent = "📋 COPIAR CÓDIGO PIX";
+            btnCopiar.style = "margin-top:12px; padding:10px 15px; background:#2563eb; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; width:100%;";
+            btnCopiar.onclick = async () => {
+                await navigator.clipboard.writeText(res.codigo_pix);
+                mostrarCaixa("✅ Código Copiado!", "Agora é só colar no app do seu banco e pagar!");
+            };
+            areaPix.appendChild(btnCopiar);
+
             // SALVA DADOS TEMPORARIOS PRA QUANDO PAGAR
             window.dadosGrupoPendente = {
                 link: res.link_grupo,
@@ -77,17 +124,12 @@ async function enviarGrupo() {
                 dias: res.dias_vip,
                 idPagamento: res.id_pagamento
             };
-        } else if (res.sucesso) {
-            // ✅ CÓDIGO VIP USADO — SALVO DIRETO
-            respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
-            setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
         }
+
     } catch (e) {
         respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
     }
 }
-
-// ... (resto das funções IGUAL) ...
 
 // CARREGA AO ABRIR
 carregarGrupos();
