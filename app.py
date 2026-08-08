@@ -43,7 +43,7 @@ def grupos_dados():
             ("criado_em", -1)
         ]))
         
-now()
+        agora = datetime.utcnow()
         for g in grupos:
             g["_id"] = str(g["_id"])
             # Verifica se VIP expirou
@@ -54,14 +54,14 @@ now()
             if ultimo:
                 proximo = ultimo + TEMPO_IMPULSIONAR
                 g["pode_impulsionar"] = agora >= proximo
-                g["tempo_restante_impulso"] = (proximo - agora).total_seconds() if not g["pode_impulsionar"] else 0
+                g["tempo_restante_impulso"] = int((proximo - agora).total_seconds()) if not g["pode_impulsionar"] else 0
             else:
                 g["pode_impulsionar"] = True
                 g["tempo_restante_impulso"] = 0
             # Tempo restante VIP
             vip_ate = g.get("vip_ate")
             if vip_ate:
-                g["tempo_restante_vip"] = (vip_ate - agora).total_seconds()
+                g["tempo_restante_vip"] = int((vip_ate - agora).total_seconds())
                 g["vip_ativo"] = agora < vip_ate
             else:
                 g["tempo_restante_vip"] = 0
@@ -74,7 +74,8 @@ now()
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
-    if not uid: return jsonify({"erro": "Sem ID"}), 400
+    if not uid:
+        return jsonify({"erro": "Sem ID"}), 400
     if not ObjectId.is_valid(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     
@@ -175,7 +176,8 @@ def impulsionar(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     
     grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    if not grupo: return jsonify({"erro": "Não encontrado"}), 404
+    if not grupo:
+        return jsonify({"erro": "Não encontrado"}), 404
     
     # ⏰ VERIFICA 3 HORAS
     ultimo = grupo.get("ultimo_impulso")
@@ -202,7 +204,8 @@ def impulsionar_vip(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     
     grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    if not grupo: return jsonify({"erro": "Não encontrado"}), 404
+    if not grupo:
+        return jsonify({"erro": "Não encontrado"}), 404
     
     # Se já tem VIP ativo → não deixa impulsionar de novo
     if grupo.get("vip_ate") and datetime.utcnow() < grupo["vip_ate"]:
@@ -266,7 +269,9 @@ def adm_grupos():
     if not verificar_senha_adm():
         return jsonify({"erro": "SENHA ERRADA"}), 403
     todos = list(grupos_col.find().sort("criado_em", -1))
-    for g in todos: g["_id"] = str(g["_id"]); g["ativo"] = g.get("ativo", True)
+    for g in todos:
+        g["_id"] = str(g["_id"])
+        g["ativo"] = g.get("ativo", True)
     return jsonify(todos)
 
 @app.route("/adm/denuncias")
@@ -274,7 +279,8 @@ def adm_denuncias():
     if not verificar_senha_adm():
         return jsonify({"erro": "SENHA ERRADA"}), 403
     den = list(denuncias_col.find({"lida": False}).sort("denunciado_em", -1))
-    for d in den: d["_id"] = str(d["_id"])
+    for d in den:
+        d["_id"] = str(d["_id"])
     return jsonify(den)
 
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
