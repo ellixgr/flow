@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
@@ -7,7 +7,15 @@ from datetime import datetime, timedelta, UTC
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# ✅ LIBERA ACESSO DO GITHUB PAGES — CORRIGIDO
+CORS(app, resources={r"/*": {
+    "origins": [
+        "https://ellixgr.github.io",
+        "https://ellixgr.github.io/flow",
+        "https://ellixgr.github.io/flow/"
+    ]
+}})
 
 # ==============================================
 # 🔑 VARIÁVEIS DO RENDER
@@ -19,6 +27,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 
 if not MONGO_URI: raise Exception("❌ MONGO_URI NÃO CONFIGURADA!")
 if not MP_ACCESS_TOKEN: raise Exception("❌ MP_ACCESS_TOKEN NÃO CONFIGURADA!")
+if not CHAVE_ADM: raise Exception("❌ CHAVE_ADM NÃO CONFIGURADA!")
 
 # ==============================================
 # CONEXÃO BANCO
@@ -76,7 +85,7 @@ def gerar_pix(valor, descricao):
 # ==============================================
 def salvar_grupo(dados, dias_vip, usuario_id):
     expira_em = datetime.now(UTC) + timedelta(days=dias_vip)
-    prox_impulso = datetime.now(UTC)  # PODE IMPULSIONAR AGORA
+    prox_impulso = datetime.now(UTC)
     grupo = {
         "usuario_id": usuario_id,
         "link": dados["link"],
@@ -99,7 +108,7 @@ def salvar_grupo(dados, dias_vip, usuario_id):
 # ==============================================
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return jsonify({"mensagem": "✅ Servidor FLOW ONLINE!"})
 
 @app.route("/grupos-dados")
 def grupos_dados():
@@ -122,139 +131,4 @@ def enviar_grupo():
     foto = request.form.get("foto", "").strip()
     plano = request.form.get("plano", "5")
     codigo_adm = request.form.get("codigo_adm", "").strip()
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
-
-    if not link or not nome: return jsonify({"erro": "Preencha link e nome!"})
-    if not link.startswith("https://chat.whatsapp.com/"):
-        return jsonify({"erro": "Link inválido! Use link do WhatsApp"})
-
-    # ✅ CÓDIGO VIP → GRÁTIS
-    if codigo_adm and codigo_valido(codigo_adm):
-        dias = 1 if plano == "5" else 2
-        salvar_grupo({"link":link,"nome":nome,"foto":foto,"categoria":categoria}, dias, usuario_id)
-        marcar_codigo_usado(codigo_adm)
-        return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS!", "sem_pix": True})
-
-    if codigo_adm:
-        return jsonify({"erro": "❌ Código VIP inválido!"})
-
-    # 💳 PIX
-    valor = 5.00 if plano == "5" else 10.00
-    dias = 1 if plano == "5" else 2
-    pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
-    if "erro" in pix: return jsonify(pix)
-    return jsonify({"sucesso": "✅ PIX gerado!", "codigo_pix": pix["codigo_pix"], "dias_vip": dias,
-                    "link_grupo": link, "nome_grupo": nome, "foto_grupo": foto, "usuario_id": usuario_id})
-
-# ==============================================
-# 👤 MEUS GRUPOS DO USUÁRIO
-# ==============================================
-@app.route("/meus-grupos", methods=["GET"])
-def meus_grupos():
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
-    if not usuario_id: return jsonify({"erro": "Sem identificador"}), 400
-    agora = datetime.now(UTC)
-    lista = list(grupos_col.find({"usuario_id": usuario_id, "ativo": True}).sort([("criado_em", -1)]))
-    for g in lista:
-        g["_id"] = str(g["_id"])
-        # ✅ VERIFICA SE AINDA É VIP
-        eh_vip = g.get("vip", False) and g.get("expira_em", agora) >= agora
-        g["vip"] = eh_vip
-        # ✅ PODE IMPULSIONAR?
-        prox = g.get("proximo_impulso", agora)
-        g["pode_impulsionar"] = not eh_vip or prox <= agora
-        g["proximo_impulso"] = prox.isoformat() if isinstance(prox, datetime) else None
-    return jsonify(lista)
-
-# ==============================================
-# 🚀 IMPULSIONAR GRÁTIS
-# ==============================================
-@app.route("/impulsionar/<grupo_id>", methods=["POST"])
-def impulsionar(grupo_id):
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
-    if not usuario_id: return jsonify({"erro": "Sem identificador"}), 400
-    agora = datetime.now(UTC)
-    grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": usuario_id})
-    if not grupo: return jsonify({"erro": "Grupo não encontrado!"})
-    # ⏰ VERIFICA COOLDOWN
-    prox = grupo.get("proximo_impulso", agora)
-    if prox > agora:
-        return jsonify({"erro": "⏳ Aguarde 24h para impulsionar de novo!"})
-    # ✅ IMPULSIONA = VIP POR 1 DIA
-    expira_em = agora + timedelta(days=1)
-    prox_impulso = agora + timedelta(days=1)
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {
-        "$set": {"vip": True, "expira_em": expira_em, "proximo_impulso": prox_impulso}
-    })
-    return jsonify({"sucesso": "✅ Impulsionado! Em destaque por 24h!"})
-
-# ==============================================
-# 🗑️ APAGAR MEU GRUPO
-# ==============================================
-@app.route("/apagar-meu-grupo/<grupo_id>", methods=["POST"])
-def apagar_meu_grupo(grupo_id):
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
-    res = grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": usuario_id})
-    if res.deleted_count == 0: return jsonify({"erro": "Não foi possível apagar!"})
-    return jsonify({"sucesso": "✅ Grupo apagado!"})
-
-# ==============================================
-# 🔐 PAINEL ADM — SENHA VERIFICADA ANTES DE TUDO!
-# ==============================================
-@app.route("/verificar-senha-adm", methods=["POST"])
-def verificar_senha_adm():
-    senha = request.form.get("senha", "").strip()
-    if senha_adm_valida(senha):
-        return jsonify({"sucesso": "✅ Senha correta!"})
-    return jsonify({"erro": "❌ Senha incorreta! Acesso NEGADO!"}), 403
-
-@app.route("/admin/grupos", methods=["GET"])
-def admin_grupos():
-    senha = request.args.get("senha", "").strip()
-    if not senha_adm_valida(senha):
-        return jsonify({"erro": "❌ Acesso negado!"}), 403
-    lista = list(grupos_col.find({}).sort([("criado_em", -1)]))
-    for g in lista: g["_id"] = str(g["_id"])
-    return jsonify(lista)
-
-@app.route("/admin/apagar-grupo/<grupo_id>", methods=["POST"])
-def admin_apagar_grupo(grupo_id):
-    senha = request.form.get("senha", "").strip()
-    if not senha_adm_valida(senha):
-        return jsonify({"erro": "❌ Acesso negado!"}), 403
-    grupos_col.delete_one({"_id": ObjectId(grupo_id)})
-    return jsonify({"sucesso": "✅ Grupo apagado!"})
-
-@app.route("/admin/denuncias", methods=["GET"])
-def admin_denuncias():
-    senha = request.args.get("senha", "").strip()
-    if not senha_adm_valida(senha):
-        return jsonify({"erro": "❌ Acesso negado!"}), 403
-    lista = list(denuncias_col.find({}).sort([("data", -1)]))
-    for d in lista: d["_id"] = str(d["_id"])
-    return jsonify(lista)
-
-# ==============================================
-# 🚩 DENUNCIAR
-# ==============================================
-@app.route("/denunciar/<grupo_id>", methods=["POST"])
-def denunciar(grupo_id):
-    dados = request.get_json() or {}
-    motivo = dados.get("motivo", "outro")
-    outros = dados.get("outros_motivos", "").strip()
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"denuncias": 1}})
-    denuncias_col.insert_one({
-        "grupo_id": grupo_id, "motivo": motivo, "outros_motivos": outros, "data": datetime.now(UTC)
-    })
-    return jsonify({"sucesso": "✅ Denúncia enviada!"})
-
-# ==============================================
-# 👆 CLIQUES
-# ==============================================
-@app.route("/clicar/<grupo_id>", methods=["POST"])
-def clicar(grupo_id):
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
-    return jsonify({"ok": True})
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    usuario_id = request.headers.get("X-Usuario-ID
