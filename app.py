@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})  # ✅ CORS LIBERADO
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
@@ -20,14 +20,13 @@ denuncias_col = db["denuncias"]
 # ✅ CONFIGURAÇÕES
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP", "labareta444")
 SENHA_ADM = os.getenv("SENHA_ADM", "admin123")
-TEMPO_IMPULSIONAR = timedelta(hours=3)    # ⏰ 3 HORAS
-TEMPO_VIP = timedelta(hours=24)           # ⏰ 24 HORAS VIP
+TEMPO_IMPULSIONAR = timedelta(hours=3)
+TEMPO_VIP = timedelta(hours=24)
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# ✅ GRUPOS ORDENADOS POR IMPULSO → VAI PRO TOPO!
 @app.route("/grupos-dados")
 def grupos_dados():
     try:
@@ -87,7 +86,6 @@ def clicar(grupo_id):
         grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
         return jsonify({"sucesso": True, "aviso": "Clique contado"})
 
-# ✅ VALIDA LINK COMPLETO + SEM REPETIÇÃO
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -112,9 +110,6 @@ def enviar_grupo():
         if existe:
             return jsonify({"erro": "❌ Esse link JÁ ESTÁ CADASTRADO!"}), 400
 
-        if codigo and codigo != CODIGO_VIP_SECRETO:
-            return jsonify({"erro": "❌ Código VIP INVÁLIDO"}), 400
-
         if codigo and codigo == CODIGO_VIP_SECRETO:
             agora = datetime.utcnow()
             novo_grupo = {
@@ -127,15 +122,22 @@ def enviar_grupo():
             grupos_col.insert_one(novo_grupo)
             return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS! VIP por 24h!", "sem_pix": True})
 
-        # ✅ PIX CORRIGIDO (com CRC válido)
+        # ✅ PIX GERADO
         codigo_pix = f"00020126580014br.gov.bcb.pix0104FLOW{os.urandom(7).hex().upper()}5204000053039865802BR5904FLOW6007RIO62070503***6304"
-        return jsonify({"codigo_pix": codigo_pix})
+        novo_grupo = {
+            "link": link, "nome": nome, "categoria": categoria, "foto": foto,
+            "usuario_id": uid, "cliques": 0, "ativo": True,
+            "vip": False, "vip_ate": None,
+            "ultimo_impulso": datetime.utcnow(),
+            "criado_em": datetime.utcnow()
+        }
+        grupos_col.insert_one(novo_grupo)
+        return jsonify({"codigo_pix": codigo_pix, "grupo_id": str(novo_grupo["_id"])})
     
     except Exception as e:
         print("ERRO enviar-grupo:", str(e))
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
-# ✅ MEUS GRUPOS
 @app.route("/meus-grupos")
 def meus_grupos():
     uid = request.headers.get("X-Usuario-ID", "")
@@ -167,7 +169,6 @@ def meus_grupos():
         print("ERRO meus-grupos:", str(e))
         return jsonify({"erro": str(e)}), 500
 
-# ✅ IMPULSIONAR GRÁTIS
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
 def impulsionar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
@@ -193,7 +194,7 @@ def impulsionar(grupo_id):
     )
     return jsonify({"sucesso": "✅ Impulsionado! ⬆️ Grupo foi pro TOPO!"})
 
-# ✅ IMPULSIONAR VIP
+# ✅ ROTA IMPULSIONAR VIP — CORRIGIDA PARA O FRONTEND
 @app.route("/impulsionar-vip/<grupo_id>", methods=["POST"])
 def impulsionar_vip(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
@@ -204,39 +205,11 @@ def impulsionar_vip(grupo_id):
     if not grupo:
         return jsonify({"erro": "Não encontrado"}), 404
     
-    if grupo.get("vip_ate") and datetime.utcnow() < grupo["vip_ate"]:
-        restante = int((grupo["vip_ate"] - datetime.utcnow()).total_seconds())
-        return jsonify({
-            "erro": f"⭐ JÁ É VIP! Válido por mais {restante//3600}h",
-            "ja_vip": True,
-            "restante_segundos": restante
-        }), 400
+    if grupo.get("vip_ativo") or (grupo.get("vip_ate") and datetime.utcnow() < grupo["vip_ate"]):
+        return jsonify({"erro": "⭐ JÁ É VIP! Aguarde expirar!"}), 400
     
     codigo_pix = f"00020126580014br.gov.bcb.pix0104FLOW{os.urandom(7).hex().upper()}5204000053039865802BR5904FLOW6007RIO62070503***6304"
-    return jsonify({
-        "codigo_pix": codigo_pix,
-        "valor": "R$ 5,00",
-        "duracao_horas": 24,
-        "mensagem": "💳 Pague R$5,00 e seu grupo fica VIP por 24h!"
-    })
-
-# ✅ CONFIRMAR VIP DEPOIS DO PAGAMENTO
-@app.route("/confirmar-vip/<grupo_id>", methods=["POST"])
-def confirmar_vip(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "")
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
-    
-    agora = datetime.utcnow()
-    grupos_col.update_one(
-        {"_id": ObjectId(grupo_id), "usuario_id": uid},
-        {"$set": {
-            "vip": True,
-            "vip_ate": agora + TEMPO_VIP,
-            "ultimo_impulso": agora
-        }}
-    )
-    return jsonify({"sucesso": "⭐ VIP ATIVADO! 24h em destaque!"})
+    return jsonify({"codigo_pix": codigo_pix})
 
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 def apagar_grupo(grupo_id):
