@@ -16,6 +16,10 @@
     <meta property="og:image:type" content="image/png">
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
+    
+    <!-- ✅ ANÚNCIO ADSTERRA -->
+    <script async="async" data-cfasync="false" src="https://pl28627138.effectivecpmnetwork.com/1fd37c2a1d9d1e19537dc1d7d97cdc9b/invoke.js"></script>
+    
     <style>
         :root { 
             --primary-green: #25d366; --dark-green: #128c7e;
@@ -26,7 +30,7 @@
         body { 
             background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
             color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column;
-            padding-bottom: 80px; padding-top: 70px;
+            padding-bottom: 100px; padding-top: 70px;
         }
         body::before {
             content:""; position:fixed; top:0; left:0; width:100%; height:100%;
@@ -40,7 +44,7 @@
         
         .video-container { 
             width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
-            background: #000; margin-bottom: 25px;
+            background: #000; margin-bottom: 15px;
         }
         .video-container video { width: 100%; height: auto; display: block; }
         .mute-btn { 
@@ -52,6 +56,26 @@
         .tiktok-icon { 
             position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
+        }
+        
+        /* ✅ CAIXA DE ANÚNCIO */
+        .anuncio-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 12px 0;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .anuncio-rotulo {
+            font-size: 10px;
+            color: #888;
+            text-align: right;
+            margin-bottom: 4px;
         }
         
         .menu-btn { 
@@ -192,13 +216,33 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
+    <!-- ✅ ANÚNCIO ALEATÓRIO EM CIMA DOS GRUPOS -->
+    <div id="anuncio-topo" class="anuncio-box" style="display:none;">
+        <div>
+            <div class="anuncio-rotulo">ANÚNCIO</div>
+            <div id="container-topo"></div>
+        </div>
+    </div>
+
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando...</p>
     </div>
+
+    <!-- ✅ ANÚNCIO ALEATÓRIO EMBAIXO DOS GRUPOS -->
+    <div id="anuncio-embaixo" class="anuncio-box" style="display:none;">
+        <div>
+            <div class="anuncio-rotulo">ANÚNCIO</div>
+            <div id="container-embaixo"></div>
+        </div>
+    </div>
 </main>
 
+<!-- ✅ RODAPÉ COM LINK DE ANÚNCIO -->
 <footer>
-    © 2020-2026 FLOW — <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
+    © 2020-2026 FLOW — 
+    <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
+    <a href="#" onclick="mostrarPrivacidade()">Privacidade</a> |
+    <a href="https://www.effectivecpmnetwork.com/y99yjf7v3y?key=5f6de430d75a855ddff7717775ff4ae3" target="_blank" rel="noopener">Anúncios</a>
     <a href="#" class="btn-adm" onclick="abrirPainelAdm(); return false;">⚙️</a>
 </footer>
 
@@ -248,7 +292,7 @@
     </div>
 </div>
 
-<!-- ✅ DENÚNCIA — FALTAVA ISSO! -->
+<!-- DENÚNCIA -->
 <div id="denunciaModal" class="modal" onclick="fecharDenuncia()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🚩 Denunciar Grupo</h2>
@@ -319,6 +363,19 @@ let categoriaAtual = "Todos";
 let senhaAdm = "";
 let grupoDenunciadoId = "";
 
+// ✅ ANÚNCIOS ALEATÓRIOS AO CARREGAR
+window.onload = function() {
+    const mostrarTopo = Math.random() < 0.7;   // 70% de chance de aparecer em cima
+    const mostrarBaixo = Math.random() < 0.7;  // 70% de chance de aparecer embaixo
+    
+    if (mostrarTopo) {
+        document.getElementById("anuncio-topo").style.display = "block";
+    }
+    if (mostrarBaixo) {
+        document.getElementById("anuncio-embaixo").style.display = "block";
+    }
+};
+
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { e && (e.preventDefault(), e.stopPropagation()); video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
@@ -381,7 +438,6 @@ async function registrarClique(grupoId){
     }catch(e){}
 }
 
-// ✅ DENÚNCIA — AGORA FUNCIONA!
 function abrirDenuncia(grupoId){
     grupoDenunciadoId = grupoId;
     document.getElementById("denunciaModal").style.display="flex";
@@ -450,7 +506,7 @@ async function impulsionarGrupo(id){
 
 async function apagarMeuGrupo(id){
     if(!confirm("Apagar esse grupo?")) return;
-    const res = await requisionar(`/apagar-grupo/${id}`, {method:"POST"});
+    const res = await requisionar(`/apagar-meu-grupo/${id}`, {method:"POST"});
     alert(res.sucesso||res.erro);
     abrirMeusGrupos();
     carregarGrupos();
