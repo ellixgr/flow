@@ -108,6 +108,8 @@
         .btn-entrar {background:#25d366; color:#000; padding:6px 12px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:13px;}
         .btn-denunciar {background:#ff4444; color:#fff; border:none; padding:4px 6px; border-radius:6px; font-size:10px; cursor:pointer; margin-top:4px;}
         .btn-apagar {background:#ff4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; margin-top:4px;}
+        .btn-impulsionar {background:#ffd700; color:#000; border:none; padding:6px 10px; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:4px; width:100%;}
+        .btn-impulsionar:disabled {background:#888; color:#ccc; cursor:not-allowed;}
         
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
@@ -129,7 +131,6 @@
         .aviso-btn {width: 100%; text-align: center; font-size: 14px; color: #fff; margin-bottom: 15px; opacity: 0.9;}
         .painel-adm-item {padding:10px 0; border-bottom:1px solid #eee; font-size:13px; margin-bottom:8px;}
         .painel-adm-item b {display:block; margin-bottom:4px;}
-        .input-senha {margin-bottom:15px;}
         .outro-motivo {margin-top:8px; display:none;}
         .outro-motivo.visivel {display:block;}
     </style>
@@ -241,7 +242,7 @@
 <div id="meusModal" class="modal" onclick="fecharMeusGrupos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>👤 Meus Grupos</h2>
-        <div id="lista-meus"></div>
+        <div id="lista-meus"><p class="vazio">Carregando...</p></div>
         <button class="btn-cancelar" onclick="fecharMeusGrupos()">FECHAR</button>
     </div>
 </div>
@@ -316,7 +317,7 @@ function processarFoto(e){const arq=e.target.files[0];if(!arq)return;const leito
 
 function trocarCategoria(cat){categoriaAtual=cat;document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));document.querySelector(`[data-cat="${cat}"]`).classList.add("ativa");carregarGrupos();}
 
-// ✅ CARREGA GRUPOS
+// ✅ CARREGA GRUPOS PÚBLICOS
 async function carregarGrupos(){
     try{
         const resp=await fetch(`${API_URL}/grupos-dados`);
@@ -335,11 +336,11 @@ async function carregarGrupos(){
             lista.appendChild(card);
         });
     }catch(erro){
-        document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro ao carregar grupos: ${erro.message}<br>Verifique se o Render está rodando.</p>`;
+        document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro ao carregar: ${erro.message}</p>`;
     }
 }
 
-// ✅ DENÚNCIA — COM MOTIVOS
+// ✅ DENÚNCIA
 function abrirDenuncia(grupoId){
     grupoDenunciadoId = grupoId;
     document.getElementById("denunciaModal").style.display="flex";
@@ -354,11 +355,7 @@ function fecharDenuncia(){
 }
 function trocarMotivo(){
     const sel = document.getElementById("selMotivo").value;
-    if(sel === "outro"){
-        document.getElementById("divOutroMotivo").classList.add("visivel");
-    } else {
-        document.getElementById("divOutroMotivo").classList.remove("visivel");
-    }
+    document.getElementById("divOutroMotivo").classList.toggle("visivel", sel==="outro");
 }
 async function enviarDenuncia(){
     const motivo = document.getElementById("selMotivo").value;
@@ -369,33 +366,69 @@ async function enviarDenuncia(){
         const resp = await fetch(`${API_URL}/denunciar/${grupoDenunciadoId}`, {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({
-                motivo: motivo,
-                outros_motivos: outros
-            })
+            body: JSON.stringify({motivo: motivo, outros_motivos: outros})
         });
         const res = await resp.json();
-        if(res.erro){
-            respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-        } else {
-            respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
-            setTimeout(fecharDenuncia, 1500);
-        }
-    } catch {
-        respDiv.innerHTML = `<span class="erro">❌ Erro de conexão</span>`;
-    }
+        respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ ${res.sucesso}</span>`;
+        if(!res.erro) setTimeout(fecharDenuncia, 1500);
+    } catch { respDiv.innerHTML = `<span class="erro">❌ Erro de conexão</span>`; }
 }
 
-// ✅ MEUS GRUPOS
+// ✅ MEUS GRUPOS — AGORA FUNCIONANDO!
 async function abrirMeusGrupos(){
     document.getElementById("meusModal").style.display="flex";
-    document.getElementById("lista-meus").innerHTML = "<p class='vazio'>Função em manutenção</p>";
+    document.getElementById("lista-meus").innerHTML = "<p class='vazio'>⏳ Carregando...</p>";
+    try {
+        const resp = await fetch(`${API_URL}/meus-grupos`, {
+            headers: {"X-Usuario-ID": usuarioId}
+        });
+        const grupos = await resp.json();
+        const lista = document.getElementById("lista-meus");
+        if(!grupos.length){
+            lista.innerHTML = "<p class='vazio'>Você ainda não enviou nenhum grupo.</p>";
+            return;
+        }
+        lista.innerHTML = "";
+        grupos.forEach(g=>{
+            let botoes = "";
+            if(g.pode_impulsionar){
+                botoes += `<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
+            } else {
+                botoes += `<button class="btn-impulsionar" disabled>⏳ Aguarde 24h</button>`;
+            }
+            botoes += `<button class="btn-apagar" onclick="apagarMeuGrupo('${g._id}')">🗑️ Apagar</button>`;
+            lista.innerHTML += `<div class="card" style="margin-bottom:12px;"><img src="${g.foto}" style="width:50px;height:50px;"><div class="card-info"><div class="card-nome">${g.vip?"🥇 ":""}${g.nome}</div><div class="card-cat">${g.categoria||"Outros"}</div><div class="card-cliques">👆 ${g.cliques||0} cliques</div>${g.vip?"<div style='color:#ffd700; font-size:11px;'>✅ Em destaque</div>":"<div style='color:#888; font-size:11px;'>⏳ Sem destaque</div>"}${botoes}</div></div>`;
+        });
+    } catch(erro){
+        document.getElementById("lista-meus").innerHTML = `<p class='vazio'>❌ Erro: ${erro.message}</p>`;
+    }
 }
-function fecharMeusGrupos(){
-    document.getElementById("meusModal").style.display="none";
+function fecharMeusGrupos(){ document.getElementById("meusModal").style.display="none"; }
+
+// ✅ IMPULSIONAR GRÁTIS
+async function impulsionarGrupo(id){
+    const resp = await fetch(`${API_URL}/impulsionar/${id}`, {
+        method: "POST", headers: {"Content-Type": "application/json", "X-Usuario-ID": usuarioId}
+    });
+    const res = await resp.json();
+    alert(res.sucesso || res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
 }
 
-// ✅ ENVIAR GRUPO — SEM VERIFICAÇÃO ANTES! MANDA PRO BACKEND!
+// ✅ APAGAR MEU GRUPO
+async function apagarMeuGrupo(id){
+    if(!confirm("Apagar esse grupo?")) return;
+    const resp = await fetch(`${API_URL}/apagar-meu-grupo/${id}`, {
+        method: "POST", headers: {"Content-Type": "application/json", "X-Usuario-ID": usuarioId}
+    });
+    const res = await resp.json();
+    alert(res.sucesso || res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
+}
+
+// ✅ ENVIAR GRUPO
 async function enviarGrupo(){
     const codigo = document.getElementById("inpCodigo").value.trim();
     const dados = new URLSearchParams({
@@ -406,77 +439,68 @@ async function enviarGrupo(){
         plano: document.getElementById("inpPlano").value,
         codigo_adm: codigo
     });
-    
     document.getElementById("respForm").innerHTML = "";
     document.getElementById("areaPix").style.display = "none";
     document.getElementById("btnEnviar").style.display = "";
-
     try {
         const resp = await fetch(`${API_URL}/enviar-grupo`, {
-            method: "POST",
-            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded", "X-Usuario-ID": usuarioId},
             body: dados
         });
         const res = await resp.json();
-
         if(res.erro){
             document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${res.erro}</span>`;
-        }
-        // ✅ CÓDIGO ACEITO → SALVO GRÁTIS!
-        else if(res.sucesso && !res.codigo_pix){
+        } else if(res.sucesso && res.sem_pix){
             document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ ${res.sucesso}</span>`;
             setTimeout(()=>{ fecharFormulario(); carregarGrupos(); }, 2000);
-        }
-        // 💳 GERA PIX
-        else if(res.codigo_pix){
-            document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ PIX gerado com sucesso!</span>`;
+        } else if(res.codigo_pix){
+            document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ PIX gerado!</span>`;
             document.getElementById("codigoPix").value = res.codigo_pix;
             document.getElementById("areaPix").style.display = "block";
             document.getElementById("btnEnviar").style.display = "none";
         }
     } catch {
-        document.getElementById("respForm").innerHTML = `<span class='erro'>❌ Erro de conexão com o servidor</span>`;
+        document.getElementById("respForm").innerHTML = `<span class='erro'>❌ Erro de conexão</span>`;
     }
 }
 
-function copiarPix(){document.getElementById("codigoPix").select();document.execCommand("copy");alert("✅ Copiado! Cole no app do banco!");}
+function copiarPix(){document.getElementById("codigoPix").select();document.execCommand("copy");alert("✅ Copiado!");}
 function registrarClique(id){fetch(`${API_URL}/clicar/${id}`,{method:"POST"});}
 function fecharFormulario(){document.getElementById("formModal").style.display="none";document.getElementById("areaPix").style.display="none";document.getElementById("btnEnviar").style.display="";document.getElementById("respForm").innerHTML="";fotoBase64="";document.getElementById("previewFoto").src="https://files.catbox.moe/0aa6f2.png";}
 function mostrarTermos(){document.getElementById("termosModal").style.display="flex";}
 function fecharTermos(){document.getElementById("termosModal").style.display="none";}
-function mostrarPrivacidade(){alert("Armazenamos apenas: link, nome, foto e identificador anônimo.");}
+function mostrarPrivacidade(){alert("Armazenamos: link, nome, foto e identificador anônimo.");}
 
-// ✅ PAINEL ADM — SENHA VALIDA NO BACKEND!
-function abrirPainelAdm(){
-    senhaAdm = prompt("Digite a SENHA DE ADMINISTRADOR:");
-    if(!senhaAdm || senhaAdm.trim() === "") return;
-    
+// ✅ PAINEL ADM — SENHA ERRADA = NÃO ENTRA!
+async function abrirPainelAdm(){
+    const senha = prompt("Digite a SENHA DE ADMINISTRADOR:");
+    if(!senha || senha.trim() === "") return;
+
     document.getElementById("admModal").style.display = "flex";
     document.getElementById("admConteudo").innerHTML = "<p style='text-align:center'>⏳ Verificando senha...</p>";
-    
-    // ✅ VERIFICA SENHA NO BACKEND
-    fetch(`${API_URL}/verificar-senha-adm`, {
+
+    const resp = await fetch(`${API_URL}/verificar-senha-adm`, {
         method: "POST",
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: new URLSearchParams({senha: senhaAdm})
-    }).then(r=>r.json()).then(res=>{
-        if(res.erro){
-            alert("❌ " + res.erro);
-            fecharPainelAdm();
-        } else {
-            admVerGrupos();
-        }
-    }).catch(()=>{
-        alert("❌ Erro ao verificar senha!");
-        fecharPainelAdm();
+        body: new URLSearchParams({senha: senha.trim()})
     });
+    const res = await resp.json();
+
+    if(resp.status === 403 || res.erro){
+        alert("❌ SENHA INCORRETA! Acesso NEGADO!");
+        fecharPainelAdm();
+        return;
+    }
+
+    senhaAdm = senha.trim();
+    admVerGrupos();
 }
 function fecharPainelAdm(){document.getElementById("admModal").style.display="none";document.getElementById("admConteudo").innerHTML="";senhaAdm="";}
 
-// ✅ LISTA GRUPOS NO PAINEL ADM
+// ✅ LISTA GRUPOS ADM
 async function admVerGrupos(){
     const resp = await fetch(`${API_URL}/admin/grupos?senha=${encodeURIComponent(senhaAdm)}`);
-    if(resp.status === 403){ alert("❌ Acesso negado! Senha incorreta!"); fecharPainelAdm(); return; }
+    if(resp.status === 403){ alert("❌ Acesso negado!"); fecharPainelAdm(); return; }
     const grupos = await resp.json();
     let html = "<b>📋 Grupos Cadastrados:</b><br><br>";
     if(!grupos.length){ html += "<p>Nenhum grupo cadastrado.</p>"; }
@@ -491,32 +515,26 @@ async function admVerGrupos(){
     document.getElementById("admConteudo").innerHTML = html;
 }
 
-// ✅ APAGAR GRUPO DO ADM
+// ✅ APAGAR GRUPO ADM
 async function admApagarGrupo(id){
-    if(!confirm("Tem certeza que deseja APAGAR esse grupo?")) return;
-    const resp = await fetch(`${API_URL}/admin/apagar-grupo/${id}`, {
-        method: "POST",
-        headers: {"Content-Type": "application/x-www-form-urlencoded"},
-        body: new URLSearchParams({senha: senhaAdm})
-    });
+    if(!confirm("APAGAR esse grupo?")) return;
+    const resp = await fetch(`${API_URL}/admin/apagar-grupo/${id}?senha=${encodeURIComponent(senhaAdm)}`, {method:"POST"});
     const res = await resp.json();
     alert(res.sucesso || res.erro);
     admVerGrupos();
 }
 
-// ✅ LISTA DENÚNCIAS NO PAINEL ADM
+// ✅ LISTA DENÚNCIAS ADM
 async function admVerDenuncias(){
     const resp = await fetch(`${API_URL}/admin/denuncias?senha=${encodeURIComponent(senhaAdm)}`);
     if(resp.status === 403){ alert("❌ Acesso negado!"); fecharPainelAdm(); return; }
     const denuncias = await resp.json();
-    let html = "<b>⚠️ Denúncias Recebidas:</b><br><br>";
-    if(!denuncias.length){ html += "<p>Nenhuma denúncia nova.</p>"; }
+    let html = "<b>⚠️ Denúncias:</b><br><br>";
+    if(!denuncias.length){ html += "<p>Nenhuma denúncia.</p>"; }
     denuncias.forEach(d=>{
         const motivoTexto = {
-            "link_invalido": "🔗 Link Inválido",
-            "conteudo_improprio": "⚠️ Conteúdo Impróprio",
-            "spam": "📧 Spam",
-            "outro": "❌ Outro"
+            "link_invalido": "🔗 Link Inválido", "conteudo_improprio": "⚠️ Conteúdo Impróprio",
+            "spam": "📧 Spam", "outro": "❌ Outro"
         }[d.motivo] || d.motivo;
         html += `<div class="painel-adm-item">
             <b>Grupo ID:</b> ${d.grupo_id}<br>
