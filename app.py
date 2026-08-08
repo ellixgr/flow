@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from flask_cors import CORS  # ✅ ADICIONADO! LIBERA ACESSO DO GITHUB
+from flask_cors import CORS
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime, timedelta
@@ -8,10 +8,11 @@ import os
 import uuid
 from dotenv import load_dotenv
 from functools import wraps
+import mercadopago  # ✅ ADICIONA ESSA BIBLIOTECA!
 
 load_dotenv()
 app = Flask(__name__)
-CORS(app)  # ✅ LIBERA O GITHUB PRA FALAR COM O RENDER — SEM ISSO DÁ ERRO DE CONEXÃO!
+CORS(app)
 app.secret_key = os.getenv("SECRET_KEY", "chave_secreta_super_segura_123456")
 
 # 🔗 DADOS DE CONEXÃO
@@ -33,7 +34,7 @@ grupos_col.create_index("vip_ate")
 denuncias_col.create_index([("ip", 1), ("grupo_id", 1)], unique=True)
 sessoes_col.create_index("criado_em", expireAfterSeconds=60)
 
-# 🛡️ SISTEMA ANTI-FLOOD / ANTI-HACKER
+# 🛡️ SISTEMA ANTI-FLOOD
 def limite_requisicoes(segundos=10):
     def decorator(f):
         @wraps(f)
@@ -44,57 +45,56 @@ def limite_requisicoes(segundos=10):
             tempo_limite = datetime.utcnow() - timedelta(seconds=segundos)
             existente = sessoes_col.find_one({"ip": ip, "acao": acao, "criado_em": {"$gte": tempo_limite}})
             if existente:
-                return jsonify({"erro": "⏳ Aguarde! Você está enviando muito rápido. Tente novamente em alguns segundos."}), 429
+                return jsonify({"erro": "⏳ Aguarde! Você está enviando muito rápido."}), 429
             sessoes_col.delete_many({"ip": ip, "acao": acao})
             sessoes_col.insert_one({"ip": ip, "acao": acao, "criado_em": datetime.utcnow()})
             return f(*args, **kwargs)
         return wrapper
     return decorator
 
-# 💰 GERAR PAGAMENTO MERCADO PAGO
-def criar_pagamento(valor, descricao, grupo_id):
-    url = "https://api.mercadopago.com/checkout/preferences"
-    headers = {
-        "Authorization": f"Bearer {MP_TOKEN}",
-        "Content-Type": "application/json"
-    }
-    dados = {
-        "items": [{
-            "id": str(grupo_id),
-            "title": descricao,
-            "quantity": 1,
-            "unit_price": float(valor)
-        }],
+# 💰 GERAR PIX DIRETO (SEM SAIR DO SITE!)
+def criar_pix_pagamento(valor, descricao, grupo_id, ip_usuario):
+    sdk = mercadopago.SDK(MP_TOKEN)
+    
+    dados_pagamento = {
+        "transaction_amount": float(valor),
+        "description": descricao,
+        "payment_method_id": "pix",
+        "payer": {
+            "email": f"usuario_{ip_usuario.replace('.','_')}@flow-grupos.com.br",
+            "first_name": "Usuario",
+            "last_name": "Flow"
+        },
         "notification_url": f"{request.url_root}webhook-mercadopago",
-        "back_urls": {
-            "success": f"{request.url_root}sucesso",
-            "failure": f"{request.url_root}",
-            "pending": f"{request.url_root}"
-        }
+        "external_reference": str(grupo_id)  # ✅ ID DO GRUPO PARA SABER QUEM PAGOU!
     }
+    
     try:
-        resp = requests.post(url, json=dados, headers=headers, timeout=15)
-        if resp.status_code == 201:
-            return resp.json()
+        resultado = sdk.payment().create(dados_pagamento)
+        if resultado["status"] in [200, 201]:
+            pix_dados = resultado["response"]
+            return {
+                "sucesso": True,
+                "codigo_pix": pix_dados["point_of_interaction"]["transaction_data"]["qr_code"],
+                "pix_base64": pix_dados["point_of_interaction"]["transaction_data"]["qr_code_base64"],
+                "id_pagamento": pix_dados["id"]
+            }
     except Exception as e:
-        print(f"Erro MP: {e}")
-    return None
+        print(f"Erro ao gerar PIX: {e}")
+    return {"sucesso": False}
 
 # 🏠 PÁGINA PRINCIPAL
 @app.route("/")
 def index():
-    # ✅ REMOVE VIP AUTOMATICAMENTE APÓS EXPIRAR
     grupos_col.update_many({"vip_ate": {"$lt": datetime.utcnow()}}, {"$set": {"vip": False}})
-    # 📋 BUSCA GRUPOS (VIP PRIMEIRO)
     grupos = list(grupos_col.find().sort([("vip", -1), ("criado_em", -1)]))
-    # CONVERTE ID PARA STRING
     for g in grupos:
         g["_id"] = str(g["_id"])
         g.setdefault("cliques", 0)
         g.setdefault("foto", "https://files.catbox.moe/6av9dl.png")
     return render_template("index.html", grupos=grupos)
 
-# 📤 ENVIAR GRUPO / FORMULÁRIO
+# 📤 ENVIAR GRUPO → AGORA GERA PIX DIRETO!
 @app.route("/enviar-grupo", methods=["POST"])
 @limite_requisicoes(15)
 def enviar_grupo():
@@ -104,29 +104,25 @@ def enviar_grupo():
     foto = dados.get("foto", "").strip() or "https://files.catbox.moe/6av9dl.png"
     codigo_adm = dados.get("codigo_adm", "").strip()
     plano = dados.get("plano", "5")
+    ip_usuario = request.remote_addr
 
-    # ✅ VALIDAÇÕES
+    # VALIDAÇÕES
     if not link.startswith(("https://chat.whatsapp.com/", "https://gruposwhats.app/")):
         return jsonify({"erro": "🔗 Link inválido! Use apenas link de grupo do WhatsApp"}), 400
     if len(nome) < 3:
         return jsonify({"erro": "📛 Nome muito curto! Mínimo 3 caracteres"}), 400
 
-    # 🔑 CÓDIGO ADMIN — ENVIA GRÁTIS!
+    # CÓDIGO ADMIN = GRÁTIS
     if codigo_adm == CHAVE_ADM:
         novo_grupo = {
-            "nome": nome,
-            "link": link,
-            "foto": foto,
-            "vip": True,
-            "vip_ate": datetime.utcnow() + timedelta(days=365*10),
-            "cliques": 0,
-            "criado_em": datetime.utcnow(),
-            "gratuito": True
+            "nome": nome, "link": link, "foto": foto,
+            "vip": True, "vip_ate": datetime.utcnow() + timedelta(days=3650),
+            "cliques": 0, "criado_em": datetime.utcnow(), "gratuito": True
         }
         grupos_col.insert_one(novo_grupo)
-        return jsonify({"sucesso": "✅ GRUPO ENVIADO GRATUITAMENTE! Código Admin aceito! 🎉"})
+        return jsonify({"sucesso": "✅ GRUPO ENVIADO GRATUITAMENTE! 🎉"})
 
-    # 💳 ESCOLHA DE PLANO
+    # ESCOLHA DE VALORES
     if plano == "5":
         valor, dias = 5.00, 1
     elif plano == "10":
@@ -134,14 +130,10 @@ def enviar_grupo():
     else:
         return jsonify({"erro": "❌ Plano inválido!"}), 400
 
-    # ⚠️ SALVA GRUPO TEMPORÁRIO
+    # SALVA GRUPO TEMPORÁRIO
     grupo_temp = {
-        "nome": nome,
-        "link": link,
-        "foto": foto,
-        "vip": False,
-        "cliques": 0,
-        "criado_em": datetime.utcnow()
+        "nome": nome, "link": link, "foto": foto,
+        "vip": False, "cliques": 0, "criado_em": datetime.utcnow()
     }
     try:
         resultado = grupos_col.insert_one(grupo_temp)
@@ -149,100 +141,74 @@ def enviar_grupo():
     except DuplicateKeyError:
         return jsonify({"erro": "⚠️ Esse grupo JÁ foi enviado anteriormente!"}), 409
 
-    # 💰 CRIA PAGAMENTO
-    pagamento = criar_pagamento(valor, f"VIP Grupo — {dias} Dia(s)", grupo_id)
-    if not pagamento:
+    # 🎯 GERA O PIX DIRETO AQUI!
+    pix = criar_pix_pagamento(valor, f"VIP Grupo - {dias} Dia(s)", grupo_id, ip_usuario)
+    if not pix["sucesso"]:
         grupos_col.delete_one({"_id": resultado.inserted_id})
-        return jsonify({"erro": "❌ Erro ao gerar pagamento. Tente novamente."}), 500
+        return jsonify({"erro": "❌ Erro ao gerar código PIX. Tente novamente."}), 500
 
-    # 📝 REGISTRA TRANSAÇÃO
+    # SALVA TRANSAÇÃO
     transacoes_col.insert_one({
-        "grupo_id": grupo_id,
-        "valor": valor,
-        "dias": dias,
-        "status": "pendente",
-        "criado_em": datetime.utcnow()
+        "grupo_id": grupo_id, "id_pagamento_mp": pix["id_pagamento"],
+        "valor": valor, "dias": dias, "ip_usuario": ip_usuario,
+        "status": "pendente", "criado_em": datetime.utcnow()
     })
 
+    # ✅ RETORNA O CÓDIGO PIX PARA O SEU SITE MOSTRAR!
     return jsonify({
-        "sucesso": "✅ Grupo cadastrado! Conclua o pagamento para ativar o VIP ⬇️",
-        "pagamento_url": pagamento["init_point"],
+        "sucesso": "✅ Grupo cadastrado! Use o PIX abaixo para ativar o VIP 👇",
+        "codigo_pix": pix["codigo_pix"],
         "grupo_id": grupo_id
     })
 
-# 💳 WEBHOOK — ATIVA VIP APÓS PAGAMENTO
+# 💳 WEBHOOK → QUANDO PAGAR, ATIVA AUTOMATICAMENTE!
 @app.route("/webhook-mercadopago", methods=["POST"])
 def webhook_mp():
-    dados = request.get_json()
-    if not dados:
-        dados = request.form
+    dados = request.get_json() or request.form
     if dados.get("action") == "payment.created" or dados.get("topic") == "payment":
         pagamento_id = dados.get("data", {}).get("id") or dados.get("id")
         if not pagamento_id:
             return "OK", 200
-        # CONSULTA PAGAMENTO
-        url = f"https://api.mercadopago.com/v1/payments/{pagamento_id}"
-        headers = {"Authorization": f"Bearer {MP_TOKEN}"}
-        try:
-            resp = requests.get(url, headers=headers, timeout=15).json()
-            status = resp.get("status")
-            if status == "approved":
-                ref = resp["additional_info"]["items"][0]["id"]
-                transacao = transacoes_col.find_one({"grupo_id": ref})
-                if transacao and transacao["status"] != "aprovado":
-                    transacoes_col.update_one({"grupo_id": ref}, {"$set": {"status": "aprovado"}})
-                    grupos_col.update_one({"_id": ref}, {
-                        "$set": {
-                            "vip": True,
-                            "vip_ate": datetime.utcnow() + timedelta(days=transacao["dias"])
-                        }
-                    })
-        except Exception as e:
-            print(f"Webhook erro: {e}")
+        
+        # BUSCA DADOS DO PAGAMENTO
+        sdk = mercadopago.SDK(MP_TOKEN)
+        resp = sdk.payment().get(pagamento_id)
+        if resp["status"] == 200 and resp["response"]["status"] == "approved":
+            grupo_id = resp["response"]["external_reference"]
+            transacao = transacoes_col.find_one({"grupo_id": grupo_id, "status": "pendente"})
+            
+            if transacao:
+                # ATIVA VIP E MARCA PAGO
+                transacoes_col.update_one({"grupo_id": grupo_id}, {"$set": {"status": "aprovado"}})
+                grupos_col.update_one({"_id": grupo_id}, {
+                    "$set": {
+                        "vip": True,
+                        "vip_ate": datetime.utcnow() + timedelta(days=transacao["dias"])
+                    }
+                })
+                print(f"✅ PAGAMENTO CONFIRMADO! Grupo {grupo_id} ativado!")
     return "OK", 200
 
-# ✅ PÁGINA DE SUCESSO
-@app.route("/sucesso")
-def sucesso():
-    return """
-    <html><body style="background:#090a0f;color:white;font-family:sans-serif;text-align:center;padding-top:50px;">
-        <h1 style="color:#25d366">✅ PAGAMENTO APROVADO!</h1>
-        <p style="font-size:18px">Seu grupo ficará em DESTAQUE por 1 ou 2 dias 🥇</p>
-        <p>Volte para a página principal ↓</p>
-        <a href="/" style="background:#25d366;color:black;padding:12px 24px;border-radius:12px;text-decoration:none;font-weight:bold;">VOLTAR AO SITE</a>
-    </body></html>
-    """
-
-# 👁️ CONTADOR DE CLIQUES
+# DEMAIS ROTAS (clicar, denunciar, etc) CONTINUAM IGUAIS
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
     ip = request.remote_addr
-    chave_ja_clicou = f"clicou:{ip}:{grupo_id}"
-    ja_clicou = sessoes_col.find_one({"ip": ip, "acao": chave_ja_clicou, "criado_em": {"$gte": datetime.utcnow() - timedelta(hours=24)}})
-    if not ja_clicou:
+    chave = f"clicou:{ip}:{grupo_id}"
+    if not sessoes_col.find_one({"ip": ip, "acao": chave, "criado_em": {"$gte": datetime.utcnow() - timedelta(hours=24)}}):
         grupos_col.update_one({"_id": grupo_id}, {"$inc": {"cliques": 1}})
-        sessoes_col.insert_one({"ip": ip, "acao": chave_ja_clicou, "criado_em": datetime.utcnow()})
-    grupo = grupos_col.find_one({"_id": grupo_id})
-    total = grupo.get("cliques", 0) if grupo else 0
-    return jsonify({"total": total})
+        sessoes_col.insert_one({"ip": ip, "acao": chave, "criado_em": datetime.utcnow()})
+    return jsonify({"total": grupos_col.find_one({"_id": grupo_id}).get("cliques", 0) if grupos_col.find_one({"_id": grupo_id}) else 0})
 
-# 🚩 DENUNCIAR GRUPO
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 @limite_requisicoes(120)
 def denunciar(grupo_id):
     ip = request.remote_addr
-    dados = request.get_json() or {}
-    motivo = dados.get("motivo", "Não informado")
+    motivo = (request.get_json() or {}).get("motivo", "Não informado")
     try:
-        denuncias_col.insert_one({
-            "grupo_id": grupo_id,
-            "ip": ip,
-            "motivo": motivo,
-            "criado_em": datetime.utcnow()
-        })
-        return jsonify({"sucesso": "✅ Denúncia enviada! O dono vai verificar."})
+        denuncias_col.insert_one({"grupo_id": grupo_id, "ip": ip, "motivo": motivo, "criado_em": datetime.utcnow()})
+        return jsonify({"sucesso": "✅ Denúncia enviada!"})
     except DuplicateKeyError:
-        return jsonify({"erro": "⚠️ Você JÁ denunciou esse grupo!"}), 429
+        return jsonify({"erro": "⚠️ Você já denunciou esse grupo!"}), 429
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
