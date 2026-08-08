@@ -59,13 +59,13 @@
         .menu-btn { 
             position: fixed; top: 15px; right: 15px; font-size: 24px; 
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
-            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 20000; 
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 9999; 
             border: 2px solid var(--primary-green); color: #000; 
         }
         .side-menu { 
             position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
             background: #ffffff; padding: 60px 20px; 
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 19999; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 9998; 
             box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
         }
         .side-menu.active { right: 0; }
@@ -116,13 +116,13 @@
         .btn-apagar {background:#ff4444; color:#fff; border:none; padding:4px 8px; border-radius:6px; font-size:11px; cursor:pointer; margin-top:4px;}
         .cronometro {font-size:10px; color:#ffd700; margin-top:2px;}
         
-        /* RODAPÉ FIXO */
+        /* RODAPÉ FIXO — APENAS TERMOS E PRIVACIDADE */
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         
-        /* MODAIS */
-        .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
-        .modal-content {background:#fff; color:#000; padding:20px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto;}
+        /* MODAIS — FICA NA FRENTE DE TUDO */
+        .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
+        .modal-content {background:#fff; color:#000; padding:20px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000;}
         .modal-content h2 {text-align:center; margin-bottom:15px; font-size:18px;}
         .modal-content label {font-weight:600; font-size:14px; display:block; margin:10px 0 4px;}
         .modal-content input, .modal-content select {width:100%; padding:10px; border-radius:8px; border:1px solid #ccc; font-size:14px;}
@@ -206,10 +206,9 @@
     </div>
 </main>
 
-<!-- RODAPÉ FIXO — SEM AVISO DUPLICADO -->
+<!-- RODAPÉ — APENAS TERMOS DE USO & PRIVACIDADE -->
 <footer>
-    © 2020-2026 FLOW — <a href="#" onclick="mostrarTermos()">Termos de Uso</a> | 
-    <a href="#" onclick="mostrarPrivacidade()">Coleta de Dados</a>
+    © 2020-2026 FLOW — <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
 
 <!-- FORMULÁRIO ENVIAR GRUPO -->
@@ -241,7 +240,7 @@
         </select>
         
         <label>🔑 Código VIP (se tiver):</label>
-        <input type="text" id="inpCodigo" placeholder="Código grátis">
+        <input type="text" id="inpCodigo" placeholder="Digite seu código">
         
         <div id="respForm"></div>
         <div class="area-pix" id="areaPix">
@@ -268,7 +267,7 @@
 <!-- TERMOS -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>📜 Termos de Uso</h2>
+        <h2>📜 Termos de Uso & Privacidade</h2>
         <p style="font-size:13px; line-height:1.6;">
             ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
             ⚠️ Se você enviar um grupo com imagem imprópria e alguém denunciar, o grupo será APAGADO imediatamente e NÃO haverá reembolso do valor pago.<br><br>
@@ -279,7 +278,6 @@
 </div>
 
 <script>
-// ✅ CORRIGIDO — API URL CERTA
 const API_URL = 'https://flow-mohn.onrender.com';
 
 let usuarioId = localStorage.getItem("flow_usuario_id");
@@ -295,15 +293,28 @@ const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { e && (e.preventDefault(), e.stopPropagation()); video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
 
-// ☰ MENU LATERAL
-function toggleMenu(e) { e && e.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
+// ☰ MENU LATERAL — FECHA E ABRE FORMULÁRIO NA FRENTE
+function toggleMenu(e) { 
+    e && e.stopPropagation(); 
+    document.getElementById('sideMenu').classList.toggle('active'); 
+}
+
+// ✅ ABRIR FORMULÁRIO PELO MENU — FECHA MENU E MOSTRA FORMULÁRIO
+function abrirFormulario() {
+    document.getElementById('sideMenu').classList.remove('active'); // FECHA O MENU
+    document.getElementById('formModal').style.display = "flex"; // ABRE O FORMULÁRIO NA FRENTE
+}
+
 function toggleDropdown() {
     const d = document.getElementById('telasDropdown'), b = document.getElementById('btnTelas');
     d.classList.toggle('active'); b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
 }
 document.addEventListener('click', e => {
     const m = document.getElementById('sideMenu'), b = document.querySelector('.menu-btn');
-    if (m.classList.contains('active') && !m.contains(e.target) && !b.contains(e.target)) m.classList.remove('active');
+    const form = document.getElementById('formModal');
+    if (m.classList.contains('active') && !m.contains(e.target) && !b.contains(e.target)) {
+        m.classList.remove('active');
+    }
 });
 
 // 🖼️ PROCESSAR FOTO
@@ -423,24 +434,37 @@ async function apagarMeuGrupo(id) {
 
 // 📤 ENVIAR GRUPO
 async function enviarGrupo() {
+    const codigo = document.getElementById("inpCodigo").value.trim();
     const dados = new URLSearchParams({
         link: document.getElementById("inpLink").value.trim(),
         nome: document.getElementById("inpNome").value.trim(),
         categoria: document.getElementById("inpCat").value,
         foto_base64: fotoBase64,
         plano: document.getElementById("inpPlano").value,
-        codigo_adm: document.getElementById("inpCodigo").value.trim()
+        codigo_adm: codigo
     });
+    
+    // LIMPA MENSAGEM ANTES DE ENVIAR
+    document.getElementById("respForm").innerHTML = "";
+    document.getElementById("areaPix").style.display = "none";
+    document.getElementById("btnEnviar").style.display = "";
+    
     const resp = await fetch(`${API_URL}/enviar-grupo`, {
         method: "POST", headers: {"Content-Type": "application/x-www-form-urlencoded", "X-Usuario-ID": usuarioId},
         body: dados
     });
     const res = await resp.json();
-    if (res.erro) { document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${res.erro}</span>`; }
+    
+    if (res.erro) { 
+        document.getElementById("respForm").innerHTML = `<span class='erro'>❌ ${res.erro}</span>`; 
+    }
+    // ✅ SE CÓDIGO FOR VÁLIDO → SALVA DIRETO, SEM MOSTRAR PIX
     else if (res.sucesso && !res.codigo_pix) {
         document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ ${res.sucesso}</span>`;
         setTimeout(()=>{ fecharFormulario(); carregarGrupos(); }, 2000);
-    } else if (res.codigo_pix) {
+    }
+    // ❌ SEM CÓDIGO VÁLIDO → MOSTRA PIX
+    else if (res.codigo_pix) {
         document.getElementById("respForm").innerHTML = `<span class='sucesso'>✅ PIX gerado!</span>`;
         document.getElementById("codigoPix").value = res.codigo_pix;
         document.getElementById("areaPix").style.display = "block";
@@ -450,8 +474,12 @@ async function enviarGrupo() {
 
 function copiarPix() { document.getElementById("codigoPix").select(); document.execCommand("copy"); alert("✅ Copiado!"); }
 function registrarClique(id) { fetch(`${API_URL}/clicar/${id}`, {method:"POST"}); }
-function abrirFormulario() { document.getElementById("formModal").style.display = "flex"; }
-function fecharFormulario() { document.getElementById("formModal").style.display = "none"; document.getElementById("areaPix").style.display = "none"; document.getElementById("btnEnviar").style.display = ""; }
+function fecharFormulario() { 
+    document.getElementById("formModal").style.display = "none"; 
+    document.getElementById("areaPix").style.display = "none"; 
+    document.getElementById("btnEnviar").style.display = "";
+    document.getElementById("respForm").innerHTML = "";
+}
 function fecharMeusGrupos() { document.getElementById("meusModal").style.display = "none"; }
 function mostrarTermos() { document.getElementById("termosModal").style.display = "flex"; }
 function fecharTermos() { document.getElementById("termosModal").style.display = "none"; }
