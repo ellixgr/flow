@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import mercadopago
@@ -11,12 +12,27 @@ from PIL import Image
 
 app = Flask(__name__)
 
+# ✅ LIBERA ACESSO DO GITHUB PAGES — CORRIGE O ERRO "Failed to fetch"
+CORS(app, resources={r"/*": {"origins": [
+    "https://ellixgr.github.io",
+    "https://ellixgr.github.io/flow/",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500"
+]}})
+
+@app.after_request
+def liberar_cors(resposta):
+    resposta.headers["Access-Control-Allow-Origin"] = "*"
+    resposta.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    resposta.headers["Access-Control-Allow-Headers"] = "Content-Type, X-Usuario-ID"
+    return resposta
+
 # ==============================================
 # 🔑 VARIÁVEIS DO RENDER
 # ==============================================
 MONGO_URI = os.getenv("MONGO_URI")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
-ADMIN_SENHA = os.getenv("ADMIN_SENHA", "admin123")  # Configure no Render!
+ADMIN_SENHA = os.getenv("ADMIN_SENHA", "admin123")
 
 if not MONGO_URI:
     raise Exception("❌ VARIÁVEL MONGO_URI NÃO CONFIGURADA!")
@@ -166,7 +182,6 @@ def enviar_grupo():
     if categoria not in CATEGORIAS:
         categoria = "Outros"
 
-    # 🖼️ Processa foto
     foto_final = "https://files.catbox.moe/0aa6f2.png"
     if foto_base64:
         comprimida = comprimir_foto(foto_base64)
@@ -177,14 +192,12 @@ def enviar_grupo():
 
     dados_grupo = {"link": link, "nome": nome, "foto": foto_final, "categoria": categoria}
 
-    # ✅ Código VIP → salva direto
     if codigo_adm and codigo_valido(codigo_adm):
         dias = 1 if plano == "5" else 2
         salvar_grupo(dados_grupo, dias, usuario_id)
         marcar_codigo_usado(codigo_adm)
         return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS!", "usuario_id": usuario_id})
 
-    # 💳 Gera PIX
     valor = 5.00 if plano == "5" else 10.00
     dias = 1 if plano == "5" else 2
     pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
