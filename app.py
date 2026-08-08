@@ -8,14 +8,11 @@ import os
 app = Flask(__name__)
 
 # ==============================================
-# 🔑 CONFIGURAÇÕES — COLOCA SEUS VALORES AQUI
+# 🔑 CONFIGURAÇÕES — SÓ PEGA DO RENDER, SEM VALOR FALSO!
 # ==============================================
 
-# 👇 COLOCA A URL DO SEU MONGODB ATLAS AQUI
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://USUARIO:SENHA@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority")
-
-# 👇 COLOCA SEU TOKEN DO MERCADO PAGO AQUI
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "TESTE-SEU-TOKEN-AQUI")
+MONGO_URI = os.getenv("MONGO_URI")
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 
 # ==============================================
 # NÃO MEXE DAQUI PRA BAIXO
