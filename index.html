@@ -193,10 +193,6 @@
         .resposta { margin-top: 12px; font-weight: bold; text-align: center; font-size: 14px; }
         .erro { color: red; }
         .sucesso { color: green; }
-        .aviso-pix {
-            background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; 
-            margin-top: 10px; font-size: 13px; display: none;
-        }
         .area-pix {
             display: none; margin-top:15px; padding:15px; background:#f0fdf4; 
             border-radius:12px; border:2px solid #25d366;
@@ -301,7 +297,7 @@
                 <p style="font-size:12px; color:#166534; margin-top:8px;">✅ Após pagar, o VIP é ativado automaticamente em até 1 minuto!</p>
             </div>
             
-            <button class="btn-enviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
+            <button class="btn-enviar" id="btnEnviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
             <button class="btn-cancelar" onclick="fecharFormulario()">❌ CANCELAR</button>
         </div>
     </div>
@@ -336,19 +332,29 @@
         let grupoAtualDenunciar = null;
         let gruposCarregados = [];
 
+        // ✅ CAIXA DE AVISO PERSONALIZADA (NÃO MAIS O ALERT FEIO!)
+        function mostrarCaixa(titulo, texto, tipo = "sucesso") {
+            const cor = tipo === "sucesso" ? "#25d366" : "#ef4444";
+            const fundo = document.createElement("div");
+            fundo.style = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:999999;`;
+            fundo.innerHTML = `
+                <div style="background:#fff;padding:25px;border-radius:16px;max-width:340px;width:90%;text-align:center;box-shadow:0 0 30px rgba(0,0,0,0.4);">
+                    <h3 style="color:${cor};margin-bottom:12px;font-size:18px;">${titulo}</h3>
+                    <p style="color:#333;margin-bottom:20px;font-size:15px;line-height:1.5;">${texto}</p>
+                    <button onclick="this.closest('div[style]').parentElement.remove()" style="background:${cor};color:white;border:none;padding:10px 28px;border-radius:10px;font-weight:bold;cursor:pointer;font-size:15px;">OK</button>
+                </div>`;
+            document.body.appendChild(fundo);
+        }
+
         // CARREGA GRUPOS DO RENDER
         async function carregarGrupos() {
             try {
-                const resp = await fetch(API_URL + '/');
-                const html = await resp.text();
-                const lista = document.getElementById('lista-grupos');
-                // Extrai os grupos do JSON que o backend retorna
                 const dadosResp = await fetch(API_URL + '/grupos-dados');
                 if (dadosResp.ok) {
                     gruposCarregados = await dadosResp.json();
                     renderizarGrupos();
                 } else {
-                    lista.innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
+                    document.getElementById('lista-grupos').innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
                 }
             } catch(e) {
                 document.getElementById('lista-grupos').innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
@@ -398,20 +404,24 @@
             btn.innerHTML = dropdown.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
         }
 
-        // FORMULÁRIO COM PIX
+        // ABRE FORMULÁRIO — MOSTRA BOTÃO ENVIAR
         function abrirFormulario() { 
             document.getElementById('formModal').style.display = 'flex'; 
             document.getElementById('respForm').innerHTML = '';
             document.getElementById('areaPix').style.display = 'none';
             document.getElementById('codigoPix').value = '';
+            document.getElementById('btnEnviar').style.display = ''; // MOSTRA BOTÃO
         }
         function fecharFormulario() { 
             document.getElementById('formModal').style.display = 'none';
         }
+
+        // ✅ ENVIAR GRUPO COM TODAS AS REGRAS
         async function enviarGrupo() {
             const respDiv = document.getElementById('respForm');
             const areaPix = document.getElementById('areaPix');
             const campoPix = document.getElementById('codigoPix');
+            const btnEnviar = document.getElementById('btnEnviar');
             
             respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
             areaPix.style.display = 'none';
@@ -432,27 +442,47 @@
                 });
                 const res = await resp.json();
 
+                // ❌ ERRO / CÓDIGO INVÁLIDO
                 if (res.erro) {
                     respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-                } else if (res.sucesso && !res.codigo_pix) {
+                    if (res.erro.includes("inválido") || res.erro.includes("Código")) {
+                        mostrarCaixa("❌ Código Inválido", "Esse código VIP não existe ou já foi usado!", "erro");
+                    }
+                    return;
+                }
+
+                // ✅ CÓDIGO VIP CERTO → SALVA DIRETO E FECHA
+                if (res.sucesso && !res.codigo_pix) {
                     respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                    mostrarCaixa("✅ Grupo Enviado!", "Seu grupo foi salvo com sucesso! Aparecerá em breve na lista!");
                     setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
-                } else if (res.codigo_pix) {
+                    return;
+                }
+
+                // ✅ SEM CÓDIGO → GERA PIX + ESCONDE BOTÃO ENVIAR
+                if (res.codigo_pix) {
                     respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
                     campoPix.value = res.codigo_pix;
                     areaPix.style.display = 'block';
+                    btnEnviar.style.display = 'none'; // ✅ BOTÃO ENVIAR SOME!
+
+                    // ✅ MOSTRA VALOR E VALIDADE
+                    const valorTexto = res.dias_vip === 1 ? "R$ 5,00" : "R$ 10,00";
+                    const diasTexto = res.dias_vip === 1 ? "1 Dia" : "2 Dias";
+                    respDiv.innerHTML += `<div style="margin-top:10px; font-size:14px; color:#166534;">💰 Valor: ${valorTexto} | ⏳ Válido por: ${diasTexto}</div>`;
                 }
+
             } catch (e) {
                 respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
             }
         }
 
-        // COPIAR PIX
-        function copiarPix() {
+        // ✅ COPIAR PIX COM CAIXA PERSONALIZADA
+        async function copiarPix() {
             const campo = document.getElementById('codigoPix');
             campo.select();
             document.execCommand('copy');
-            alert('✅ Código PIX copiado! Agora é só colar no app do seu banco!');
+            mostrarCaixa("✅ Código Copiado!", "Agora é só colar no app do seu banco e pagar!");
         }
 
         // DENÚNCIA
