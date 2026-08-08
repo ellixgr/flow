@@ -329,7 +329,6 @@ async function requisionar(caminho, opcoes={}){
     });
     const texto = await resp.text();
     
-    // Se começar com < é página de erro
     if(texto.trim().startsWith('<')){
       throw new Error("Servidor retornou erro — Render pode estar dormindo ou CORS faltando");
     }
@@ -340,17 +339,28 @@ async function requisionar(caminho, opcoes={}){
   }
 }
 
-// ✅ CARREGA GRUPOS PÚBLICOS
+// ✅ CARREGA GRUPOS PÚBLICOS — FILTRADO POR CATEGORIA!
 async function carregarGrupos(){
     try{
         const grupos = await requisionar('/grupos-dados');
         const lista = document.getElementById("lista-grupos");
-        if(!grupos.length){
-            lista.innerHTML="<p class='vazio'>Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>";
+        
+        // ✅ FILTRA PELA CATEGORIA SELECIONADA
+        let gruposFiltrados = grupos;
+        if(categoriaAtual !== "Todos"){
+            gruposFiltrados = grupos.filter(g => {
+                const catGrupo = (g.categoria || "Outros").trim();
+                return catGrupo === categoriaAtual;
+            });
+        }
+
+        if(!gruposFiltrados.length){
+            lista.innerHTML=`<p class='vazio'>Nenhum grupo em ${categoriaAtual} ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
             return;
         }
+        
         lista.innerHTML="";
-        grupos.forEach(g=>{
+        gruposFiltrados.forEach(g=>{
             const card=document.createElement("div");
             card.className=`card ${g.vip?"vip":""}`;
             card.innerHTML=`<img src="${g.foto}" alt="Foto do Grupo"><div class="card-info"><div class="card-nome">${g.vip?"🥇 ":""}${g.nome}</div><div class="card-cat">${g.categoria||"Outros"}</div><div class="card-cliques">👆 ${g.cliques||0} cliques</div></div><div style="display:flex; flex-direction:column; gap:4px;"><a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a><button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">⚠️ Denunciar</button></div>`;
@@ -396,7 +406,7 @@ async function enviarDenuncia(){
     }
 }
 
-// ✅ MEUS GRUPOS — CORRIGIDO
+// ✅ MEUS GRUPOS
 async function abrirMeusGrupos(){
     document.getElementById("meusModal").style.display="flex";
     document.getElementById("lista-meus").innerHTML = "<p class='vazio'>⏳ Carregando...</p>";
@@ -488,7 +498,7 @@ function mostrarTermos(){document.getElementById("termosModal").style.display="f
 function fecharTermos(){document.getElementById("termosModal").style.display="none";}
 function mostrarPrivacidade(){alert("Armazenamos: link, nome, foto e identificador anônimo.");}
 
-// ✅ PAINEL ADM — CORRIGIDO
+// ✅ PAINEL ADM
 async function abrirPainelAdm(){
   const senha = prompt("Digite a SENHA DE ADMINISTRADOR:");
   if(!senha || senha.trim() === "") return;
