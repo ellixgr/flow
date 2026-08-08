@@ -7,18 +7,29 @@ import os
 
 app = Flask(__name__)
 
-# 🔑 DADOS DO MERCADO PAGO — COLOCA SEU TOKEN AQUI
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "SEU_TOKEN_AQUI")
+# ==============================================
+# 🔑 CONFIGURAÇÕES — COLOCA SEUS VALORES AQUI
+# ==============================================
+
+# 👇 COLOCA A URL DO SEU MONGODB ATLAS AQUI
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://USUARIO:SENHA@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority")
+
+# 👇 COLOCA SEU TOKEN DO MERCADO PAGO AQUI
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "TESTE-SEU-TOKEN-AQUI")
+
+# ==============================================
+# NÃO MEXE DAQUI PRA BAIXO
+# ==============================================
+
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
-# 📦 BANCO MONGO
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/flow")
+# CONEXÃO COM BANCO
 client = MongoClient(MONGO_URI)
 db = client.flow
 grupos_col = db.grupos
 codigos_col = db.codigos_vip
 
-# ✅ VERIFICA CÓDIGO VIP (GRÁTIS)
+# ✅ CÓDIGO VIP VÁLIDO?
 def codigo_valido(codigo):
     if not codigo:
         return False
@@ -28,7 +39,7 @@ def codigo_valido(codigo):
 def marcar_codigo_usado(codigo):
     codigos_col.update_one({"codigo": codigo}, {"$set": {"usado": True, "usado_em": datetime.utcnow()}})
 
-# ✅ GERA PIX DO MERCADO PAGO
+# ✅ GERA PIX
 def gerar_pix(valor, descricao):
     try:
         pix_data = {
@@ -51,7 +62,7 @@ def gerar_pix(valor, descricao):
     except Exception as e:
         return {"erro": str(e)}
 
-# ✅ SALVA GRUPO NO BANCO (SÓ DEPOIS DO PAGAMENTO OU CÓDIGO VÁLIDO)
+# ✅ SALVA GRUPO NO BANCO
 def salvar_grupo(dados, dias_vip):
     expira_em = datetime.utcnow() + timedelta(days=dias_vip)
     grupo = {
@@ -70,19 +81,17 @@ def salvar_grupo(dados, dias_vip):
 # 🌐 PÁGINA PRINCIPAL
 @app.route("/")
 def index():
-    # Só mostra grupos ATIVOS e com VIP NÃO EXPIRADO
     agora = datetime.utcnow()
     lista = list(grupos_col.find({
         "ativo": True,
         "expira_em": {"$gte": agora}
     }).sort([("$natural", -1)]))
     
-    # Converte ObjectId pra string
     for g in lista:
         g["_id"] = str(g["_id"])
     return render_template("index.html", grupos=lista)
 
-# 📤 ENVIAR GRUPO — SÓ GERA PIX, NÃO SALVA AINDA!
+# 📤 ENVIAR GRUPO → SÓ GERA PIX, NÃO SALVA ANTES DE PAGAR!
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     link = request.form.get("link", "").strip()
@@ -91,20 +100,19 @@ def enviar_grupo():
     plano = request.form.get("plano", "5")
     codigo_adm = request.form.get("codigo_adm", "").strip()
 
-    # ✅ VALIDAÇÕES BÁSICAS
     if not link or not nome:
         return jsonify({"erro": "Preencha link e nome!"})
     if not link.startswith("https://chat.whatsapp.com/"):
         return jsonify({"erro": "Link inválido! Use link do WhatsApp"})
 
-    # ✅ SE TIVER CÓDIGO VÁLIDO → SALVA DIRETO GRÁTIS
+    # ✅ CÓDIGO VIP → SALVA DIRETO GRÁTIS
     if codigo_adm and codigo_valido(codigo_adm):
         dias = 1 if plano == "5" else 2
         salvar_grupo({"link": link, "nome": nome, "foto": foto}, dias)
         marcar_codigo_usado(codigo_adm)
-        return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS! Ativado agora!"})
+        return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS! Ativado!"})
 
-    # ✅ SEM CÓDIGO → GERA PIX, NÃO SALVA NADA AINDA!
+    # ✅ SEM CÓDIGO → GERA PIX, NÃO SALVA NADA AINDA
     valor = 5.00 if plano == "5" else 10.00
     dias = 1 if plano == "5" else 2
     pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
@@ -112,7 +120,6 @@ def enviar_grupo():
     if "erro" in pix:
         return jsonify({"erro": pix["erro"]})
 
-    # ⚠️ AQUI NÃO SALVA GRUPO! SÓ RETORNA O PIX!
     return jsonify({
         "sucesso": "✅ PIX gerado! Pague e o grupo aparecerá automaticamente!",
         "codigo_pix": pix["codigo_pix"],
@@ -123,35 +130,7 @@ def enviar_grupo():
         "foto_grupo": foto
     })
 
-# ✅ WEBHOOK — QUANDO PAGAR, SALVA O GRUPO!
-@app.route("/webhook-pagamento", methods=["POST"])
-def webhook_pagamento():
-    try:
-        dados = request.get_json()
-        pagamento_id = dados.get("id")
-        status = dados.get("status")
-        
-        if status == "approved":
-            # Aqui você salva o grupo depois de aprovado
-            # Você pode guardar os dados temporariamente e associar ao pagamento
-            print(f"✅ PAGAMENTO APROVADO! ID: {pagamento_id}")
-        return jsonify({"ok": True})
-    except Exception as e:
-        return jsonify({"erro": str(e)})
-
-# 🚩 DENÚNCIA
-@app.route("/denunciar/<grupo_id>", methods=["POST"])
-def denunciar(grupo_id):
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"denuncias": 1}})
-    return jsonify({"sucesso": "✅ Denúncia enviada! Obrigado por avisar!"})
-
-# 👆 CLIQUES
-@app.route("/clicar/<grupo_id>", methods=["POST"])
-def clicar(grupo_id):
-    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
-    return jsonify({"ok": True})
-
-# 📋 LISTA DE GRUPOS (JSON)
+# 📋 JSON DOS GRUPOS
 @app.route("/grupos-dados")
 def grupos_dados():
     agora = datetime.utcnow()
@@ -163,5 +142,17 @@ def grupos_dados():
         g["_id"] = str(g["_id"])
     return jsonify(lista)
 
+# 🚩 DENÚNCIA
+@app.route("/denunciar/<grupo_id>", methods=["POST"])
+def denunciar(grupo_id):
+    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"denuncias": 1}})
+    return jsonify({"sucesso": "✅ Denúncia enviada!"})
+
+# 👆 CLIQUES
+@app.route("/clicar/<grupo_id>", methods=["POST"])
+def clicar(grupo_id):
+    grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
+    return jsonify({"ok": True})
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
