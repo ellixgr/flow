@@ -8,13 +8,15 @@ import os
 
 app = Flask(__name__)
 
-# ✅ LIBERA ACESSO DO GITHUB PAGES
+# ✅ CORS LIBERADO TOTALMENTE PARA SEU SITE
 CORS(app, resources={r"/*": {
     "origins": [
         "https://ellixgr.github.io",
         "https://ellixgr.github.io/flow",
         "https://ellixgr.github.io/flow/"
-    ]
+    ],
+    "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "allow_headers": ["Content-Type", "X-Usuario-ID"]
 }})
 
 # ==============================================
@@ -134,14 +136,13 @@ def enviar_grupo():
     foto = request.form.get("foto", "").strip()
     plano = request.form.get("plano", "5")
     codigo_adm = request.form.get("codigo_adm", "").strip()
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()  # ✅ ASPA FECHADA!
+    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
 
     if not link or not nome:
         return jsonify({"erro": "Preencha link e nome!"})
     if not link.startswith("https://chat.whatsapp.com/"):
         return jsonify({"erro": "Link inválido! Use link do WhatsApp"})
 
-    # ✅ CÓDIGO VIP → GRÁTIS
     if codigo_adm and codigo_valido(codigo_adm):
         dias = 1 if plano == "5" else 2
         salvar_grupo({"link": link, "nome": nome, "foto": foto, "categoria": categoria}, dias, usuario_id)
@@ -151,7 +152,6 @@ def enviar_grupo():
     if codigo_adm:
         return jsonify({"erro": "❌ Código VIP inválido!"})
 
-    # 💳 PIX
     valor = 5.00 if plano == "5" else 10.00
     dias = 1 if plano == "5" else 2
     pix = gerar_pix(valor, f"VIP Grupo WhatsApp — {dias} dia(s)")
@@ -168,11 +168,12 @@ def enviar_grupo():
     })
 
 # ==============================================
-# 👤 MEUS GRUPOS DO USUÁRIO
+# 👤 MEUS GRUPOS — ✅ CORRIGIDA E FUNCIONANDO
 # ==============================================
-@app.route("/meus-grupos", methods=["GET"])
+@app.route("/meus-grupos", methods=["GET", "OPTIONS"])
 def meus_grupos():
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()  # ✅ ASPA FECHADA!
+    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
+    print(f"📤 Requisição /meus-grupos de: {usuario_id}")  # Log pra debug
     if not usuario_id:
         return jsonify({"erro": "Sem identificador"}), 400
     agora = datetime.now(UTC)
@@ -189,9 +190,9 @@ def meus_grupos():
 # ==============================================
 # 🚀 IMPULSIONAR GRÁTIS
 # ==============================================
-@app.route("/impulsionar/<grupo_id>", methods=["POST"])
+@app.route("/impulsionar/<grupo_id>", methods=["POST", "OPTIONS"])
 def impulsionar(grupo_id):
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()  # ✅ ASPA FECHADA!
+    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
     if not usuario_id:
         return jsonify({"erro": "Sem identificador"}), 400
     agora = datetime.now(UTC)
@@ -211,9 +212,9 @@ def impulsionar(grupo_id):
 # ==============================================
 # 🗑️ APAGAR MEU GRUPO
 # ==============================================
-@app.route("/apagar-meu-grupo/<grupo_id>", methods=["POST"])
+@app.route("/apagar-meu-grupo/<grupo_id>", methods=["POST", "OPTIONS"])
 def apagar_meu_grupo(grupo_id):
-    usuario_id = request.headers.get("X-Usuario-ID", "").strip()  # ✅ ASPA FECHADA!
+    usuario_id = request.headers.get("X-Usuario-ID", "").strip()
     res = grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": usuario_id})
     if res.deleted_count == 0:
         return jsonify({"erro": "Não foi possível apagar!"})
@@ -258,7 +259,7 @@ def admin_denuncias():
 # ==============================================
 # 🚩 DENUNCIAR
 # ==============================================
-@app.route("/denunciar/<grupo_id>", methods=["POST"])
+@app.route("/denunciar/<grupo_id>", methods=["POST", "OPTIONS"])
 def denunciar(grupo_id):
     dados = request.get_json() or {}
     motivo = dados.get("motivo", "outro")
@@ -275,7 +276,7 @@ def denunciar(grupo_id):
 # ==============================================
 # 👆 CLIQUES
 # ==============================================
-@app.route("/clicar/<grupo_id>", methods=["POST"])
+@app.route("/clicar/<grupo_id>", methods=["POST", "OPTIONS"])
 def clicar(grupo_id):
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
     return jsonify({"ok": True})
