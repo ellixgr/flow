@@ -46,7 +46,7 @@
         .video-container video { width: 100%; height: auto; display: block; }
         .mute-btn { 
             position: absolute; top: 15px; left: 15px; z-index: 15; 
-            background: rgba(255,255,255,0.3); border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.3); border-radius: 50%; 
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
             cursor: pointer;
         }
@@ -55,6 +55,7 @@
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
         
+        /* ✅ CAIXA DE ANÚNCIO */
         .anuncio-box {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -119,9 +120,8 @@
         
         .lista {display:flex; flex-direction:column; gap:12px;}
         .card {background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding:12px; display:flex; align-items:center; gap:10px; position:relative;}
-        .card.vip {box-shadow:0 0 20px rgba(255,215,0,0.4); border-color:#ffd700;}
-        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366; position:relative;}
-        .sela-vip {position:absolute; top:0; left:45px; font-size:18px; z-index:10;}
+        .card.vip {box-shadow:0 0 15px rgba(255,215,0,0.3);}
+        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
         .card-info {flex:1;}
         .card-nome {font-weight:bold; font-size:15px;}
         .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
@@ -132,10 +132,6 @@
         .btn-apagar {background:#ff4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:6px; font-weight:bold; width:100%;}
         .btn-impulsionar {background:#ffd700; color:#000; border:none; padding:10px 14px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:6px; width:100%; font-size:14px;}
         .btn-impulsionar:disabled {background:#555; color:#aaa; cursor:not-allowed; opacity:0.7;}
-        .btn-impulsionar-vip {background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; border:none; padding:10px 14px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:6px; width:100%; font-size:14px;}
-        .btn-impulsionar-vip:disabled {background:#555; color:#aaa; cursor:not-allowed; opacity:0.7;}
-        .cronometro {font-size:11px; color:#ffd700; margin-top:4px; font-weight:bold;}
-        .cronometro-vip {color:#ffd700; font-size:11px; margin-top:4px; font-weight:bold;}
         
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
@@ -159,9 +155,6 @@
         .painel-adm-item b {display:block; margin-bottom:6px; font-size:15px;}
         .outro-motivo {margin-top:10px; display:none;}
         .outro-motivo.visivel {display:block;}
-        .codigo-vip-caixa {margin-top: 15px; padding: 10px; background: #fff8e1; border-radius: 8px; border: 1px solid #ffd700; display:block;}
-        .aviso-codigo {font-size:12px; margin-top:4px; color:#666;}
-        .aviso-link {font-size:12px; color:#25d366; margin-top:4px;}
     </style>
 </head>
 <body>
@@ -212,6 +205,7 @@
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
+    <!-- ✅ SEU ANÚNCIO ADSTERRA 320×50 -->
     <div class="anuncio-box">
         <div class="anuncio-rotulo">🔞</div>
         <script>
@@ -239,6 +233,7 @@
     </div>
 </main>
 
+<!-- ✅ RODAPÉ -->
 <footer>
     © 2020-2026 FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
@@ -252,8 +247,7 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📤 Enviar Grupo</h2>
         <label>🔗 Link WhatsApp:</label>
-        <input type="url" id="inpLink" placeholder="https://chat.whatsapp.com/K7ai1KeLMiZCsaZ3ni04Zq" required>
-        <div class="aviso-link">⚠️ Coloque o link COMPLETO com o código no final!</div>
+        <input type="url" id="inpLink" placeholder="https://chat.whatsapp.com/..." required>
         <label>📛 Nome do Grupo:</label>
         <input type="text" id="inpNome" placeholder="Nome do grupo" required>
         <label>📂 Categoria:</label>
@@ -271,17 +265,14 @@
             <option value="5">R$ 5,00 → 1 Dia em Destaque</option>
             <option value="10">R$ 10,00 → 2 Dias em Destaque</option>
         </select>
-        <div class="codigo-vip-caixa">
-            <label>🔑 Código VIP (OPCIONAL):</label>
-            <input type="text" id="inpCodigo" placeholder="Digite se tiver código">
-            <div id="avisoCodigo" class="aviso-codigo"></div>
-        </div>
+        <label>🔑 Código VIP (se tiver):</label>
+        <input type="text" id="inpCodigo" placeholder="Digite seu código">
         <div id="respForm"></div>
         <div id="areaPix" class="area-pix">
             <strong>💳 CÓDIGO PIX:</strong>
             <textarea id="codigoPix" readonly class="codigo-pix"></textarea>
             <button class="btn-enviar" onclick="copiarPix()">📋 Copiar PIX</button>
-            <small>✅ Após pagar, o grupo aparece automaticamente!</small>
+            <small>✅ Após pagar, o grupo aparece em até 1 minuto</small>
         </div>
         <button class="btn-enviar" id="btnEnviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
         <button class="btn-cancelar" onclick="fecharFormulario()">❌ CANCELAR</button>
@@ -360,7 +351,6 @@
 
 <script>
 const API_URL = 'https://flow-mohn.onrender.com';
-const CODIGO_CORRETO = 'labareta444';
 
 let usuarioId = localStorage.getItem("flow_usuario_id");
 if (!usuarioId) { usuarioId = crypto.randomUUID(); localStorage.setItem("flow_usuario_id", usuarioId); }
@@ -368,18 +358,229 @@ let fotoBase64 = "";
 let categoriaAtual = "Todos";
 let senhaAdm = "";
 let grupoDenunciadoId = "";
-let cronometroInterval = null;
 
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { e && (e.preventDefault(), e.stopPropagation()); video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
 
 function toggleMenu(e) { e && e.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
+function abrirFormulario() { document.getElementById('sideMenu').classList.remove('active'); document.getElementById('formModal').style.display = "flex"; }
+function toggleDropdown() { const d=document.getElementById('telasDropdown'), b=document.getElementById('btnTelas'); d.classList.toggle('active'); b.innerHTML=d.classList.contains('active')?'📺 Telas ↑':'📺 Telas ↓'; }
+document.addEventListener('click',e=>{const m=document.getElementById('sideMenu'),b=document.querySelector('.menu-btn'); if(m.classList.contains('active')&&!m.contains(e.target)&&!b.contains(e.target))m.classList.remove('active');});
 
-function abrirFormulario() { 
-    document.getElementById('sideMenu').classList.remove('active'); 
-    document.getElementById('formModal').style.display = "flex";
-    document.getElementById('avisoCodigo').innerHTML = "";
+function processarFoto(e){const arq=e.target.files[0];if(!arq)return;const leitor=new FileReader();leitor.onload=ev=>{const img=new Image();img.onload=()=>{const c=document.createElement("canvas");let w=img.width,h=img.height;if(w>300){h=h*300/w;w=300;}c.width=w;c.height=h;c.getContext("2d").drawImage(img,0,0,w,h);fotoBase64=c.toDataURL("image/jpeg",0.75);document.getElementById("previewFoto").src=fotoBase64;};img.src=ev.target.result;};leitor.readAsDataURL(arq);}
+
+function trocarCategoria(cat){categoriaAtual=cat;document.querySelectorAll(".aba").forEach(a=>a.classList.remove("ativa"));document.querySelector(`[data-cat="${cat}"]`).classList.add("ativa");carregarGrupos();}
+
+async function requisionar(caminho, opcoes={}){
+  try {
+    const resp = await fetch(`${API_URL}${caminho}`, {
+      ...opcoes,
+      headers: {
+        ...(opcoes.headers||{}),
+        "X-Usuario-ID": usuarioId
+      }
+    });
+    if (!resp.ok) throw new Error(`Erro ${resp.status}`);
+    const texto = await resp.text();
+    if(texto.trim().startsWith('<')) throw new Error("Servidor dormindo — acesse o Render primeiro!");
+    return JSON.parse(texto);
+  } catch(erro) { throw erro; }
 }
 
-function toggleDropdown() { const d=document.getElementById('telasDropdown'), b=document.getElementById('btnTelas'); d.classList.toggle('active'); b.innerHTML=d.classList.contains('active')?'📺 Telas ↑':'📺 Telas ↓'; }
+async function carregarGrupos(){
+    try{
+        const grupos = await requisionar('/grupos-dados');
+        const lista = document.getElementById("lista-grupos");
+        let gruposFiltrados = grupos;
+        if(categoriaAtual !== "Todos"){
+            gruposFiltrados = grupos.filter(g => {
+                const catGrupo = (g.categoria || "Outros").trim();
+                return catGrupo === categoriaAtual;
+            });
+        }
+        if(!gruposFiltrados.length){
+            lista.innerHTML=`<p class='vazio'>Nenhum grupo em ${categoriaAtual} ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
+            return;
+        }
+        lista.innerHTML="";
+        gruposFiltrados.forEach(g=>{
+            const card=document.createElement("div");
+            card.className=`card ${g.vip?"vip":""}`;
+            card.innerHTML=`<img src="${g.foto}" alt="Foto"><div class="card-info"><div class="card-nome">${g.vip?"🥇 ":""}${g.nome}</div><div class="card-cat">${g.categoria||"Outros"}</div><div class="card-cliques">👆 ${g.cliques||0} cliques</div></div><div style="display:flex; flex-direction:column; gap:4px;"><a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">Entrar</a><button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">⚠️ Denunciar</button></div>`;
+            lista.appendChild(card);
+        });
+    }catch(erro){
+        document.getElementById("lista-grupos").innerHTML=`<p class='vazio'>❌ Erro: ${erro.message}<br>👉 Acesse primeiro: <a href="${API_URL}" target="_blank" style="color:#25d366">${API_URL}</a></p>`;
+    }
+}
+
+async function registrarClique(grupoId){
+    try{
+        await requisionar(`/clicar/${grupoId}`, {method:"POST"});
+    }catch(e){}
+}
+
+function abrirDenuncia(grupoId){
+    grupoDenunciadoId = grupoId;
+    document.getElementById("denunciaModal").style.display="flex";
+    document.getElementById("respDenuncia").innerHTML="";
+    document.getElementById("selMotivo").value="link_invalido";
+    document.getElementById("divOutroMotivo").classList.remove("visivel");
+    document.getElementById("inpOutroMotivo").value="";
+}
+function fecharDenuncia(){
+    document.getElementById("denunciaModal").style.display="none";
+    grupoDenunciadoId="";
+}
+function trocarMotivo(){
+    const sel = document.getElementById("selMotivo").value;
+    document.getElementById("divOutroMotivo").classList.toggle("visivel", sel==="outro");
+}
+async function enviarDenuncia(){
+    const motivo = document.getElementById("selMotivo").value;
+    const outros = document.getElementById("inpOutroMotivo").value.trim();
+    const respDiv = document.getElementById("respDenuncia");
+    respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
+    try {
+        const res = await requisionar(`/denunciar/${grupoDenunciadoId}`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({motivo, outros_motivos: outros})
+        });
+        respDiv.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ Denunciado!</span>`;
+        if(!res.erro) setTimeout(fecharDenuncia, 1500);
+    } catch(erro) { 
+        respDiv.innerHTML = `<span class="erro">❌ ${erro.message}</span>`;
+    }
+}
+
+async function abrirMeusGrupos(){
+    document.getElementById("meusModal").style.display="flex";
+    try{
+        const grupos = await requisionar('/meus-grupos');
+        const lista=document.getElementById("lista-meus");
+        if(!grupos.length){
+            lista.innerHTML="<p class='vazio'>Você ainda não enviou nenhum grupo.</p>";
+            return;
+        }
+        lista.innerHTML="";
+        grupos.forEach(g=>{
+            let botaoImpulsar="",cron="";
+            if(g.pode_impulsionar){
+                botaoImpulsar=`<button class="btn-impulsionar" onclick="impulsionarGrupo('${g._id}')">🚀 Impulsionar Grátis</button>`;
+            }else{
+                cron=`<div style="font-size:11px; color:#ffd700; margin-top:4px;">⏰ Aguarde 1h</div>`;
+                botaoImpulsar=`<button class="btn-impulsionar" disabled>⏳ Em espera</button>`;
+            }
+            lista.innerHTML+=`<div style="background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding:12px; margin-bottom:12px;"><div style="display:flex; gap:10px; align-items:flex-start;"><img src="${g.foto}" style="width:50px; height:50px; border-radius:50%; border:2px solid #25d366;"><div style="flex:1;"><div style="font-weight:bold; font-size:15px;">${g.nome}</div><div style="font-size:12px; color:#aaa;">👆 ${g.cliques||0} cliques</div>${cron}${botaoImpulsar}<button class="btn-apagar" onclick="apagarMeuGrupo('${g._id}')">🗑️ Apagar</button></div></div></div>`;
+        });
+    }catch(erro){
+        document.getElementById("lista-meus").innerHTML=`<p class='vazio'>❌ Erro: ${erro.message}</p>`;
+    }
+}
+
+async function impulsionarGrupo(id){
+    const res = await requisionar(`/impulsionar/${id}`, {method:"POST"});
+    alert(res.sucesso||res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
+}
+
+async function apagarMeuGrupo(id){
+    if(!confirm("Apagar esse grupo?")) return;
+    const res = await requisionar(`/apagar-meu-grupo/${id}`, {method:"POST"});
+    alert(res.sucesso||res.erro);
+    abrirMeusGrupos();
+    carregarGrupos();
+}
+
+async function enviarGrupo(){
+    const codigo=document.getElementById("inpCodigo").value.trim();
+    const dados=new URLSearchParams({
+        link:document.getElementById("inpLink").value.trim(),
+        nome:document.getElementById("inpNome").value.trim(),
+        categoria:document.getElementById("inpCat").value,
+        foto_base64:fotoBase64,
+        plano:document.getElementById("inpPlano").value,
+        codigo_adm:codigo
+    });
+    document.getElementById("respForm").innerHTML="";
+    document.getElementById("areaPix").style.display="none";
+    document.getElementById("btnEnviar").style.display="";
+    try{
+        const res=await requisionar('/enviar-grupo',{
+            method:"POST",
+            headers:{"Content-Type":"application/x-www-form-urlencoded"},
+            body:dados
+        });
+        if(res.erro){
+            document.getElementById("respForm").innerHTML=`<span class='erro'>❌ ${res.erro}</span>`;
+        }else if(res.sucesso&&res.sem_pix){
+            document.getElementById("respForm").innerHTML=`<span class='sucesso'>✅ ${res.sucesso}</span>`;
+            setTimeout(()=>{fecharFormulario();carregarGrupos();},2000);
+        }else if(res.codigo_pix){
+            document.getElementById("respForm").innerHTML=`<span class='sucesso'>✅ PIX gerado!</span>`;
+            document.getElementById("codigoPix").value=res.codigo_pix;
+            document.getElementById("areaPix").style.display="block";
+            document.getElementById("btnEnviar").style.display="none";
+        }
+    }catch(erro){
+        document.getElementById("respForm").innerHTML=`<span class='erro'>❌ ${erro.message}</span>`;
+    }
+}
+
+function copiarPix(){document.getElementById("codigoPix").select();document.execCommand("copy");alert("✅ Copiado!");}
+function fecharFormulario(){document.getElementById("formModal").style.display="none";document.getElementById("areaPix").style.display="none";document.getElementById("btnEnviar").style.display="";document.getElementById("respForm").innerHTML="";}
+function fecharMeusGrupos(){document.getElementById("meusModal").style.display="none";}
+function mostrarTermos(){document.getElementById("termosModal").style.display="flex";}
+function fecharTermos(){document.getElementById("termosModal").style.display="none";}
+function mostrarPrivacidade(){document.getElementById("privacidadeModal").style.display="flex";}
+function fecharPrivacidade(){document.getElementById("privacidadeModal").style.display="none";}
+
+function abrirPainelAdm(){senhaAdm=prompt("Digite a SENHA DE ADMINISTRADOR:");if(!senhaAdm)return;document.getElementById("admModal").style.display="flex";admVerGrupos();}
+function fecharPainelAdm(){document.getElementById("admModal").style.display="none";document.getElementById("admConteudo").innerHTML="";}
+
+async function admVerGrupos(){
+    try{
+        const resp = await fetch(`${API_URL}/adm/grupos`,{headers:{"X-Adm-Senha":senhaAdm}});
+        if(resp.status===403){alert("❌ SENHA ERRADA!");fecharPainelAdm();return;}
+        const grupos=await resp.json();
+        let html="<b>📋 Grupos Cadastrados:</b><br><br>";
+        if(!grupos.length){html+="Nenhum grupo.";}
+        grupos.forEach(g=>{html+=`<div style="padding:8px 0; border-bottom:1px solid #eee;"><b>${g.nome}</b><br>${g.categoria} | ${g.ativo?"✅ ATIVO":"❌ DESATIVADO"} | 👆 ${g.cliques||0} cliques<br><button onclick="admDesativarGrupo('${g._id}')" style="padding:4px 8px; background:#ff4444; color:white; border:none; border-radius:4px; margin-top:4px;">${g.ativo?"Desativar":"Já desativado"}</button></div>`;});
+        document.getElementById("admConteudo").innerHTML=html;
+    }catch(e){alert("Erro: "+e.message);}
+}
+
+async function admVerDenuncias(){
+    try{
+        const resp = await fetch(`${API_URL}/adm/denuncias`,{headers:{"X-Adm-Senha":senhaAdm}});
+        if(resp.status===403){alert("❌ SENHA ERRADA!");fecharPainelAdm();return;}
+        const denuncias=await resp.json();
+        let html="<b>⚠️ Denúncias:</b><br><br>";
+        if(!denuncias.length){html+="Nenhuma denúncia nova.";}
+        denuncias.forEach(d=>{html+=`<div style="padding:8px 0; border-bottom:1px solid #eee;">Grupo ID: ${d.grupo_id}<br>Motivo: ${d.motivo}<br>Data: ${new Date(d.denunciado_em).toLocaleString('pt-BR')}<br><button onclick="admMarcarLida('${d._id}')" style="padding:4px 8px; background:#25d366; color:white; border:none; border-radius:4px; margin-top:4px;">✅ Marcar lida</button></div>`;});
+        document.getElementById("admConteudo").innerHTML=html;
+    }catch(e){alert("Erro: "+e.message);}
+}
+
+async function admDesativarGrupo(id){
+    if(!confirm("Desativar esse grupo?"))return;
+    const resp=await fetch(`${API_URL}/adm/desativar/${id}`,{method:"POST",headers:{"X-Adm-Senha":senhaAdm}});
+    const res=await resp.json();
+    alert(res.sucesso||res.erro);
+    admVerGrupos();
+}
+
+async function admMarcarLida(id){
+    const resp=await fetch(`${API_URL}/adm/marcar-lida/${id}`,{method:"POST",headers:{"X-Adm-Senha":senhaAdm}});
+    const res=await resp.json();
+    alert(res.sucesso||res.erro);
+    admVerDenuncias();
+}
+
+carregarGrupos();
+</script>
+</body>
+</html>
