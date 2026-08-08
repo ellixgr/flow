@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask_cors import CORS  # ✅ ADICIONADO! LIBERA ACESSO DO GITHUB
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from datetime import datetime, timedelta
@@ -10,6 +11,7 @@ from functools import wraps
 
 load_dotenv()
 app = Flask(__name__)
+CORS(app)  # ✅ LIBERA O GITHUB PRA FALAR COM O RENDER — SEM ISSO DÁ ERRO DE CONEXÃO!
 app.secret_key = os.getenv("SECRET_KEY", "chave_secreta_super_segura_123456")
 
 # 🔗 DADOS DE CONEXÃO
@@ -28,11 +30,7 @@ sessoes_col = db["sessoes"]
 # 📌 ÍNDICES DE SEGURANÇA
 grupos_col.create_index("link", unique=True)
 grupos_col.create_index("vip_ate")
-denuncias_col.create_index([("ip", 1), ("grupo_id", 1)], unique=True)# ✅ ÍNDICES DE SEGURANÇA — CORRIGIDO
-grupos_col.create_index("link", unique=True)
-grupos_col.create_index("vip_ate")
 denuncias_col.create_index([("ip", 1), ("grupo_id", 1)], unique=True)
-# ✅ TTL em CAMPO ÚNICO — funciona!
 sessoes_col.create_index("criado_em", expireAfterSeconds=60)
 
 # 🛡️ SISTEMA ANTI-FLOOD / ANTI-HACKER
@@ -92,7 +90,7 @@ def index():
     # CONVERTE ID PARA STRING
     for g in grupos:
         g["_id"] = str(g["_id"])
-        g.setdefault("visualizacoes", 0)
+        g.setdefault("cliques", 0)
         g.setdefault("foto", "https://files.catbox.moe/6av9dl.png")
     return render_template("index.html", grupos=grupos)
 
@@ -121,7 +119,7 @@ def enviar_grupo():
             "foto": foto,
             "vip": True,
             "vip_ate": datetime.utcnow() + timedelta(days=365*10),
-            "visualizacoes": 0,
+            "cliques": 0,
             "criado_em": datetime.utcnow(),
             "gratuito": True
         }
@@ -142,7 +140,7 @@ def enviar_grupo():
         "link": link,
         "foto": foto,
         "vip": False,
-        "visualizacoes": 0,
+        "cliques": 0,
         "criado_em": datetime.utcnow()
     }
     try:
@@ -215,17 +213,17 @@ def sucesso():
     </body></html>
     """
 
-# 👁️ CONTADOR DE VISUALIZAÇÕES (PROTEGIDO)
-@app.route("/visualizar/<grupo_id>", methods=["POST"])
-def visualizar(grupo_id):
+# 👁️ CONTADOR DE CLIQUES
+@app.route("/clicar/<grupo_id>", methods=["POST"])
+def clicar(grupo_id):
     ip = request.remote_addr
-    chave_ja_viu = f"visualizou:{ip}:{grupo_id}"
-    ja_viu = sessoes_col.find_one({"ip": ip, "acao": chave_ja_viu, "criado_em": {"$gte": datetime.utcnow() - timedelta(hours=24)}})
-    if not ja_viu:
-        grupos_col.update_one({"_id": grupo_id}, {"$inc": {"visualizacoes": 1}})
-        sessoes_col.insert_one({"ip": ip, "acao": chave_ja_viu, "criado_em": datetime.utcnow()})
+    chave_ja_clicou = f"clicou:{ip}:{grupo_id}"
+    ja_clicou = sessoes_col.find_one({"ip": ip, "acao": chave_ja_clicou, "criado_em": {"$gte": datetime.utcnow() - timedelta(hours=24)}})
+    if not ja_clicou:
+        grupos_col.update_one({"_id": grupo_id}, {"$inc": {"cliques": 1}})
+        sessoes_col.insert_one({"ip": ip, "acao": chave_ja_clicou, "criado_em": datetime.utcnow()})
     grupo = grupos_col.find_one({"_id": grupo_id})
-    total = grupo.get("visualizacoes", 0) if grupo else 0
+    total = grupo.get("cliques", 0) if grupo else 0
     return jsonify({"total": total})
 
 # 🚩 DENUNCIAR GRUPO
