@@ -162,11 +162,18 @@
         }
         .btn-enviar {
             width: 100%; padding: 12px; background: var(--primary-green); color: white;
-            border: none; border-radius: 12px; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 12px; font-weight: bold; cursor: pointer; margin-top: 8px;
         }
         .btn-cancelar {
             width: 100%; padding: 10px; background: #eee; color: #333;
             border: none; border-radius: 12px; cursor: pointer; margin-top: 8px;
+        }
+        .resposta { margin-top: 12px; font-weight: bold; text-align: center; font-size: 14px; }
+        .erro { color: red; }
+        .sucesso { color: green; }
+        .aviso-pix {
+            background: #fff3cd; color: #856404; padding: 10px; border-radius: 8px; 
+            margin-top: 10px; font-size: 13px; display: none;
         }
     </style>
 </head>
@@ -217,7 +224,7 @@
         <div class="lista-container">
             {% for grupo in grupos %}
             <div class="card-grupo {% if grupo.vip %}vip-destaque{% endif %}">
-                <button class="btn-denunciar">🚩</button>
+                <button class="btn-denunciar" onclick="abrirDenuncia('{{ grupo._id }}')">🚩</button>
                 <img src="{{ grupo.foto }}" alt="Grupo">
                 <div class="info-grupo">
                     <div class="nome">
@@ -225,7 +232,7 @@
                     </div>
                     <div class="cliques-info">👆 {{ grupo.cliques }} cliques</div>
                 </div>
-                <a href="{{ grupo.link }}" target="_blank" class="btn-ver">Entrar</a>
+                <a href="{{ grupo.link }}" target="_blank" class="btn-ver" onclick="registrarClique('{{ grupo._id }}')">Entrar</a>
             </div>
             {% else %}
             <div class="vazio">
@@ -240,7 +247,55 @@
         </footer>
     </main>
 
+    <!-- FORMULÁRIO ENVIAR GRUPO -->
+    <div id="formModal" class="modal" onclick="fecharFormulario()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2>📤 Enviar Seu Grupo</h2>
+            <label>🔗 Link do Grupo (WhatsApp):</label>
+            <input type="url" id="inpLink" placeholder="https://chat.whatsapp.com/..." required>
+            
+            <label>📛 Nome do Grupo:</label>
+            <input type="text" id="inpNome" placeholder="Digite o nome do grupo" required>
+            
+            <label>🖼️ Link da Foto (opcional):</label>
+            <input type="url" id="inpFoto" placeholder="Deixe vazio para imagem padrão">
+            
+            <label>🥇 Plano VIP:</label>
+            <select id="inpPlano">
+                <option value="5">R$ 5,00 → DESTAQUE por 1 Dia 🥇</option>
+                <option value="10">R$ 10,00 → DESTAQUE por 2 Dias 🥇</option>
+            </select>
+            
+            <label>🔑 Código VIP (se tiver):</label>
+            <input type="text" id="inpCodigo" placeholder="Digite o código para enviar GRÁTIS">
+            
+            <div id="avisoPix" class="aviso-pix">✅ Grupo salvo! Você será redirecionado para o pagamento 👇</div>
+            <div id="respForm" class="resposta"></div>
+            
+            <button class="btn-enviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
+            <button class="btn-cancelar" onclick="fecharFormulario()">❌ CANCELAR</button>
+        </div>
+    </div>
+
+    <!-- DENÚNCIA -->
+    <div id="denunciaModal" class="modal" onclick="fecharDenuncia()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2>🚩 Denunciar Grupo</h2>
+            <label>Motivo da Denúncia:</label>
+            <select id="inpMotivo">
+                <option value="link_invalido">🔗 Link inválido / Não funciona</option>
+                <option value="conteudo_improprio">⚠️ Conteúdo impróprio</option>
+                <option value="outro">❓ Outro motivo</option>
+            </select>
+            <div id="respDenuncia" class="resposta"></div>
+            <button class="btn-enviar" onclick="enviarDenuncia()">🚩 ENVIAR DENÚNCIA</button>
+            <button class="btn-cancelar" onclick="fecharDenuncia()">❌ CANCELAR</button>
+        </div>
+    </div>
+
     <script>
+        let grupoAtualDenunciar = null;
+
         function toggleMenu() { document.getElementById('sideMenu').classList.toggle('active'); }
         function toggleDropdown() {
             const d = document.getElementById('telasDropdown');
@@ -252,7 +307,86 @@
             video.muted = !video.muted; 
             muteIcon.textContent = video.muted ? "🔇" : "🔊"; 
         }
-        function abrirFormulario() { alert('Formulário funcionando!'); }
+
+        // FORMULÁRIO
+        function abrirFormulario() { 
+            document.getElementById('formModal').style.display = 'flex'; 
+            document.getElementById('avisoPix').style.display = 'none';
+            document.getElementById('respForm').innerHTML = '';
+        }
+        function fecharFormulario() { 
+            document.getElementById('formModal').style.display = 'none';
+        }
+        async function enviarGrupo() {
+            const respDiv = document.getElementById('respForm');
+            const avisoPix = document.getElementById('avisoPix');
+            respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
+            avisoPix.style.display = 'none';
+
+            const dados = new URLSearchParams({
+                link: document.getElementById('inpLink').value.trim(),
+                nome: document.getElementById('inpNome').value.trim(),
+                foto: document.getElementById('inpFoto').value.trim(),
+                plano: document.getElementById('inpPlano').value,
+                codigo_adm: document.getElementById('inpCodigo').value.trim()
+            });
+
+            try {
+                const resp = await fetch('/enviar-grupo', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: dados
+                });
+                const res = await resp.json();
+
+                if (res.erro) {
+                    respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
+                } else if (res.sucesso && !res.pagamento_url) {
+                    respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                    setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
+                } else if (res.pagamento_url) {
+                    avisoPix.style.display = 'block';
+                    respDiv.innerHTML = `<span class="sucesso">✅ Abrindo pagamento...</span>`;
+                    setTimeout(()=>{ 
+                        window.open(res.pagamento_url, '_blank'); 
+                        fecharFormulario(); 
+                        location.reload();
+                    }, 1500);
+                }
+            } catch (e) {
+                respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
+            }
+        }
+
+        // DENÚNCIA
+        function abrirDenuncia(grupoId) {
+            grupoAtualDenunciar = grupoId;
+            document.getElementById('denunciaModal').style.display = 'flex';
+        }
+        function fecharDenuncia() { 
+            document.getElementById('denunciaModal').style.display = 'none';
+        }
+        async function enviarDenuncia() {
+            const respDiv = document.getElementById('respDenuncia');
+            respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
+            const resp = await fetch(`/denunciar/${grupoAtualDenunciar}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({motivo: document.getElementById('inpMotivo').value})
+            });
+            const res = await resp.json();
+            if (res.erro) {
+                respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
+            } else {
+                respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                setTimeout(fecharDenuncia, 2000);
+            }
+        }
+
+        // CONTADOR DE CLIQUES
+        async function registrarClique(grupoId) {
+            await fetch(`/clicar/${grupoId}`, {method: 'POST'});
+        }
     </script>
 </body>
 </html>
