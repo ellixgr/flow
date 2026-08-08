@@ -289,7 +289,7 @@
             
             <div id="respForm" class="resposta"></div>
             
-            <!-- ÁREA DO PIX QUE APARECE -->
+            <!-- ÁREA DO PIX QUE APARECE SOMENTE SEM CÓDIGO -->
             <div id="areaPix" class="area-pix">
                 <p style="font-weight:bold; color:#166534;">💳 CÓDIGO PIX — COPIA E COLA NO SEU BANCO:</p>
                 <textarea id="codigoPix" readonly class="codigo-pix"></textarea>
@@ -332,7 +332,7 @@
         let grupoAtualDenunciar = null;
         let gruposCarregados = [];
 
-        // ✅ CAIXA DE AVISO PERSONALIZADA (NÃO MAIS O ALERT FEIO!)
+        // ✅ CAIXA PERSONALIZADA
         function mostrarCaixa(titulo, texto, tipo = "sucesso") {
             const cor = tipo === "sucesso" ? "#25d366" : "#ef4444";
             const fundo = document.createElement("div");
@@ -346,19 +346,15 @@
             document.body.appendChild(fundo);
         }
 
-        // CARREGA GRUPOS DO RENDER
+        // CARREGA GRUPOS
         async function carregarGrupos() {
             try {
                 const dadosResp = await fetch(API_URL + '/grupos-dados');
                 if (dadosResp.ok) {
                     gruposCarregados = await dadosResp.json();
                     renderizarGrupos();
-                } else {
-                    document.getElementById('lista-grupos').innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
                 }
-            } catch(e) {
-                document.getElementById('lista-grupos').innerHTML = `<p style="text-align:center; color:#aaa; padding:20px;">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>`;
-            }
+            } catch(e) {}
         }
 
         function renderizarGrupos() {
@@ -375,9 +371,7 @@
                     <button class="btn-denunciar" onclick="abrirDenuncia('${grupo._id}', event)">🚩</button>
                     <img src="${grupo.foto||'https://files.catbox.moe/0aa6f2.png'}" alt="Ícone do Grupo">
                     <div class="info-grupo">
-                        <div class="nome">
-                            ${grupo.vip ? '🥇 ' : ''}${grupo.nome}
-                        </div>
+                        <div class="nome">${grupo.vip ? '🥇 ' : ''}${grupo.nome}</div>
                         <div class="cliques-info">👆 <span>${grupo.cliques||0}</span> cliques</div>
                     </div>
                     <a href="${grupo.link}" target="_blank" rel="noopener" class="btn-ver" onclick="registrarClique('${grupo._id}')">Entrar</a>
@@ -386,42 +380,30 @@
             });
         }
 
-        function toggleMenu(event) { 
-            if (event) event.stopPropagation(); 
-            document.getElementById('sideMenu').classList.toggle('active'); 
-        }
+        function toggleMenu(e) { e && e.stopPropagation(); document.getElementById('sideMenu').classList.toggle('active'); }
         const video = document.getElementById('meuVideo');
         const muteIcon = document.getElementById('muteIcon');
-        function toggleMute(event) { 
-            if (event) { event.preventDefault(); event.stopPropagation(); } 
-            video.muted = !video.muted; 
-            muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
-        }
+        function toggleMute(e) { e && (e.preventDefault(), e.stopPropagation()); video.muted = !video.muted; muteIcon.innerText = video.muted ? "🔇" : "🔊"; }
         function toggleDropdown() {
-            const dropdown = document.getElementById('telasDropdown');
-            const btn = document.getElementById('btnTelas');
-            dropdown.classList.toggle('active');
-            btn.innerHTML = dropdown.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
+            const d = document.getElementById('telasDropdown'), b = document.getElementById('btnTelas');
+            d.classList.toggle('active'); b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓';
         }
 
-        // ABRE FORMULÁRIO — MOSTRA BOTÃO ENVIAR
         function abrirFormulario() { 
             document.getElementById('formModal').style.display = 'flex'; 
             document.getElementById('respForm').innerHTML = '';
             document.getElementById('areaPix').style.display = 'none';
-            document.getElementById('codigoPix').value = '';
-            document.getElementById('btnEnviar').style.display = ''; // MOSTRA BOTÃO
+            document.getElementById('btnEnviar').style.display = '';
         }
-        function fecharFormulario() { 
-            document.getElementById('formModal').style.display = 'none';
-        }
+        function fecharFormulario() { document.getElementById('formModal').style.display = 'none'; }
 
-        // ✅ ENVIAR GRUPO COM TODAS AS REGRAS
+        // ✅ FUNÇÃO PRINCIPAL CORRIGIDA!
         async function enviarGrupo() {
             const respDiv = document.getElementById('respForm');
             const areaPix = document.getElementById('areaPix');
             const campoPix = document.getElementById('codigoPix');
             const btnEnviar = document.getElementById('btnEnviar');
+            const codigo = document.getElementById('inpCodigo').value.trim();
             
             respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
             areaPix.style.display = 'none';
@@ -431,7 +413,7 @@
                 nome: document.getElementById('inpNome').value.trim(),
                 foto: document.getElementById('inpFoto').value.trim(),
                 plano: document.getElementById('inpPlano').value,
-                codigo_adm: document.getElementById('inpCodigo').value.trim()
+                codigo_adm: codigo
             });
 
             try {
@@ -442,107 +424,66 @@
                 });
                 const res = await resp.json();
 
-                // ❌ ERRO / CÓDIGO INVÁLIDO
+                // ❌ CÓDIGO INVÁLIDO
                 if (res.erro) {
                     respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-                    if (res.erro.includes("inválido") || res.erro.includes("Código")) {
-                        mostrarCaixa("❌ Código Inválido", "Esse código VIP não existe ou já foi usado!", "erro");
-                    }
+                    if (codigo) mostrarCaixa("❌ Código Inválido", "Esse código não existe!", "erro");
                     return;
                 }
 
-                // ✅ CÓDIGO VIP CERTO → SALVA DIRETO E FECHA
+                // ✅ TEM CÓDIGO E ESTÁ CERTO → ENVIA DIRETO! SEM PIX!
                 if (res.sucesso && !res.codigo_pix) {
                     respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
-                    mostrarCaixa("✅ Grupo Enviado!", "Seu grupo foi salvo com sucesso! Aparecerá em breve na lista!");
-                    setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2500);
+                    mostrarCaixa("✅ Grupo Enviado!", "Código VIP aceito! Grupo salvo com sucesso!");
+                    setTimeout(()=>{ fecharFormulario(); location.reload(); }, 2000);
                     return;
                 }
 
-                // ✅ SEM CÓDIGO → GERA PIX + ESCONDE BOTÃO ENVIAR
+                // ✅ SEM CÓDIGO → GERA PIX
                 if (res.codigo_pix) {
-                    respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
+                    respDiv.innerHTML = `<span class="sucesso">✅ Pagamento necessário</span>`;
                     campoPix.value = res.codigo_pix;
                     areaPix.style.display = 'block';
-                    btnEnviar.style.display = 'none'; // ✅ BOTÃO ENVIAR SOME!
-
-                    // ✅ MOSTRA VALOR E VALIDADE
-                    const valorTexto = res.dias_vip === 1 ? "R$ 5,00" : "R$ 10,00";
-                    const diasTexto = res.dias_vip === 1 ? "1 Dia" : "2 Dias";
-                    respDiv.innerHTML += `<div style="margin-top:10px; font-size:14px; color:#166534;">💰 Valor: ${valorTexto} | ⏳ Válido por: ${diasTexto}</div>`;
+                    btnEnviar.style.display = 'none'; // SOME O BOTÃO
                 }
 
             } catch (e) {
-                respDiv.innerHTML = `<span class="erro">❌ Erro de conexão. Tente novamente.</span>`;
+                respDiv.innerHTML = `<span class="erro">❌ Erro de conexão</span>`;
             }
         }
 
-        // ✅ COPIAR PIX COM CAIXA PERSONALIZADA
+        // ✅ COPIAR PIX
         async function copiarPix() {
-            const campo = document.getElementById('codigoPix');
-            campo.select();
+            document.getElementById('codigoPix').select();
             document.execCommand('copy');
-            mostrarCaixa("✅ Código Copiado!", "Agora é só colar no app do seu banco e pagar!");
+            mostrarCaixa("✅ Copiado!", "Cole no app do seu banco e pague!");
         }
 
-        // DENÚNCIA
-        function abrirDenuncia(grupoId, event) {
-            event.preventDefault(); event.stopPropagation();
-            grupoAtualDenunciar = grupoId;
-            document.getElementById('denunciaModal').style.display = 'flex';
-        }
-        function fecharDenuncia() { 
-            document.getElementById('denunciaModal').style.display = 'none';
-            document.getElementById('respDenuncia').innerHTML = '';
-        }
+        // DENÚNCIA, CLIQUES, MODAIS...
+        function abrirDenuncia(id, e) { e.preventDefault(); e.stopPropagation(); grupoAtualDenunciar = id; document.getElementById('denunciaModal').style.display = 'flex'; }
+        function fecharDenuncia() { document.getElementById('denunciaModal').style.display = 'none'; document.getElementById('respDenuncia').innerHTML = ''; }
         async function enviarDenuncia() {
-            const respDiv = document.getElementById('respDenuncia');
-            respDiv.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
-            const resp = await fetch(API_URL + `/denunciar/${grupoAtualDenunciar}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+            const r = document.getElementById('respDenuncia');
+            r.innerHTML = '<span style="color:blue">⏳ Enviando...</span>';
+            const res = await fetch(`${API_URL}/denunciar/${grupoAtualDenunciar}`, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({motivo: document.getElementById('inpMotivo').value})
-            });
-            const res = await resp.json();
-            if (res.erro) {
-                respDiv.innerHTML = `<span class="erro">❌ ${res.erro}</span>`;
-            } else {
-                respDiv.innerHTML = `<span class="sucesso">✅ ${res.sucesso}</span>`;
-                setTimeout(fecharDenuncia, 2000);
-            }
+            }).then(x=>x.json());
+            r.innerHTML = res.erro ? `<span class="erro">❌ ${res.erro}</span>` : `<span class="sucesso">✅ ${res.sucesso}</span>`;
+            setTimeout(fecharDenuncia, 2000);
         }
-
-        // CONTADOR DE CLIQUES
-        async function registrarClique(grupoId) {
-            await fetch(API_URL + `/clicar/${grupoId}`, {method: 'POST'});
-        }
-
-        // TERMOS E PRIVACIDADE
+        async function registrarClique(id) { await fetch(`${API_URL}/clicar/${id}`, {method:'POST'}); }
         function showModal(tipo) {
-            const modal = document.getElementById('infoModal');
-            const tit = document.getElementById('infoTitulo');
-            const txt = document.getElementById('infoTexto');
-            if(tipo === 'termos') { 
-                tit.innerText = "Termos de Uso"; 
-                txt.innerHTML = "<p>Ao acessar e utilizar esta lista, você declara estar ciente e de acordo com as nossas diretrizes. O conteúdo aqui disponibilizado tem caráter apenas informativo. O acesso aos grupos de terceiros é de sua total responsabilidade, não nos responsabilizando por interações, conteúdos ou políticas de outros ambientes. Reservamo-nos o direito de alterar, remover ou atualizar esta lista a qualquer momento, sem aviso prévio.</p>"; 
-            } else { 
-                tit.innerText = "Política de Privacidade"; 
-                txt.innerHTML = "<p>Este site não coleta, armazena ou processa qualquer dado pessoal de seus visitantes. Não utilizamos cookies para rastreamento nem mantemos registros de informações de quem acessa esta página. Ao clicar nos links de anúncio ou grupos, você estará sujeito às políticas de privacidade das plataformas de destino, sendo a sua navegação fora deste ambiente de sua inteira responsabilidade.</p>"; 
-            } 
-            modal.style.display = 'flex';
+            const m = document.getElementById('infoModal'), t = document.getElementById('infoTitulo'), x = document.getElementById('infoTexto');
+            if(tipo==='termos'){t.innerText='Termos de Uso';x.innerHTML='<p>Ao acessar esta lista, você concorda com nossos termos. O conteúdo é de terceiros e não nos responsabilizamos.</p>';}
+            else{t.innerText='Política de Privacidade';x.innerHTML='<p>Não coletamos dados pessoais. Links externos seguem suas próprias políticas.</p>';}
+            m.style.display='flex';
         }
-        function fecharInfoModal() { document.getElementById('infoModal').style.display = 'none'; }
-
-        // FECHAR MENU AO CLICAR FORA
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('sideMenu');
-            const btn = document.querySelector('.menu-btn');
-            if (menu.classList.contains('active') && !menu.contains(e.target) && !btn.contains(e.target)) {
-                menu.classList.remove('active');
-            }
+        function fecharInfoModal(){document.getElementById('infoModal').style.display='none';}
+        document.addEventListener('click',e=>{
+            const m=document.getElementById('sideMenu'),b=document.querySelector('.menu-btn');
+            if(m.classList.contains('active')&&!m.contains(e.target)&&!b.contains(e.target))m.classList.remove('active');
         });
-
-        // CARREGA GRUPOS AO ABRIR
         carregarGrupos();
     </script>
     <script src="https://pl28642215.effectivecpmnetwork.com/b9/7f/04/b97f0402af5fa803ef8d137e4050caf4.js"></script>
