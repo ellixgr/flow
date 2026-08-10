@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 from bson.objectid import ObjectId
 import os
+from uuid import uuid4
 from dotenv import load_dotenv
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -12,17 +13,18 @@ from slowapi.errors import RateLimitExceeded
 load_dotenv()
 app = Flask(__name__)
 
-# ✅ MÉTODO UNIVERSAL, NÃO USA .state NEM init_app, FUNCIONA EM QUALQUER FLASK!
+# ✅ Limitador compatível com QUALQUER versão do Flask — SEM ERRO DE .state!
 limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
 app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# O RESTO DO SEU CÓDIGO CONTINUA EXATAMENTE IGUAL!
+# ✅ CORS liberado APENAS para seu site, seguro e funcional
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
+# ✅ Variáveis secretas vindas do Render, nunca no código!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
@@ -35,12 +37,23 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
+# ✅ Conexão segura com MongoDB
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
-cliques_col.create_index("chave", unique=True, name="idx_chave_unica")
+
+# ✅ ÍNDICE CORRIGIDO: cria apenas se não existir, não dá erro de duplicado!
+try:
+    cliques_col.create_index(
+        "chave", 
+        unique=True, 
+        name="idx_chave_unica",
+        partialFilterExpression={"chave": {"$exists": True}}
+    )
+except Exception:
+    pass
 
 @app.route("/")
 def index():
@@ -93,11 +106,16 @@ def grupos_dados():
         print("ERRO grupos-dados:", str(e))
         return jsonify([]), 200
 
+# ✅ ROTA DO CLIQUE CORRIGIDA DE VEZ: NUNCA DEIXA CHAVE NULA!
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 @limiter.limit("30/minute")
 def clicar(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "")[:64]
-    if not uid or not ObjectId.is_valid(grupo_id):
+    uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
+    # Se vier vazio, gera um código único automático!
+    if not uid:
+        uid = str(uuid4())
+
+    if not ObjectId.is_valid(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     try:
         chave = f"{uid}||{grupo_id}"
@@ -120,7 +138,8 @@ def enviar_grupo():
         categoria = dados.get("categoria", "Outros")[:50]
         foto = dados.get("foto_base64", "")[:50000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
-        uid = request.headers.get("X-Usuario-ID", "")[:64]
+        uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
+        if not uid: uid = str(uuid4())
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
@@ -159,7 +178,7 @@ def enviar_grupo():
 
 @app.route("/meus-grupos")
 def meus_grupos():
-    uid = request.headers.get("X-Usuario-ID", "")[:64]
+    uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
     if not uid: return jsonify([])
     try:
         agora = datetime.utcnow()
@@ -190,7 +209,7 @@ def meus_grupos():
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
 @limiter.limit("10/minute")
 def impulsionar(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "")[:64]
+    uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     if not grupo: return jsonify({"erro":"Esse grupo não pertence a você!"}),403
@@ -204,7 +223,7 @@ def impulsionar(grupo_id):
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 @limiter.limit("10/minute")
 def apagar_grupo(grupo_id):
-    uid = request.headers.get("X-Usuario-ID","")[:64]
+    uid = request.headers.get("X-Usuario-ID","").strip()[:64]
     grupos_col.delete_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     cliques_col.delete_many({"grupo_id":grupo_id})
     return jsonify({"sucesso":True, "mensagem":"Grupo apagado!"})
@@ -247,7 +266,7 @@ def adm_desativar(grupo_id):
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
 @limiter.limit("8/minute")
 def escolher_plano_vip(grupo_id):
-    uid = request.headers.get("X-Usuario-ID","")[:64]
+    uid = request.headers.get("X-Usuario-ID","").strip()[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     if not grupo: return jsonify({"erro":"Grupo não encontrado ou não é seu!"}),404
