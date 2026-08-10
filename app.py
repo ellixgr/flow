@@ -6,14 +6,14 @@ from bson.objectid import ObjectId
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-import requests  # ✅ Usamos ESSE, igual seu bot!
+import requests
 import time
 from collections import defaultdict
 
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ Anti-Flood funcional
+# Anti-Flood
 limite_requisitos = defaultdict(list)
 LIMITE_POR_IP = 4
 JANELA_TEMPO = 60
@@ -29,7 +29,7 @@ def verificar_anti_flood():
             return jsonify({"erro": "⚠️ Muitas requisições! Aguarde 1 minuto antes de enviar novamente."}), 429
         limite_requisitos[ip].append(agora)
 
-# ✅ CORS seguro e liberado
+# CORS SEGURO
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST", "OPTIONS"],
@@ -37,11 +37,11 @@ CORS(app, resources={r"/*": {
     "supports_credentials": True
 }})
 
-# ✅ Variáveis do ambiente (MESMO TOKEN DO SEU BOT!)
+# VARIÁVEIS
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")  # 🔑 O MESMO QUE FUNCIONA!
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
 TEMPO_IMPULSIONAR = timedelta(hours=2)
 
 PLANOS_VIP = {
@@ -51,22 +51,20 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# Conexão MongoDB
+# CONEXÃO BANCO
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 grupos_pendentes_col = db["grupos_pendentes"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
-pagamentos_col = db["pagamentos"]
 
 try:
     cliques_col.create_index("chave", unique=True, name="idx_chave_unica", partialFilterExpression={"chave": {"$exists": True}})
-    pagamentos_col.create_index("codigo_pix", unique=True)
 except Exception:
     pass
 
-# ✅ FUNÇÃO DE GERAR PAGAMENTO — IGUALZINHA AO SEU BOT!
+# ✅ FUNÇÕES PAGAMENTO IGUAL BOT
 def gerar_pagamento_mp(valor, descricao="Grupo FLOW"):
     url = "https://api.mercadopago.com/v1/payments"
     headers = {
@@ -93,7 +91,6 @@ def gerar_pagamento_mp(valor, descricao="Grupo FLOW"):
         print(f"ERRO CONEXÃO MP: {str(e)}")
         return False, None, str(e)
 
-# ✅ FUNÇÃO DE VERIFICAR PAGAMENTO — TAMBÉM IGUAL AO BOT!
 def verificar_pagamento_mp(pag_id):
     url = f"https://api.mercadopago.com/v1/payments/{pag_id}"
     headers = {"Authorization": f"Bearer {MP_ACCESS_TOKEN}"}
@@ -101,11 +98,12 @@ def verificar_pagamento_mp(pag_id):
         resp = requests.get(url, headers=headers, timeout=10)
         if resp.status_code == 200:
             dados = resp.json()
-            return dados.get("status") == "approved", dados.get("transaction_amount", 0)
-        return False, 0
+            status = dados.get("status")
+            return status == "approved", dados.get("transaction_amount", 0), status
+        return False, 0, "error"
     except Exception as e:
         print(f"ERRO VERIFICAR: {str(e)}")
-        return False, 0
+        return False, 0, "error"
 
 @app.route("/")
 def index():
@@ -130,6 +128,8 @@ def grupos_dados():
             g["_id"] = str(g["_id"])
             dono_grupo = g.get("usuario_id", "")
             g["cliques"] = g.get("cliques", 0)
+            # ✅ GARANTE QUE A FOTO VEM SEMPRE, COLOCA PADRÃO SE VAZIO
+            g["foto"] = g.get("foto") or "https://files.catbox.moe/0aa6f2.png"
 
             if g.get("vip_ate") and agora < g["vip_ate"]:
                 g["vip_ativo"] = True
@@ -192,26 +192,25 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
         
-        # 🎁 Código VIP do dono: gratuito
+        # 🎁 CÓDIGO VIP DIRETO (PUBLICA IMEDIATAMENTE)
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             grupos_col.insert_one({
-                "link": link, "nome": nome, "categoria": categoria, "foto": foto,
+                "link": link, "nome": nome, "categoria": categoria, "foto": foto or "https://files.catbox.moe/0aa6f2.png",
                 "usuario_id": uid, "cliques": 0, "ativo": True,
                 "vip": True, "vip_ate": agora + timedelta(days=1),
                 "ultimo_impulso": agora, "criado_em": agora
             })
             return jsonify({"sucesso": "✅ Grupo GRÁTIS publicado!", "sem_pix": True})
 
-        # 💳 GERA PIX COM O MÉTODO INFALÍVEL DO SEU BOT!
+        # 💅 GERA PIX E SALVA COMO PENDENTE — NÃO PUBLICA AINDA!
         plano = PLANOS_VIP.get(dados.get("plano", "5"))
         ok, id_pagamento, codigo_pix = gerar_pagamento_mp(plano["valor"], f"Grupo: {nome}")
 
         if not ok:
             return jsonify({"erro": f"Falha ao gerar PIX: {codigo_pix}"}), 500
 
-        # Salva pendente
         pendente = grupos_pendentes_col.insert_one({
-            "link": link, "nome": nome, "categoria": categoria, "foto": foto,
+            "link": link, "nome": nome, "categoria": categoria, "foto": foto or "https://files.catbox.moe/0aa6f2.png",
             "usuario_id": uid, "plano": plano, "id_pagamento_mp": id_pagamento,
             "criado_em": agora
         })
@@ -237,9 +236,10 @@ def verificar_pagamento(pendente_id):
         if not pendente:
             return jsonify({"erro": "Não encontrado"}), 404
 
-        aprovado, valor = verificar_pagamento_mp(pendente["id_pagamento_mp"])
+        aprovado, valor, status = verificar_pagamento_mp(pendente["id_pagamento_mp"])
 
         if aprovado:
+            # ✅ SÓ PUBLICA SE FOR APROVADO MESMO!
             grupos_col.insert_one({
                 "link": pendente["link"], "nome": pendente["nome"], "categoria": pendente["categoria"],
                 "foto": pendente["foto"], "usuario_id": pendente["usuario_id"], "cliques": 0, "ativo": True,
@@ -248,6 +248,10 @@ def verificar_pagamento(pendente_id):
             })
             grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
             return jsonify({"sucesso": True, "mensagem": "✅ Pagamento aprovado! Grupo publicado!"})
+        
+        elif status in ["cancelled", "expired"]:
+            grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
+            return jsonify({"erro": "Pagamento cancelado/expirado"}), 400
         
         else:
             return jsonify({"status": "pendente", "mensagem": "Aguardando pagamento..."})
@@ -266,9 +270,11 @@ def meus_grupos():
         pendentes = list(grupos_pendentes_col.find({"usuario_id": uid}))
         todos = []
 
+        # ✅ GRUPOS JÁ PUBLICADOS
         for g in grupos:
             g["_id"] = str(g["_id"])
             g["cliques"] = g.get("cliques", 0)
+            g["foto"] = g.get("foto") or "https://files.catbox.moe/0aa6f2.png"
             g["vip_ativo"] = bool(g.get("vip_ate") and agora < g["vip_ate"])
             if g["vip_ativo"]:
                 g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
@@ -280,9 +286,11 @@ def meus_grupos():
             
             todos.append(g)
 
+        # ✅ ADICIONA PENDENTES COM MARCAÇÃO CLARA
         for p in pendentes:
             p["_id"] = str(p["_id"])
             p["status"] = "aguardando_pagamento"
+            p["foto"] = p.get("foto") or "https://files.catbox.moe/0aa6f2.png"
             todos.append(p)
 
         return jsonify(todos)
@@ -308,12 +316,23 @@ def impulsionar(grupo_id):
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ultimo_impulso": datetime.utcnow()}})
     return jsonify({"sucesso": True, "mensagem": "✅ Impulsionado!"})
 
+# ✅ CORRIGIDO: APAGA TANTO PUBLICADO QUANTO PENDENTE!
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-    grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
+    if not ObjectId.is_valid(grupo_id):
+        return jsonify({"erro": "ID inválido"}), 400
+
+    # Apaga dos aprovados verificando dono
+    res1 = grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
+    # Apaga dos pendentes também
+    res2 = grupos_pendentes_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
     cliques_col.delete_many({"grupo_id": grupo_id})
-    return jsonify({"sucesso": True})
+
+    if res1.deleted_count > 0 or res2.deleted_count > 0:
+        return jsonify({"sucesso": True, "mensagem": "✅ Grupo apagado!"})
+    else:
+        return jsonify({"erro": "Não encontrado ou não é dono"}), 404
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 def denunciar(grupo_id):
@@ -336,6 +355,7 @@ def adm_grupos():
     for g in todos:
         g["_id"] = str(g["_id"])
         g["cliques"] = g.get("cliques", 0)
+        g["foto"] = g.get("foto") or "https://files.catbox.moe/0aa6f2.png"
     return jsonify(todos)
 
 @app.route("/adm/denuncias")
