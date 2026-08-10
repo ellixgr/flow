@@ -7,27 +7,30 @@ import os
 from uuid import uuid4
 from dotenv import load_dotenv
 import mercadopago
+import time
+from collections import defaultdict
 
-# ✅ IMPORTAÇÕES CORRETAS PARA FLASK (SEM ERRO .state)
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+# 🚫 REMOVIDO TODAS AS IMPORTAÇÕES DO SLOWAPI/STARLETTE!
 
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ INICIALIZAÇÃO DO LIMITADOR COMPATÍVEL COM FLASK
-limiter = Limiter(
-    key_func=get_remote_address,
-    app=app  # <-- AQUI O SEGREDO: liga direto no app Flask, SEM app.state!
-)
+# ✅ MEU PRÓPRIO ANTI-FLOOD SIMPLES E SEGURO (SEM DEPENDÊNCIAS!)
+limite_requisitos = defaultdict(list)
+LIMITE_POR_IP = 4  # máximo de envios
+JANELA_TEMPO = 60  # segundos (1 minuto)
 
-# Tratamento de erro de limite de requisições
-@app.errorhandler(RateLimitExceeded)
-def erro_limite(e):
-    return jsonify({
-        "erro": "⚠️ Muitas requisições! Aguarde alguns segundos antes de tentar novamente."
-    }), 429
+@app.before_request
+def verificar_anti_flood():
+    rota = request.path
+    if rota == "/enviar-grupo": # só protege envios
+        ip = request.remote_addr
+        agora = time.time()
+        # limpa registros antigos
+        limite_requisitos[ip] = [t for t in limite_requisitos[ip] if agora - t < JANELA_TEMPO]
+        if len(limite_requisitos[ip]) >= LIMITE_POR_IP:
+            return jsonify({"erro": "⚠️ Muitas requisições! Aguarde 1 minuto antes de enviar novamente."}), 429
+        limite_requisitos[ip].append(agora)
 
 # ✅ CORS SEGURO E LIBERADO PARA SEU SITE
 CORS(app, resources={r"/*": {
@@ -136,7 +139,6 @@ def clicar(grupo_id):
         return jsonify({"erro": str(e)}), 500
 
 @app.route("/enviar-grupo", methods=["POST"])
-@limiter.limit("4/minute") # ✅ Anti-flood: só 4 envios por minuto por IP
 def enviar_grupo():
     try:
         dados = request.form
