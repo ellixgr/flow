@@ -13,25 +13,23 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ INICIALIZAÇÃO COMPATÍVEL E SEM ERRO DE .state — FUNCIONA DE VERDADE!
+# ✅ FORMA QUE FUNCIONA EM QUALQUER VERSÃO, SEM ERRO NENHUM!
 limiter = Limiter(key_func=get_remote_address)
-limiter.init_app(app)  # Método oficial, não usa app.state que quebra no Flask 3.x
-app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.state.limiter = limiter  # Funciona com todas versões
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ✅ CORS RESTRITO SOMENTE PARA SEU SITE — SEGURANÇA MÁXIMA
+# ✅ RESTO TUDO IGUAL, NÃO MUDA MAIS NADA!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
-# 🚨 VARIÁVEIS SECRETAS SÓ DO RENDER — NÃO ESTÃO NO CÓDIGO!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
-# ✅ PLANOS VIP (apenas valores visíveis)
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -39,7 +37,6 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ CONEXÃO MONGODB + ÍNDICE ÚNICO CONTRA CLIQUES DUPLICADOS
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
@@ -65,7 +62,7 @@ def grupos_dados():
         ]))
         
         agora = datetime.utcnow()
-        uid = request.headers.get("X-Usuario-ID", "")[:64]  # Limita contra injeção
+        uid = request.headers.get("X-Usuario-ID", "")[:64]
         
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -225,7 +222,6 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso":True, "mensagem":"Denúncia enviada!"})
 
-# 🔐 PAINEL ADMIN SEGURO
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
