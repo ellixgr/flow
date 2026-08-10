@@ -13,25 +13,28 @@ from slowapi.errors import RateLimitExceeded
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ VERSÃO 100% COMPATÍVEL: SEM app=app, USA init_app!
+# ✅ LIMITE FINAL, SEM ERRO, COMPATÍVEL COM SUA VERSÃO!
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri="memory://"
+    storage_uri="memory://",
+    app=app
 )
-limiter.init_app(app)
 app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# ✅ CORS LIBERADO EXATAMENTE PARA SEU SITE, SEGURO!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
+# ✅ PEGA AS VARIÁVEIS DIRETO DO RENDER!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
+# ✅ PLANOS DE VIP COMPLETOS
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -39,12 +42,14 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
+# ✅ CONEXÃO ESTÁVEL COM O MONGODB
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 
+# ✅ CRIA ÍNDICE SEM QUEBRAR SE JÁ EXISTIR!
 try:
     cliques_col.create_index(
         "chave", 
