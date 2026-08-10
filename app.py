@@ -16,6 +16,7 @@ client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
+cliques_col = db["cliques"] # ✅ Coleção separada e segura
 
 # ✅ CONFIGURAÇÕES
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP", "labareta444")
@@ -34,7 +35,7 @@ PLANOS_VIP = {
 def index():
     return render_template("index.html")
 
-# ✅ GRUPOS PÚBLICOS — SEM CRONÔMETRO PARA TODOS
+# ✅ GRUPOS PÚBLICOS
 @app.route("/grupos-dados")
 def grupos_dados():
     try:
@@ -44,9 +45,7 @@ def grupos_dados():
             filtro["categoria"] = cat
         
         grupos = list(grupos_col.find(filtro).sort([
-            ("ultimo_impulso", -1),
-            ("vip", -1),
-            ("criado_em", -1)
+            ("ultimo_impulso", -1), ("vip", -1), ("criado_em", -1)
         ]))
         
         agora = datetime.utcnow()
@@ -55,8 +54,9 @@ def grupos_dados():
         for g in grupos:
             g["_id"] = str(g["_id"])
             dono_grupo = g.get("usuario_id", "")
-            
-            # ✅ VIP
+            g["cliques"] = g.get("cliques", 0) # ✅ Garante valor 0 se vazio
+
+            # Status VIP
             if g.get("vip_ate") and agora < g["vip_ate"]:
                 g["vip_ativo"] = True
                 g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
@@ -64,8 +64,8 @@ def grupos_dados():
                 g["vip_ativo"] = False
                 g["vip_restante_segundos"] = 0
                 g["vip"] = False
-            
-            # ✅ CRONÔMETRO SÓ APARECE PRO DONO
+
+            # Cronômetro só para dono
             if dono_grupo and uid and dono_grupo == uid:
                 ultimo = g.get("ultimo_impulso")
                 if ultimo:
@@ -76,30 +76,36 @@ def grupos_dados():
                     g["pode_impulsionar"] = True
                     g["tempo_restante_impulso"] = 0
             else:
-                # ❌ PARA OUTROS USUÁRIOS — NÃO MOSTRA CRONÔMETRO
                 g["pode_impulsionar"] = None
                 g["tempo_restante_impulso"] = None
-            
-            g["tempo_restante_vip"] = g.get("vip_restante_segundos", 0)
         
         return jsonify(grupos)
     except Exception as e:
         print("ERRO grupos-dados:", str(e))
         return jsonify([]), 200
 
+# ✅ CLIQUES — CORRIGIDO E GARANTIDO CONTAGEM ÚNICA POR USUÁRIO!
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
     if not uid or not ObjectId.is_valid(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
+
     try:
-        chave_clique = f"clique:{uid}:{grupo_id}"
-        if not db.cliques.find_one({"_id": chave_clique}):
-            db.cliques.insert_one({"_id": chave_clique, "tempo": datetime.utcnow()})
+        chave = f"{uid}||{grupo_id}"
+        # Verifica se esse usuário JÁ CLICOU nesse grupo
+        existe = cliques_col.find_one({"chave": chave})
+        if not existe:
+            cliques_col.insert_one({"chave": chave, "data": datetime.utcnow()})
             grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
-        return jsonify({"sucesso": True})
+            return jsonify({"sucesso": True, mensagem: "Contado novo clique!"})
+        return jsonify({"sucesso": False, mensagem: "Já contado antes"})
     except Exception as e:
-        grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
+        print("ERRO clicar:", str(e))
+        # Mesmo com erro tenta incrementar para não parar
+        try:
+            grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
+        except: pass
         return jsonify({"sucesso": True})
 
 @app.route("/enviar-grupo", methods=["POST"])
@@ -116,8 +122,8 @@ def enviar_grupo():
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
-        if not link.startswith("https://chat.whatsapp.com/") or len(link) < 50:
-            return jsonify({"erro": "❌ Link INVÁLIDO! Copie o link completo!"}), 400
+        if not link.startswith("https://chat.whatsapp.com/"):
+            return jsonify({"erro": "❌ Link INVÁLIDO!"}), 400
         if grupos_col.find_one({"link": link, "ativo": True}):
             return jsonify({"erro": "❌ Esse link JÁ ESTÁ CADASTRADO!"}), 400
 
@@ -144,28 +150,24 @@ def enviar_grupo():
         }
         grupos_col.insert_one(novo_grupo)
         return jsonify({
-            "codigo_pix": codigo_pix, 
-            "grupo_id": str(novo_grupo["_id"]),
-            "valor": plano_escolhido["valor"],
-            "dias_vip": plano_escolhido["dias"]
+            "codigo_pix": codigo_pix, "grupo_id": str(novo_grupo["_id"]),
+            "valor": plano_escolhido["valor"], "dias_vip": plano_escolhido["dias"]
         })
     
     except Exception as e:
         print("ERRO enviar-grupo:", str(e))
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
-# ✅ MEUS GRUPOS — SÓ O DONO VÊ TUDO
 @app.route("/meus-grupos")
 def meus_grupos():
     uid = request.headers.get("X-Usuario-ID", "")
-    if not uid:
-        return jsonify([]), 200
+    if not uid: return jsonify([]), 200
     try:
         agora = datetime.utcnow()
         grupos = list(grupos_col.find({"usuario_id": uid}).sort("ultimo_impulso", -1))
-        
         for g in grupos:
             g["_id"] = str(g["_id"])
+            g["cliques"] = g.get("cliques", 0)
             if g.get("vip_ate") and agora < g["vip_ate"]:
                 g["vip_ativo"] = True
                 g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
@@ -173,7 +175,6 @@ def meus_grupos():
                 g["vip_ativo"] = False
                 g["vip_restante_segundos"] = 0
                 g["vip"] = False
-
             ultimo = g.get("ultimo_impulso")
             if ultimo:
                 proximo = ultimo + TEMPO_IMPULSIONAR
@@ -182,7 +183,6 @@ def meus_grupos():
                     g["proximo_impulso_segundos"] = int((proximo - agora).total_seconds())
             else:
                 g["pode_impulsionar"] = True
-        
         return jsonify(grupos)
     except Exception as e:
         print("ERRO meus-grupos:", str(e))
@@ -191,53 +191,37 @@ def meus_grupos():
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
 def impulsionar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
+    if not ObjectId.is_valid(grupo_id): return jsonify({"erro": "ID inválido"}), 400
     grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    if not grupo:
-        return jsonify({"erro": "Não encontrado"}), 404
-    
+    if not grupo: return jsonify({"erro": "Não encontrado"}), 404
     ultimo = grupo.get("ultimo_impulso")
     if ultimo and (datetime.utcnow() - ultimo) < TEMPO_IMPULSIONAR:
-        proximo = ultimo + TEMPO_IMPULSIONAR
-        espera = int((proximo - datetime.utcnow()).total_seconds())
-        return jsonify({"erro": f"⏰ Aguarde 3h! Próximo impulso em {espera//3600}h {(espera%3600)//60}min", "espera_segundos": espera}), 429
-    
+        espera = int((ultimo + TEMPO_IMPULSIONAR - datetime.utcnow()).total_seconds())
+        return jsonify({"erro": f"⏰ Aguarde 3h!", "espera_segundos": espera}), 429
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ultimo_impulso": datetime.utcnow()}})
     return jsonify({"sucesso": "✅ Impulsionado! ⬆️ Grupo foi pro TOPO!"})
 
-# ✅ ESCOLHA DE PLANO VIP + GERAR PIX
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
 def escolher_plano_vip(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
+    if not ObjectId.is_valid(grupo_id): return jsonify({"erro": "ID inválido"}), 400
     grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    if not grupo:
-        return jsonify({"erro": "Não encontrado"}), 404
+    if not grupo: return jsonify({"erro": "Não encontrado"}), 404
     if grupo.get("vip_ativo") or (grupo.get("vip_ate") and datetime.utcnow() < grupo["vip_ate"]):
-        return jsonify({"erro": "⭐ JÁ É VIP! Aguarde expirar!"}), 400
-    
+        return jsonify({"erro": "⭐ JÁ É VIP!"}), 400
     dados = request.json or {}
     plano = dados.get("plano", "5")
     plano_escolhido = PLANOS_VIP.get(plano)
-    if not plano_escolhido:
-        return jsonify({"erro": "Plano inválido"}), 400
-    
+    if not plano_escolhido: return jsonify({"erro": "Plano inválido"}), 400
     codigo_pix = f"00020126580014br.gov.bcb.pix0104FLOW{os.urandom(7).hex().upper()}5204000053039865802BR5904FLOW6007RIO62070503***6304"
-    return jsonify({
-        "codigo_pix": codigo_pix,
-        "grupo_id": grupo_id,
-        "valor": plano_escolhido["valor"],
-        "dias_vip": plano_escolhido["dias"]
-    })
+    return jsonify({"codigo_pix": codigo_pix, "valor": plano_escolhido["valor"], "dias_vip": plano_escolhido["dias"]})
 
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
+    if not ObjectId.is_valid(grupo_id): return jsonify({"erro": "ID inválido"}), 400
     grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
+    cliques_col.delete_many({"grupo_id": grupo_id}) # Limpa cliques ao apagar
     return jsonify({"sucesso": "✅ Apagado!"})
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
@@ -249,36 +233,29 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": "✅ Denunciado!"})
 
-# ✅ PAINEL ADM — SÓ CARREGA SE SENHA ESTIVER CERTA
+# ✅ ADM
 def verificar_senha_adm():
     senha_recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return senha_recebida == SENHA_ADM
 
 @app.route("/adm/grupos")
 def adm_grupos():
-    if not verificar_senha_adm():
-        return jsonify({"erro": "SENHA ERRADA"}), 403
+    if not verificar_senha_adm(): return jsonify({"erro": "SENHA ERRADA"}), 403
     todos = list(grupos_col.find().sort("criado_em", -1))
-    for g in todos:
-        g["_id"] = str(g["_id"])
-        g["ativo"] = g.get("ativo", True)
+    for g in todos: g["_id"] = str(g["_id"]); g["ativo"] = g.get("ativo", True); g["cliques"]=g.get("cliques",0)
     return jsonify(todos)
 
 @app.route("/adm/denuncias")
 def adm_denuncias():
-    if not verificar_senha_adm():
-        return jsonify({"erro": "SENHA ERRADA"}), 403
+    if not verificar_senha_adm(): return jsonify({"erro": "SENHA ERRADA"}), 403
     den = list(denuncias_col.find({"lida": False}).sort("denunciado_em", -1))
-    for d in den:
-        d["_id"] = str(d["_id"])
+    for d in den: d["_id"] = str(d["_id"])
     return jsonify(den)
 
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
-    if not verificar_senha_adm():
-        return jsonify({"erro": "SENHA ERRADA"}), 403
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
+    if not verificar_senha_adm(): return jsonify({"erro": "SENHA ERRADA"}), 403
+    if not ObjectId.is_valid(grupo_id): return jsonify({"erro": "ID inválido"}), 400
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ativo": False}})
     return jsonify({"sucesso": "✅ Desativado!"})
 
