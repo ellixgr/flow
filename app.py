@@ -10,21 +10,23 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-# Carrega variáveis do ambiente (Render sobrescreve local)
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ Limitador compatível com QUALQUER Flask, SEM ERRO DE .state!
-limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
+# ✅ LIMITE CORRIGIDO COMPATÍVEL COM FLASK SEM ERRO DE ARGUMENTO
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri="memory://",
+    app=app  # <-- ESSA LINHA FALTAVA! Liga direto ao app
+)
 app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ✅ CORS liberado APENAS para seu site, seguro e funcional
+# Resto do código continua TUDO IGUAL como te passei antes!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
-
 # ✅ Variáveis do Render
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
