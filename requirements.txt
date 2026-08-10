@@ -7,3 +7,4 @@ gunicorn==21.2.0
 mercadopago==2.3.0
 Pillow==10.4.0
 slowapi
+starlette==0.37.2
