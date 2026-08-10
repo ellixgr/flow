@@ -10,10 +10,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-load_dotenv()
+# Carrega variáveis do ambiente (Render sobrescreve local)
+load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ Limitador compatível com QUALQUER versão do Flask — SEM ERRO DE .state!
+# ✅ Limitador compatível com QUALQUER Flask, SEM ERRO DE .state!
 limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
 app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -24,7 +25,7 @@ CORS(app, resources={r"/*": {
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
-# ✅ Variáveis secretas vindas do Render, nunca no código!
+# ✅ Variáveis do Render
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
@@ -37,14 +38,14 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ Conexão segura com MongoDB
-client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+# ✅ Conexão mais estável com MongoDB
+client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 
-# ✅ ÍNDICE CORRIGIDO: cria apenas se não existir, não dá erro de duplicado!
+# ✅ Índice criado SEM ERRO se já existir!
 try:
     cliques_col.create_index(
         "chave", 
@@ -73,7 +74,7 @@ def grupos_dados():
         ]))
         
         agora = datetime.utcnow()
-        uid = request.headers.get("X-Usuario-ID", "")[:64]
+        uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
         
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -106,12 +107,12 @@ def grupos_dados():
         print("ERRO grupos-dados:", str(e))
         return jsonify([]), 200
 
-# ✅ ROTA DO CLIQUE CORRIGIDA DE VEZ: NUNCA DEIXA CHAVE NULA!
+# ✅ ROTA CLIQUE CORRIGIDA: NUNCA DEIXA CHAVE NULA!
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 @limiter.limit("30/minute")
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-    # Se vier vazio, gera um código único automático!
+    # GERA ID ÚNICO SE VIER VAZIO!
     if not uid:
         uid = str(uuid4())
 
@@ -139,6 +140,7 @@ def enviar_grupo():
         foto = dados.get("foto_base64", "")[:50000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
+        # Garante uid nunca vazio ao enviar
         if not uid: uid = str(uuid4())
 
         if not link or not nome:
