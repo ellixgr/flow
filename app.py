@@ -13,21 +13,20 @@ from slowapi.errors import RateLimitExceeded
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ LIMITE CORRIGIDO COMPATÍVEL COM FLASK SEM ERRO DE ARGUMENTO
+# ✅ VERSÃO 100% COMPATÍVEL: SEM app=app, USA init_app!
 limiter = Limiter(
     key_func=get_remote_address,
-    storage_uri="memory://",
-    app=app  # <-- ESSA LINHA FALTAVA! Liga direto ao app
+    storage_uri="memory://"
 )
+limiter.init_app(app)
 app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# Resto do código continua TUDO IGUAL como te passei antes!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
-# ✅ Variáveis do Render
+
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
@@ -40,14 +39,12 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ Conexão mais estável com MongoDB
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 
-# ✅ Índice criado SEM ERRO se já existir!
 try:
     cliques_col.create_index(
         "chave", 
@@ -109,12 +106,10 @@ def grupos_dados():
         print("ERRO grupos-dados:", str(e))
         return jsonify([]), 200
 
-# ✅ ROTA CLIQUE CORRIGIDA: NUNCA DEIXA CHAVE NULA!
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 @limiter.limit("30/minute")
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-    # GERA ID ÚNICO SE VIER VAZIO!
     if not uid:
         uid = str(uuid4())
 
@@ -142,7 +137,6 @@ def enviar_grupo():
         foto = dados.get("foto_base64", "")[:50000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-        # Garante uid nunca vazio ao enviar
         if not uid: uid = str(uuid4())
 
         if not link or not nome:
