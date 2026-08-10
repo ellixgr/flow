@@ -13,25 +13,25 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ INICIALIZAÇÃO CORRETA DO LIMITADOR (SEM ERRO DE .state!)
-limiter = Limiter(key_func=get_remote_address)
-limiter.init_app(app)  # <-- JEITO OFICIAL E SEGURO
-app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# ✅ INICIALIZAÇÃO COMPATÍVEL (SEM ERRO init_app!) — funciona com slowapi 0.1.9
+limiter = Limiter(key_func=get_remote_address())
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ✅ CORS RESTRITO APENAS PARA SEU SITE
+# ✅ CORS RESTRITO SOMENTE PARA SEU SITE (segurança máxima)
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
-# 🚨 VARIÁVEIS SECRETAS SÓ DO RENDER — NÃO EXPÕE NADA NO CÓDIGO!
+# 🚨 VARIÁVEIS SECRETAS SÓ DO RENDER — NENHUMA EXPOTA NO CÓDIGO!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
-# ✅ PLANOS VIP APENAS COM VALORES VISÍVEIS
+# ✅ PLANOS VIP (apenas valores visíveis, seguro)
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -39,7 +39,7 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ CONEXÃO COM MONGODB + ÍNDICE ÚNICO CONTRA CLIQUES DUPLICADOS
+# ✅ CONEXÃO MONGODB + ÍNDICE ÚNICO (impede cliques duplicados automaticamente)
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
@@ -65,7 +65,7 @@ def grupos_dados():
         ]))
         
         agora = datetime.utcnow()
-        uid = request.headers.get("X-Usuario-ID", "")[:64]  # Limita tamanho para segurança
+        uid = request.headers.get("X-Usuario-ID", "")[:64]  # Limita tamanho contra injeção
         
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -109,8 +109,8 @@ def clicar(grupo_id):
         if not cliques_col.find_one({"chave": chave}):
             cliques_col.insert_one({"chave": chave, "data": datetime.utcnow()})
             grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
-            return jsonify({"sucesso": True, "contado": True})
-        return jsonify({"sucesso": True, "contado": False, "mensagem": "Já contado antes!"})
+            return jsonify({"sucesso": True, "contado": True, "mensagem": "Clique registrado!"})
+        return jsonify({"sucesso": True, "contado": False, "mensagem": "Você já clicou nesse grupo!"})
     except Exception as e:
         print("ERRO clique:", str(e))
         return jsonify({"sucesso": False, "erro": str(e)}), 500
@@ -123,16 +123,16 @@ def enviar_grupo():
         link = dados.get("link", "").strip()[:256]
         nome = dados.get("nome", "").strip()[:100]
         categoria = dados.get("categoria", "Outros")[:50]
-        foto = dados.get("foto_base64", "")[:50000]
+        foto = dados.get("foto_base64", "")[:50000] # Limita tamanho da imagem
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "")[:64]
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
         if not link.startswith("https://chat.whatsapp.com/"):
-            return jsonify({"erro": "❌ Link INVÁLIDO!"}), 400
+            return jsonify({"erro": "❌ Link INVÁLIDO! Apenas links do WhatsApp são aceitos."}), 400
         if grupos_col.find_one({"link": link, "ativo": True}):
-            return jsonify({"erro": "❌ Esse link JÁ ESTÁ CADASTRADO!"}), 400
+            return jsonify({"erro": "❌ Esse link JÁ ESTÁ CADASTRADO e ativo!"}), 400
 
         agora = datetime.utcnow()
         
@@ -160,7 +160,7 @@ def enviar_grupo():
     
     except Exception as e:
         print("ERRO enviar:", str(e))
-        return jsonify({"erro": "Tente novamente mais tarde"}), 500
+        return jsonify({"erro": "Ocorreu um erro! Tente novamente mais tarde."}), 500
 
 @app.route("/meus-grupos")
 def meus_grupos():
@@ -198,13 +198,13 @@ def impulsionar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "")[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
-    if not grupo: return jsonify({"erro":"Não é seu grupo!"}),403
+    if not grupo: return jsonify({"erro":"Esse grupo não pertence a você!"}),403
     ultimo = grupo.get("ultimo_impulso")
     if ultimo and (datetime.utcnow()-ultimo) < TEMPO_IMPULSIONAR:
         espera = int((ultimo+TEMPO_IMPULSIONAR - datetime.utcnow()).total_seconds())
-        return jsonify({"erro":f"Aguarde {espera//3600}h {(espera%3600)//60}min"}),429
+        return jsonify({"erro":f"Aguarde {espera//3600}h {(espera%3600)//60}min para impulsionar novamente!"}),429
     grupos_col.update_one({"_id":ObjectId(grupo_id)},{"$set":{"ultimo_impulso":datetime.utcnow()}})
-    return jsonify({"sucesso":True})
+    return jsonify({"sucesso":True, "mensagem":"Impulsionado com sucesso!"})
 
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 @limiter.limit("10/minute")
@@ -212,43 +212,43 @@ def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID","")[:64]
     grupos_col.delete_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     cliques_col.delete_many({"grupo_id":grupo_id})
-    return jsonify({"sucesso":True})
+    return jsonify({"sucesso":True, "mensagem":"Grupo apagado!"})
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 @limiter.limit("20/minute")
 def denunciar(grupo_id):
     dados=request.json or {}
-    motivo = dados.get("motivo","")[:250]
+    motivo = dados.get("motivo","")[:250] # Limita tamanho do motivo
     denuncias_col.insert_one({
         "grupo_id":grupo_id,"motivo":motivo,
         "data":datetime.utcnow(),"lida":False
     })
-    return jsonify({"sucesso":True})
+    return jsonify({"sucesso":True, "mensagem":"Denúncia enviada!"})
 
-# 🔐 PAINEL ADMINISTRADOR SEGURO
+# 🔐 PAINEL ADMINISTRADOR PROTEGIDO POR SENHA
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
 
 @app.route("/adm/grupos")
 def adm_grupos():
-    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA!"}),403
+    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
     todos = list(grupos_col.find().sort("criado_em",-1))
     for g in todos: g["_id"]=str(g["_id"]);g["ativo"]=g.get("ativo",True);g["cliques"]=g.get("cliques",0)
     return jsonify(todos)
 
 @app.route("/adm/denuncias")
 def adm_denuncias():
-    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA!"}),403
+    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
     den = list(denuncias_col.find({"lida":False}).sort("data",-1))
     for d in den: d["_id"]=str(d["_id"])
     return jsonify(den)
 
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
-    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA!"}),403
+    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
     grupos_col.update_one({"_id":ObjectId(grupo_id)},{"$set":{"ativo":False}})
-    return jsonify({"sucesso":True})
+    return jsonify({"sucesso":True, "mensagem":"Grupo desativado!"})
 
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
 @limiter.limit("8/minute")
@@ -256,7 +256,7 @@ def escolher_plano_vip(grupo_id):
     uid = request.headers.get("X-Usuario-ID","")[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
-    if not grupo: return jsonify({"erro":"Não encontrado"}),404
+    if not grupo: return jsonify({"erro":"Grupo não encontrado ou não é seu!"}),404
     dados=request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano","5"))
     codigo_pix = f"00020126580014br.gov.bcb.pix0104FLOW{os.urandom(7).hex().upper()}5204000053039865802BR5904FLOW6007RIO62070503***6304"
