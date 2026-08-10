@@ -10,29 +10,26 @@ import mercadopago
 import time
 from collections import defaultdict
 
-# 🚫 REMOVIDO TODAS AS IMPORTAÇÕES DO SLOWAPI/STARLETTE!
-
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ MEU PRÓPRIO ANTI-FLOOD SIMPLES E SEGURO (SEM DEPENDÊNCIAS!)
+# ✅ Anti-Flood funcional
 limite_requisitos = defaultdict(list)
-LIMITE_POR_IP = 4  # máximo de envios
-JANELA_TEMPO = 60  # segundos (1 minuto)
+LIMITE_POR_IP = 4
+JANELA_TEMPO = 60
 
 @app.before_request
 def verificar_anti_flood():
     rota = request.path
-    if rota == "/enviar-grupo": # só protege envios
+    if rota == "/enviar-grupo":
         ip = request.remote_addr
         agora = time.time()
-        # limpa registros antigos
         limite_requisitos[ip] = [t for t in limite_requisitos[ip] if agora - t < JANELA_TEMPO]
         if len(limite_requisitos[ip]) >= LIMITE_POR_IP:
             return jsonify({"erro": "⚠️ Muitas requisições! Aguarde 1 minuto antes de enviar novamente."}), 429
         limite_requisitos[ip].append(agora)
 
-# ✅ CORS SEGURO E LIBERADO PARA SEU SITE
+# ✅ CORS seguro e liberado
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST", "OPTIONS"],
@@ -40,12 +37,12 @@ CORS(app, resources={r"/*": {
     "supports_credentials": True
 }})
 
-# ✅ VARIÁVEIS DE AMBIENTE (SÓ PEGA DO RENDER, NÃO DEIXA SENHAS NO CÓDIGO)
+# ✅ Variáveis do ambiente
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
-TEMPO_IMPULSIONAR = timedelta(hours=2) # 2h de espera entre impulsos
+TEMPO_IMPULSIONAR = timedelta(hours=2)
 
 # Inicializa Mercado Pago
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
@@ -57,7 +54,7 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ CONEXÃO COM BANCO MONGODB
+# Conexão MongoDB
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
@@ -66,7 +63,6 @@ denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 pagamentos_col = db["pagamentos"]
 
-# Índices únicos para não repetir cliques/pagamentos
 try:
     cliques_col.create_index("chave", unique=True, name="idx_chave_unica", partialFilterExpression={"chave": {"$exists": True}})
     pagamentos_col.create_index("codigo_pix", unique=True)
@@ -158,7 +154,7 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
         
-        # 🎁 Código VIP do dono: publica GRÁTIS imediatamente
+        # 🎁 Código VIP do dono: gratuito
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             grupos_col.insert_one({
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
@@ -168,7 +164,7 @@ def enviar_grupo():
             })
             return jsonify({"sucesso": "✅ Grupo GRÁTIS publicado!", "sem_pix": True})
 
-        # 💳 Usuário normal: gera pagamento PIX do Mercado Pago
+        # 💳 Gera PIX com verificação SEGURA (corrige o erro principal)
         plano = PLANOS_VIP.get(dados.get("plano", "5"))
         pix_request = {
             "transaction_amount": plano["valor"],
@@ -177,10 +173,21 @@ def enviar_grupo():
             "payer": {"email": "flow@suporte.com"}
         }
         pix_response = sdk.payment().create(pix_request)
-        codigo_pix = pix_response["point_of_interaction"]["transaction_data"]["qr_code"]
-        id_pagamento = pix_response["id"]
 
-        # Salva como pendente até confirmar pagamento
+        # ✅ VERIFICAÇÃO ANTES DE ACESSAR A CHAVE!
+        if not pix_response or "point_of_interaction" not in pix_response:
+            return jsonify({"erro": "Falha ao gerar pagamento: verifique o token do Mercado Pago"}), 500
+        
+        transaction_data = pix_response["point_of_interaction"].get("transaction_data")
+        if not transaction_data or "qr_code" not in transaction_data:
+            return jsonify({"erro": "Resposta inválida do Mercado Pago"}), 500
+
+        codigo_pix = transaction_data["qr_code"]
+        id_pagamento = pix_response.get("id")
+        if not id_pagamento:
+            return jsonify({"erro": "Não foi possível registrar o pagamento"}), 500
+
+        # Salva pendente
         pendente = grupos_pendentes_col.insert_one({
             "link": link, "nome": nome, "categoria": categoria, "foto": foto,
             "usuario_id": uid, "plano": plano, "id_pagamento_mp": id_pagamento,
@@ -196,7 +203,7 @@ def enviar_grupo():
     
     except Exception as e:
         print("ERRO envio:", str(e))
-        return jsonify({"erro": str(e)}), 500
+        return jsonify({"erro": f"Erro: {str(e)}"}), 500
 
 @app.route("/verificar-pagamento/<pendente_id>", methods=["POST"])
 def verificar_pagamento(pendente_id):
@@ -208,12 +215,10 @@ def verificar_pagamento(pendente_id):
         if not pendente:
             return jsonify({"erro": "Não encontrado"}), 404
 
-        # Consulta status no Mercado Pago
         pagamento = sdk.payment().get(pendente["id_pagamento_mp"])
         status = pagamento.get("status")
 
         if status == "approved":
-            # Publica grupo como VIP após pagamento aprovado
             grupos_col.insert_one({
                 "link": pendente["link"], "nome": pendente["nome"], "categoria": pendente["categoria"],
                 "foto": pendente["foto"], "usuario_id": pendente["usuario_id"], "cliques": 0, "ativo": True,
@@ -258,7 +263,6 @@ def meus_grupos():
             
             todos.append(g)
 
-        # Adiciona grupos pendentes de pagamento
         for p in pendentes:
             p["_id"] = str(p["_id"])
             p["status"] = "aguardando_pagamento"
@@ -303,7 +307,6 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": True})
 
-# ✅ Verificação segura da senha do painel ADM
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
@@ -355,17 +358,29 @@ def escolher_plano_vip(grupo_id):
     
     dados = request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano", "5"))
-    pix = sdk.payment().create({
-        "transaction_amount": plano["valor"],
-        "description": f"VIP {grupo['nome']}",
-        "payment_method_id": "pix",
-        "payer": {"email": "flow@suporte.com"}
-    })
-    return jsonify({
-        "codigo_pix": pix["point_of_interaction"]["transaction_data"]["qr_code"],
-        "valor": plano["valor"],
-        "dias_vip": plano["dias"]
-    })
+    try:
+        pix = sdk.payment().create({
+            "transaction_amount": plano["valor"],
+            "description": f"VIP {grupo['nome']}",
+            "payment_method_id": "pix",
+            "payer": {"email": "flow@suporte.com"}
+        })
+
+        # ✅ Verificação segura AQUI TAMBÉM!
+        if not pix or "point_of_interaction" not in pix:
+            return jsonify({"erro": "Falha ao gerar código PIX"}), 500
+        
+        td = pix["point_of_interaction"].get("transaction_data")
+        if not td or "qr_code" not in td:
+            return jsonify({"erro": "Código PIX indisponível"}), 500
+
+        return jsonify({
+            "codigo_pix": td["qr_code"],
+            "valor": plano["valor"],
+            "dias_vip": plano["dias"]
+        })
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
