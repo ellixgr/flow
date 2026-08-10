@@ -461,7 +461,7 @@ async function carregarGrupos() {
                 <!-- ✅ BOTÃO DENUNCIAR ADICIONADO AQUI -->
                 <button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">🚩 Denunciar</button>
             </div>
-            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+            <a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">👉 Entrar</a>
         </div>
     `;
 }).join("");
@@ -806,6 +806,20 @@ async function admVerDenuncias() {
         cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
     }
 }
+
+async function registrarClique(grupoId) {
+    try {
+        await fetch(`${API_URL}/clicar/${grupoId}`, {
+            method: "POST",
+            headers: { "X-Usuario-ID": usuarioId }
+        });
+        // Atualiza a lista para mostrar o número novo na hora
+        carregarGrupos();
+    } catch (e) {
+        console.log("Erro ao registrar clique:", e);
+    }
+}
+
 
 async function admDesativar(id) {
     if(!confirm("Tem certeza que quer DESATIVAR este grupo?")) return;
