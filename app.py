@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ SEM LIMITER/SLOWAPI = ZERO DE ERRO DE PARÂMETRO!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
@@ -32,6 +31,7 @@ PLANOS_VIP = {
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
+grupos_pendentes_col = db["grupos_pendentes"] # 🆕 Guarda antes de pagar
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 
@@ -114,6 +114,7 @@ def clicar(grupo_id):
         print("ERRO clique:", str(e))
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
+# ✅ CORRIGIDO: Salva como PENDENTE, NÃO PUBLICA ANTES DE PAGAR!
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -124,7 +125,7 @@ def enviar_grupo():
         foto = dados.get("foto_base64", "")[:50000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-        if not uid: uid = str(uuid4())
+        if not uid: uid = str(uuid4()) # Sempre salva o ID do usuário
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
@@ -135,6 +136,7 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
         
+        # 🎁 Se código VIP válido: PUBLICA DIRETO GRÁTIS
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             novo_grupo = {
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
@@ -145,21 +147,62 @@ def enviar_grupo():
             grupos_col.insert_one(novo_grupo)
             return jsonify({"sucesso": "✅ Grupo enviado GRÁTIS! VIP por 24h!", "sem_pix": True})
 
+        # 💳 Caso normal: SALVA COMO PENDENTE, NÃO APARECE NO SITE AINDA!
         plano = PLANOS_VIP.get(dados.get("plano","5"))
         codigo_pix = f"00020126580014br.gov.bcb.pix0104FLOW{os.urandom(7).hex().upper()}5204000053039865802BR5904FLOW6007RIO62070503***6304"
         
-        novo_grupo = {
+        pendente = {
             "link": link, "nome": nome, "categoria": categoria, "foto": foto,
-            "usuario_id": uid, "cliques": 0, "ativo": True,
-            "vip": False, "vip_ate": None,
-            "ultimo_impulso": agora, "criado_em": agora
+            "usuario_id": uid, "plano_escolhido": dados.get("plano","5"),
+            "criado_em": agora
         }
-        grupos_col.insert_one(novo_grupo)
-        return jsonify({"codigo_pix": codigo_pix, "valor": plano["valor"], "dias_vip": plano["dias"]})
+        res = grupos_pendentes_col.insert_one(pendente) # Salva só como pendente
+        return jsonify({
+            "pendente_id": str(res.inserted_id), # Envia o ID para depois confirmar pagamento
+            "codigo_pix": codigo_pix, 
+            "valor": plano["valor"], 
+            "dias_vip": plano["dias"]
+        })
     
     except Exception as e:
         print("ERRO enviar:", str(e))
         return jsonify({"erro": "Ocorreu um erro! Tente novamente mais tarde."}), 500
+
+# ✅ ROTA PARA CONFIRMAR PAGAMENTO E PUBLICAR O GRUPO NO SITE!
+@app.route("/confirmar-pagamento/<pendente_id>/<plano_id>", methods=["POST"])
+def confirmar_pagamento(pendente_id, plano_id):
+    try:
+        if not ObjectId.is_valid(pendente_id):
+            return jsonify({"erro": "ID inválido"}), 400
+        
+        pendente = grupos_pendentes_col.find_one({"_id": ObjectId(pendente_id)})
+        if not pendente:
+            return jsonify({"erro": "Grupo pendente não encontrado!"}), 404
+
+        plano = PLANOS_VIP.get(plano_id, PLANOS_VIP["5"])
+        agora = datetime.utcnow()
+
+        # Transforma pendente em grupo ATIVO e PUBLICADO no site
+        novo_grupo = {
+            "link": pendente["link"],
+            "nome": pendente["nome"],
+            "categoria": pendente["categoria"],
+            "foto": pendente["foto"],
+            "usuario_id": pendente["usuario_id"],
+            "cliques": 0,
+            "ativo": True,
+            "vip": True,
+            "vip_ate": agora + timedelta(days=plano["dias"]),
+            "ultimo_impulso": agora,
+            "criado_em": agora
+        }
+        grupos_col.insert_one(novo_grupo)
+        grupos_pendentes_col.delete_one({"_id": ObjectId(pendente_id)}) # Remove da fila pendente
+
+        return jsonify({"sucesso": True, "mensagem": "✅ Pagamento confirmado! Grupo publicado no site!"})
+    except Exception as e:
+        print("ERRO confirmar pagamento:", str(e))
+        return jsonify({"erro": str(e)}), 500
 
 @app.route("/meus-grupos")
 def meus_grupos():
@@ -168,6 +211,9 @@ def meus_grupos():
     try:
         agora = datetime.utcnow()
         grupos = list(grupos_col.find({"usuario_id": uid}).sort("ultimo_impulso", -1))
+        # Adiciona também os pendentes do usuário
+        pendentes = list(grupos_pendentes_col.find({"usuario_id": uid}))
+        todos = []
         for g in grupos:
             g["_id"] = str(g["_id"])
             g["cliques"] = g.get("cliques", 0)
@@ -186,7 +232,13 @@ def meus_grupos():
                     g["proximo_impulso_segundos"] = int((proximo - agora).total_seconds())
             else:
                 g["pode_impulsionar"] = True
-        return jsonify(grupos)
+            todos.append(g)
+        # Adiciona pendentes marcados como pendentes
+        for p in pendentes:
+            p["_id"] = str(p["_id"])
+            p["status"] = "pendente_pagamento"
+            todos.append(p)
+        return jsonify(todos)
     except Exception as e:
         print("ERRO meus:", str(e))
         return jsonify([])
@@ -211,6 +263,7 @@ def apagar_grupo(grupo_id):
     cliques_col.delete_many({"grupo_id":grupo_id})
     return jsonify({"sucesso":True, "mensagem":"Grupo apagado!"})
 
+# ✅ DENÚNCIAS RESTAURADAS COMPLETAMENTE
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 def denunciar(grupo_id):
     dados=request.json or {}
@@ -225,6 +278,7 @@ def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
 
+# ✅ PAINEL ADMIN COMPLETO: ver denúncias, desativar/apagar grupos
 @app.route("/adm/grupos")
 def adm_grupos():
     if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
@@ -239,11 +293,17 @@ def adm_denuncias():
     for d in den: d["_id"]=str(d["_id"])
     return jsonify(den)
 
+@app.route("/adm/marcar-denuncia-lida/<denuncia_id>", methods=["POST"])
+def adm_marcar_lida(denuncia_id):
+    if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
+    denuncias_col.update_one({"_id":ObjectId(denuncia_id)},{"$set":{"lida":True}})
+    return jsonify({"sucesso":True, "mensagem":"Denúncia marcada como lida!"})
+
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
     if not verificar_senha(): return jsonify({"erro":"SENHA ERRADA! Acesso negado."}),403
     grupos_col.update_one({"_id":ObjectId(grupo_id)},{"$set":{"ativo":False}})
-    return jsonify({"sucesso":True, "mensagem":"Grupo desativado!"})
+    return jsonify({"sucesso":True, "mensagem":"Grupo desativado/removido do site!"})
 
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
 def escolher_plano_vip(grupo_id):
