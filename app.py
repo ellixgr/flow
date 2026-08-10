@@ -13,23 +13,25 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ CORREÇÃO FINAL DEFINITIVA — SEM PARÊNTESES NO FINAL!
-limiter = Limiter(key_func=get_remote_address)  # <-- SEM () NO FINAL!
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# ✅ INICIALIZAÇÃO COMPATÍVEL E SEM ERRO DE .state — FUNCIONA DE VERDADE!
+limiter = Limiter(key_func=get_remote_address)
+limiter.init_app(app)  # Método oficial, não usa app.state que quebra no Flask 3.x
+app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ✅ RESTO DO CÓDIGO CONTINUA EXATAMENTE IGUAL ABAIXO!
+# ✅ CORS RESTRITO SOMENTE PARA SEU SITE — SEGURANÇA MÁXIMA
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
+# 🚨 VARIÁVEIS SECRETAS SÓ DO RENDER — NÃO ESTÃO NO CÓDIGO!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
+# ✅ PLANOS VIP (apenas valores visíveis)
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -37,6 +39,7 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
+# ✅ CONEXÃO MONGODB + ÍNDICE ÚNICO CONTRA CLIQUES DUPLICADOS
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
@@ -62,7 +65,7 @@ def grupos_dados():
         ]))
         
         agora = datetime.utcnow()
-        uid = request.headers.get("X-Usuario-ID", "")[:64]  # Limita tamanho contra injeção
+        uid = request.headers.get("X-Usuario-ID", "")[:64]  # Limita contra injeção
         
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -120,7 +123,7 @@ def enviar_grupo():
         link = dados.get("link", "").strip()[:256]
         nome = dados.get("nome", "").strip()[:100]
         categoria = dados.get("categoria", "Outros")[:50]
-        foto = dados.get("foto_base64", "")[:50000] # Limita tamanho da imagem
+        foto = dados.get("foto_base64", "")[:50000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "")[:64]
 
@@ -215,14 +218,14 @@ def apagar_grupo(grupo_id):
 @limiter.limit("20/minute")
 def denunciar(grupo_id):
     dados=request.json or {}
-    motivo = dados.get("motivo","")[:250] # Limita tamanho do motivo
+    motivo = dados.get("motivo","")[:250]
     denuncias_col.insert_one({
         "grupo_id":grupo_id,"motivo":motivo,
         "data":datetime.utcnow(),"lida":False
     })
     return jsonify({"sucesso":True, "mensagem":"Denúncia enviada!"})
 
-# 🔐 PAINEL ADMINISTRADOR PROTEGIDO POR SENHA
+# 🔐 PAINEL ADMIN SEGURO
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
