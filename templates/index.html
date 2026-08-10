@@ -551,6 +551,20 @@ async function enviarGrupo() {
             areaPix.style.display = "block";
             document.getElementById('codigoPix').value = dados.codigo_pix;
             respDiv.innerHTML = `<div style="color:orange;">💳 Valor: R$ ${valores[plano]}</div>`;
+
+         const btnVerificar = document.createElement('button');
+         btnVerificar.style = "width:100%; padding:10px; margin-top:10px;background:#25d366; color:white; border:none; border-radius:8px; font-weight:bold;";
+         btnVerificar.innerText = "✅ Já Paguei! Verificar";
+         btnVerificar.onclick = async () => {
+         respDiv.innerHTML = '<div style="color:#25d366;">🔄 Verificando...</div>';
+         setTimeout(() => {
+         fecharFormulario();
+         carregarGrupos();
+         carregarMeusGrupos();
+     }, 800);
+};
+areaPix.appendChild(btnVerificar);
+                
         } else if(dados.sucesso) {
             respDiv.innerHTML = `<div class="sucesso">✅ ${dados.sucesso}</div>`;
             document.getElementById('inpLink').value = "";
@@ -600,11 +614,22 @@ async function carregarMeusGrupos() {
         }
 
         lista.innerHTML = grupos.map(g => {
+            // Marca grupo pendente de pagamento com cor amarela
+            if(g.status === "aguardando_pagamento") {
+                return `
+                    <div style="padding:10px; border-bottom:1px solid #eee; background:#fff9c4; border-radius:8px;">
+                        <strong>⏳ ${g.nome}</strong><br>
+                        <span style="color:#f57f17">Aguardando pagamento...</span>
+                        <button class="btn-apagar" onclick="apagarGrupo('${g._id}')">🗑️ Apagar</button>
+                    </div>
+                `;
+            }
+
             let seloVip = "";
             let botaoImp = "";
             let botaoVip = "";
 
-            if(g.vip && g.vip_restante_segundos > 0) {
+            if(g.vip_ativo) {
                 seloVip = `<span style="color:gold;">⭐ VIP (${Math.floor(g.vip_restante_segundos/3600)}h)</span>`;
             }
 
@@ -637,7 +662,6 @@ async function carregarMeusGrupos() {
         lista.innerHTML = `<p class="vazio" style="color:red;">❌ Erro: ${erro.message}</p>`;
     }
 }
-
 async function impulsionar(id) {
     try {
         const res = await fetch(`${API_URL}/impulsionar/${id}`, {
@@ -651,22 +675,6 @@ async function impulsionar(id) {
         carregarGrupos();
     } catch(e) { alert("❌ Erro: " + e.message); }
 }
-
-async function impulsionarVip(id) {
-    try {
-        const res = await fetch(`${API_URL}/impulsionar-vip/${id}`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-        const dados = await res.json();
-        if(dados.erro) { alert(dados.erro); return; }
-        if(dados.codigo_pix) {
-            await navigator.clipboard.writeText(dados.codigo_pix);
-            alert(`💳 PIX COPIADO! Valor: R$${dados.valor.toFixed(2)}\n⏳ Válido por ${dados.dias_vip} dia(s)\n✅ Após pagamento, o grupo fica VIP!`);
-        }
-    } catch(e) { alert("❌ Erro: " + e.message); }
-}
-
 async function apagarGrupo(id) {
     if(!confirm("Tem certeza que quer apagar?")) return;
     try {
@@ -679,22 +687,18 @@ async function apagarGrupo(id) {
         carregarGrupos();
     } catch(e) { alert("❌ Erro: " + e.message); }
 }
-
 function trocarMotivo() {
     const sel = document.getElementById('selMotivo').value;
     document.getElementById('divOutroMotivo').classList.toggle('visivel', sel === 'outro');
 }
-
 function abrirDenuncia(grupoId) {
     grupoDenunciadoId = grupoId;
     document.getElementById('denunciaModal').style.display = "flex";
     document.getElementById('respDenuncia').innerHTML = "";
 }
-
 function fecharDenuncia() {
     document.getElementById('denunciaModal').style.display = "none";
 }
-
 async function enviarDenuncia() {
     const motivo = document.getElementById('selMotivo').value;
     const outro = document.getElementById('inpOutroMotivo').value.trim();
@@ -712,7 +716,6 @@ async function enviarDenuncia() {
         respDiv.innerHTML = '<div style="color:red;">❌ Erro ao denunciar.</div>';
     }
 }
-
 function mostrarTermos() { document.getElementById('termosModal').style.display = "flex"; }
 function fecharTermos() { document.getElementById('termosModal').style.display = "none"; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = "flex"; }
@@ -737,7 +740,6 @@ function abrirPainelAdm() {
         alert("❌ Erro ao verificar senha");
     });
 }
-
 function fecharPainelAdm() { document.getElementById('admModal').style.display = "none"; }
 
 async function admVerGrupos() {
@@ -829,8 +831,6 @@ async function admVerDenuncias() {
         cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
     }
 }
-
-
 async function registrarClique(grupoId) {
     try {
         await fetch(`${API_URL}/clicar/${grupoId}`, {
@@ -843,8 +843,6 @@ async function registrarClique(grupoId) {
         console.log("Erro ao registrar clique:", e);
     }
 }
-
-
 async function admDesativar(id) {
     if(!confirm("Tem certeza que quer DESATIVAR este grupo?")) return;
     try {
