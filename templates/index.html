@@ -128,7 +128,25 @@
         .card-cliques {font-size:11px; color:#aaa; margin-top:4px;}
         
         .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
-        .btn-denunciar {background:#ff4444; color:#fff; border:none; padding:8px 12px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:4px; font-weight:bold;}
+        .btn-denunciar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  background: rgba(255, 68, 68, 0.85);
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+}
+.btn-denunciar:hover {background:#ff0000;}
         .btn-apagar {background:#ff4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:6px; font-weight:bold; width:100%;}
         .btn-impulsionar {background:#ffd700; color:#000; border:none; padding:10px 14px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:6px; width:100%; font-size:14px;}
         .btn-impulsionar:disabled {background:#555; color:#aaa; cursor:not-allowed; opacity:0.7;}
@@ -451,6 +469,8 @@ async function carregarGrupos() {
     return `
         <div class="card ${g.vip_ativo ? 'vip' : ''}">
             ${seloVip}
+            <!-- ✅ BOTÃO DENUNCIA NO CANTO SUPERIOR DIREITO, SÓ ÍCONE -->
+            <button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">🚩</button>
             <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
             <div class="card-info">
                 <div class="card-nome">${g.nome}</div>
@@ -458,8 +478,6 @@ async function carregarGrupos() {
                 <div class="card-cliques">👁️ ${g.cliques || 0} cliques</div>
                 ${tempoImpulso}
                 ${tempoVip}
-                <!-- ✅ BOTÃO DENUNCIAR ADICIONADO AQUI -->
-                <button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">🚩 Denunciar</button>
             </div>
             <a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">👉 Entrar</a>
         </div>
@@ -796,16 +814,20 @@ async function admVerDenuncias() {
             return; 
         }
         cont.innerHTML = den.map(d => `
-            <div class="painel-adm-item">
-                <b>Grupo: ${d.grupo_nome || d.grupo_id}</b><br>
-                Motivo: ${d.motivo}<br>
-                Data: ${new Date(d.data).toLocaleString('pt-BR')}
+            <div class="painel-adm-item" style="display:flex;gap:10px;align-items:flex-start;">
+                <img src="${d.grupo_foto || 'https://files.catbox.moe/0aa6f2.png'}" width="45" height="45" style="border-radius:8px;object-fit:cover;">
+                <div>
+                    <b>${d.grupo_nome}</b><br>
+                    <a href="${d.grupo_link}" target="_blank" style="color:#25d366;font-size:12px;">${d.grupo_link}</a><br>
+                    Motivo: <span style="color:#ff5555">${d.motivo}</span>
+                </div>
             </div>
         `).join("");
     } catch(e) { 
         cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
     }
 }
+
 
 async function registrarClique(grupoId) {
     try {
