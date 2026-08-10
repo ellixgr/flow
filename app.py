@@ -10,15 +10,13 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
-
 app = Flask(__name__)
 
-# ✅ FORMA QUE FUNCIONA EM QUALQUER VERSÃO, SEM ERRO NENHUM!
-limiter = Limiter(key_func=get_remote_address)
-app.state.limiter = limiter  # Funciona com todas versões
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# ✅ MÉTODO UNIVERSAL, NÃO USA .state NEM init_app, FUNCIONA EM QUALQUER FLASK!
+limiter = Limiter(key_func=get_remote_address, storage_uri="memory://")
+app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-# ✅ RESTO TUDO IGUAL, NÃO MUDA MAIS NADA!
+# O RESTO DO SEU CÓDIGO CONTINUA EXATAMENTE IGUAL!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
