@@ -5,19 +5,32 @@ from datetime import datetime, timedelta
 from bson.objectid import ObjectId
 import os
 from dotenv import load_dotenv
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
 
-# 🚨 SÓ PEGA DAS VARIÁVEIS DO RENDER — NENHUM VALOR ESCRITO AQUI!
+# ✅ CORS RESTRITO — NÃO MAIS *!
+CORS(app, resources={r"/*": {
+    "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
+    "methods": ["GET", "POST"],
+    "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
+}})
+
+# ✅ LIMITE DE REQUISIÇÕES CONTRA FLOOD
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 🚨 SÓ PEGA DAS VARIÁVEIS DO RENDER — NENHUM VALOR AQUI!
 MONGO_URI = os.getenv("MONGO_URI")
-CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")  # COLOCA NO RENDER: labareta444
-SENHA_ADM = os.getenv("SENHA_ADM")            # COLOCA SUA SENHA FORTE NO RENDER!
+CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
+SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
-# ✅ PLANOS VIP (APENAS VALORES DE PREÇO/TEMPO, SEM SEGREDO)
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -25,18 +38,19 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# CONEXÃO BANCO
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
+cliques_col.create_index("chave", unique=True, name="idx_chave_unica")
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/grupos-dados")
+@limiter.limit("100/minute") # Limite por IP
 def grupos_dados():
     try:
         cat = request.args.get("categoria", "Todos")
@@ -49,7 +63,7 @@ def grupos_dados():
         ]))
         
         agora = datetime.utcnow()
-        uid = request.headers.get("X-Usuario-ID", "")
+        uid = request.headers.get("X-Usuario-ID", "")[:64] # Limita tamanho
         
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -83,8 +97,9 @@ def grupos_dados():
         return jsonify([]), 200
 
 @app.route("/clicar/<grupo_id>", methods=["POST"])
+@limiter.limit("30/minute")
 def clicar(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "")
+    uid = request.headers.get("X-Usuario-ID", "")[:64]
     if not uid or not ObjectId.is_valid(grupo_id):
         return jsonify({"erro": "ID inválido"}), 400
     try:
@@ -92,21 +107,23 @@ def clicar(grupo_id):
         if not cliques_col.find_one({"chave": chave}):
             cliques_col.insert_one({"chave": chave, "data": datetime.utcnow()})
             grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$inc": {"cliques": 1}})
-        return jsonify({"sucesso": True})
+            return jsonify({"sucesso": True, "contado": True})
+        return jsonify({"sucesso": True, "contado": False})
     except Exception as e:
         print("ERRO clique:", str(e))
-        return jsonify({"sucesso": True})
+        return jsonify({"sucesso": False}), 500
 
 @app.route("/enviar-grupo", methods=["POST"])
+@limiter.limit("15/minute")
 def enviar_grupo():
     try:
         dados = request.form
-        link = dados.get("link", "").strip()
-        nome = dados.get("nome", "").strip()
-        categoria = dados.get("categoria", "Outros")
-        foto = dados.get("foto_base64", "")
-        codigo = dados.get("codigo_adm", "").strip()
-        uid = request.headers.get("X-Usuario-ID", "")
+        link = dados.get("link", "").strip()[:256]
+        nome = dados.get("nome", "").strip()[:100]
+        categoria = dados.get("categoria", "Outros")[:50]
+        foto = dados.get("foto_base64", "")[:50000] # Limita tamanho
+        codigo = dados.get("codigo_adm", "").strip()[:64]
+        uid = request.headers.get("X-Usuario-ID", "")[:64]
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
@@ -117,7 +134,6 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
         
-        # COMPARA COM A VARIÁVEL DO RENDER — NÃO ESTÁ ESCRITO AQUI!
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             novo_grupo = {
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
@@ -142,11 +158,11 @@ def enviar_grupo():
     
     except Exception as e:
         print("ERRO enviar:", str(e))
-        return jsonify({"erro": str(e)}), 500
+        return jsonify({"erro": "Tente novamente mais tarde"}), 500
 
 @app.route("/meus-grupos")
 def meus_grupos():
-    uid = request.headers.get("X-Usuario-ID", "")
+    uid = request.headers.get("X-Usuario-ID", "")[:64]
     if not uid: return jsonify([])
     try:
         agora = datetime.utcnow()
@@ -175,8 +191,9 @@ def meus_grupos():
         return jsonify([])
 
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
+@limiter.limit("10/minute")
 def impulsionar(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "")
+    uid = request.headers.get("X-Usuario-ID", "")[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     if not grupo: return jsonify({"erro":"Não seu"}),403
@@ -188,25 +205,27 @@ def impulsionar(grupo_id):
     return jsonify({"sucesso":True})
 
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
+@limiter.limit("10/minute")
 def apagar_grupo(grupo_id):
-    uid = request.headers.get("X-Usuario-ID","")
+    uid = request.headers.get("X-Usuario-ID","")[:64]
     grupos_col.delete_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     cliques_col.delete_many({"grupo_id":grupo_id})
     return jsonify({"sucesso":True})
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
+@limiter.limit("20/minute")
 def denunciar(grupo_id):
-    dados=request.json
+    dados=request.json or {}
+    motivo = dados.get("motivo","")[:250]
     denuncias_col.insert_one({
-        "grupo_id":grupo_id,"motivo":dados.get("motivo",""),
+        "grupo_id":grupo_id,"motivo":motivo,
         "data":datetime.utcnow(),"lida":False
     })
     return jsonify({"sucesso":True})
 
-# 🔐 PAINEL ADM — SÓ FUNCIONA COM A SENHA DO RENDER, NÃO ESTÁ AQUI ESCRITA!
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
-    return SENHA_ADM and recebida == SENHA_ADM
+    return bool(SENHA_ADM and recebida == SENHA_ADM)
 
 @app.route("/adm/grupos")
 def adm_grupos():
@@ -229,8 +248,9 @@ def adm_desativar(grupo_id):
     return jsonify({"sucesso":True})
 
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
+@limiter.limit("8/minute")
 def escolher_plano_vip(grupo_id):
-    uid = request.headers.get("X-Usuario-ID","")
+    uid = request.headers.get("X-Usuario-ID","")[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
     grupo = grupos_col.find_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
     if not grupo: return jsonify({"erro":"Não encontrado"}),404
