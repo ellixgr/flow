@@ -432,37 +432,40 @@ async function carregarGrupos() {
         }
 
         lista.innerHTML = grupos.map(g => {
-            let seloVip = "";
-            if(g.vip_ativo) seloVip = '<span class="sela-vip">⭐</span>';
+    let seloVip = "";
+    if(g.vip_ativo) seloVip = '<span class="sela-vip">⭐</span>';
 
-            let tempoImpulso = "";
-            if(g.tempo_restante_impulso !== null && !g.pode_impulsionar && g.tempo_restante_impulso) {
-                const h = Math.floor(g.tempo_restante_impulso / 3600);
-                const m = Math.floor((g.tempo_restante_impulso % 3600) / 60);
-                tempoImpulso = `<div class="cronometro">⏰ Impulso em: ${h}h ${m}min</div>`;
-            }
+    let tempoImpulso = "";
+    if(g.tempo_restante_impulso !== null && !g.pode_impulsionar && g.tempo_restante_impulso) {
+        const h = Math.floor(g.tempo_restante_impulso / 3600);
+        const m = Math.floor((g.tempo_restante_impulso % 3600) / 60);
+        tempoImpulso = `<div class="cronometro">⏰ Impulso em: ${h}h ${m}min</div>`;
+    }
 
-            let tempoVip = "";
-            if(g.vip_ativo && g.tempo_restante_vip) {
-                const h = Math.floor(g.tempo_restante_vip / 3600);
-                tempoVip = `<div class="cronometro-vip">⭐ VIP: ${h}h restantes</div>`;
-            }
+    let tempoVip = "";
+    if(g.vip_ativo && g.vip_restante_segundos) {
+        const h = Math.floor(g.vip_restante_segundos / 3600);
+        tempoVip = `<div class="cronometro-vip">⭐ VIP: ${h}h restantes</div>`;
+    }
 
-            return `
-                <div class="card ${g.vip_ativo ? 'vip' : ''}">
-                    ${seloVip}
-                    <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
-                    <div class="card-info">
-                        <div class="card-nome">${g.nome}</div>
-                        <div class="card-cat">${g.categoria}</div>
-                        <div class="card-cliques">👁️ ${g.cliques || 0} cliques</div>
-                        ${tempoImpulso}
-                        ${tempoVip}
-                    </div>
-                    <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
-                </div>
-            `;
-        }).join("");
+    return `
+        <div class="card ${g.vip_ativo ? 'vip' : ''}">
+            ${seloVip}
+            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
+            <div class="card-info">
+                <div class="card-nome">${g.nome}</div>
+                <div class="card-cat">${g.categoria}</div>
+                <div class="card-cliques">👁️ ${g.cliques || 0} cliques</div>
+                ${tempoImpulso}
+                ${tempoVip}
+                <!-- ✅ BOTÃO DENUNCIAR ADICIONADO AQUI -->
+                <button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">🚩 Denunciar</button>
+            </div>
+            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+        </div>
+    `;
+}).join("");
+
 
     } catch (erro) {
         lista.innerHTML = `<p class="vazio" style="color:#ff6b6b;">❌ Erro ao carregar: ${erro.message}<br>Verifique se o backend está online.</p>`;
