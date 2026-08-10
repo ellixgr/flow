@@ -363,7 +363,6 @@
 
 <script>
 const API_URL = 'https://flow-mohn.onrender.com';
-const CODIGO_CORRETO = 'labareta444';
 
 let usuarioId = localStorage.getItem("flow_usuario_id");
 if (!usuarioId) { usuarioId = crypto.randomUUID(); localStorage.setItem("flow_usuario_id", usuarioId); }
@@ -482,20 +481,6 @@ function processarFoto(e) {
     };
     leitor.readAsDataURL(arquivo);
 }
-
-document.getElementById('inpCodigo')?.addEventListener('input', function() {
-    const cod = this.value.trim();
-    const aviso = document.getElementById('avisoCodigo');
-    if(cod === CODIGO_CORRETO) {
-        aviso.innerHTML = "✅ Código válido! GRÁTIS + VIP ativado!";
-        aviso.style.color = "green";
-    } else if(cod.length > 0) {
-        aviso.innerHTML = "❌ Código inválido — será cobrado";
-        aviso.style.color = "red";
-    } else {
-        aviso.innerHTML = "";
-    }
-});
 
 async function enviarGrupo() {
     const link = document.getElementById('inpLink').value.trim();
