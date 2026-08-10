@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-import mercadopago
+import requests  # ✅ Usamos ESSE, igual seu bot!
 import time
 from collections import defaultdict
 
@@ -37,15 +37,12 @@ CORS(app, resources={r"/*": {
     "supports_credentials": True
 }})
 
-# ✅ Variáveis do ambiente
+# ✅ Variáveis do ambiente (MESMO TOKEN DO SEU BOT!)
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")  # 🔑 O MESMO QUE FUNCIONA!
 TEMPO_IMPULSIONAR = timedelta(hours=2)
-
-# Inicializa Mercado Pago
-sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
 
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
@@ -68,6 +65,47 @@ try:
     pagamentos_col.create_index("codigo_pix", unique=True)
 except Exception:
     pass
+
+# ✅ FUNÇÃO DE GERAR PAGAMENTO — IGUALZINHA AO SEU BOT!
+def gerar_pagamento_mp(valor, descricao="Grupo FLOW"):
+    url = "https://api.mercadopago.com/v1/payments"
+    headers = {
+        "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+        "X-Idempotency-Key": str(uuid4())
+    }
+    payload = {
+        "transaction_amount": valor,
+        "description": descricao,
+        "payment_method_id": "pix",
+        "payer": {"email": "flow@suporte.com"}
+    }
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        if resp.status_code == 201:
+            dados = resp.json()
+            pix = dados.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code")
+            return True, dados["id"], pix
+        else:
+            print(f"ERRO MP: {resp.status_code} — {resp.text[:250]}")
+            return False, None, f"API retornou {resp.status_code}"
+    except Exception as e:
+        print(f"ERRO CONEXÃO MP: {str(e)}")
+        return False, None, str(e)
+
+# ✅ FUNÇÃO DE VERIFICAR PAGAMENTO — TAMBÉM IGUAL AO BOT!
+def verificar_pagamento_mp(pag_id):
+    url = f"https://api.mercadopago.com/v1/payments/{pag_id}"
+    headers = {"Authorization": f"Bearer {MP_ACCESS_TOKEN}"}
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            dados = resp.json()
+            return dados.get("status") == "approved", dados.get("transaction_amount", 0)
+        return False, 0
+    except Exception as e:
+        print(f"ERRO VERIFICAR: {str(e)}")
+        return False, 0
 
 @app.route("/")
 def index():
@@ -164,28 +202,12 @@ def enviar_grupo():
             })
             return jsonify({"sucesso": "✅ Grupo GRÁTIS publicado!", "sem_pix": True})
 
-        # 💳 Gera PIX com verificação SEGURA (corrige o erro principal)
+        # 💳 GERA PIX COM O MÉTODO INFALÍVEL DO SEU BOT!
         plano = PLANOS_VIP.get(dados.get("plano", "5"))
-        pix_request = {
-            "transaction_amount": plano["valor"],
-            "description": f"Grupo: {nome}",
-            "payment_method_id": "pix",
-            "payer": {"email": "flow@suporte.com"}
-        }
-        pix_response = sdk.payment().create(pix_request)
+        ok, id_pagamento, codigo_pix = gerar_pagamento_mp(plano["valor"], f"Grupo: {nome}")
 
-        # ✅ VERIFICAÇÃO ANTES DE ACESSAR A CHAVE!
-        if not pix_response or "point_of_interaction" not in pix_response:
-            return jsonify({"erro": "Falha ao gerar pagamento: verifique o token do Mercado Pago"}), 500
-        
-        transaction_data = pix_response["point_of_interaction"].get("transaction_data")
-        if not transaction_data or "qr_code" not in transaction_data:
-            return jsonify({"erro": "Resposta inválida do Mercado Pago"}), 500
-
-        codigo_pix = transaction_data["qr_code"]
-        id_pagamento = pix_response.get("id")
-        if not id_pagamento:
-            return jsonify({"erro": "Não foi possível registrar o pagamento"}), 500
+        if not ok:
+            return jsonify({"erro": f"Falha ao gerar PIX: {codigo_pix}"}), 500
 
         # Salva pendente
         pendente = grupos_pendentes_col.insert_one({
@@ -215,10 +237,9 @@ def verificar_pagamento(pendente_id):
         if not pendente:
             return jsonify({"erro": "Não encontrado"}), 404
 
-        pagamento = sdk.payment().get(pendente["id_pagamento_mp"])
-        status = pagamento.get("status")
+        aprovado, valor = verificar_pagamento_mp(pendente["id_pagamento_mp"])
 
-        if status == "approved":
+        if aprovado:
             grupos_col.insert_one({
                 "link": pendente["link"], "nome": pendente["nome"], "categoria": pendente["categoria"],
                 "foto": pendente["foto"], "usuario_id": pendente["usuario_id"], "cliques": 0, "ativo": True,
@@ -227,10 +248,6 @@ def verificar_pagamento(pendente_id):
             })
             grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
             return jsonify({"sucesso": True, "mensagem": "✅ Pagamento aprovado! Grupo publicado!"})
-        
-        elif status in ["cancelled", "expired"]:
-            grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
-            return jsonify({"erro": "Pagamento cancelado/expirado"}), 400
         
         else:
             return jsonify({"status": "pendente", "mensagem": "Aguardando pagamento..."})
@@ -358,29 +375,16 @@ def escolher_plano_vip(grupo_id):
     
     dados = request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano", "5"))
-    try:
-        pix = sdk.payment().create({
-            "transaction_amount": plano["valor"],
-            "description": f"VIP {grupo['nome']}",
-            "payment_method_id": "pix",
-            "payer": {"email": "flow@suporte.com"}
-        })
+    ok, codigo_pix, id_pagamento = gerar_pagamento_mp(plano["valor"], f"VIP {grupo['nome']}")
+    
+    if not ok:
+        return jsonify({"erro": "Falha ao gerar PIX"}), 500
 
-        # ✅ Verificação segura AQUI TAMBÉM!
-        if not pix or "point_of_interaction" not in pix:
-            return jsonify({"erro": "Falha ao gerar código PIX"}), 500
-        
-        td = pix["point_of_interaction"].get("transaction_data")
-        if not td or "qr_code" not in td:
-            return jsonify({"erro": "Código PIX indisponível"}), 500
-
-        return jsonify({
-            "codigo_pix": td["qr_code"],
-            "valor": plano["valor"],
-            "dias_vip": plano["dias"]
-        })
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+    return jsonify({
+        "codigo_pix": codigo_pix,
+        "valor": plano["valor"],
+        "dias_vip": plano["dias"]
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
