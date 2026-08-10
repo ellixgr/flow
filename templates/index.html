@@ -118,7 +118,7 @@
         .btn-meus {position:fixed; top:15px; left:15px; background:#ffd700; color:#000; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer; z-index:100;}
         
         .lista {display:flex; flex-direction:column; gap:12px;}
-        .card {background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding:12px; display:flex; align-items:center; gap:10px; position:relative;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding: 35px 12px 12px 12px; display:flex; align-items:center; gap:10px; position:relative;}
         .card.vip {box-shadow:0 0 20px rgba(255,215,0,0.4); border-color:#ffd700;}
         .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366; position:relative;}
         .sela-vip {position:absolute; top:0; left:45px; font-size:18px; z-index:10;}
@@ -814,15 +814,17 @@ async function admVerDenuncias() {
             return; 
         }
         cont.innerHTML = den.map(d => `
-            <div class="painel-adm-item" style="display:flex;gap:10px;align-items:flex-start;">
-                <img src="${d.grupo_foto || 'https://files.catbox.moe/0aa6f2.png'}" width="45" height="45" style="border-radius:8px;object-fit:cover;">
-                <div>
-                    <b>${d.grupo_nome}</b><br>
-                    <a href="${d.grupo_link}" target="_blank" style="color:#25d366;font-size:12px;">${d.grupo_link}</a><br>
-                    Motivo: <span style="color:#ff5555">${d.motivo}</span>
-                </div>
-            </div>
-        `).join("");
+    <div class="painel-adm-item" style="display:flex;gap:10px;align-items:flex-start;">
+        <img src="${d.grupo_foto || 'https://files.catbox.moe/0aa6f2.png'}" width="45" height="45" style="border-radius:8px;object-fit:cover;">
+        <div>
+            <b>${d.grupo_nome}</b><br>
+            <a href="${d.grupo_link}" target="_blank" style="color:#25d366;font-size:12px;">${d.grupo_link}</a><br>
+            Motivo: <span style="color:#ff5555">${d.motivo}</span>
+            <button class="btn-apagar" onclick="admDesativar('${d.grupo_id}')">🗑️ Apagar/Desativar</button>
+        </div>
+    </div>
+`).join("");
+
     } catch(e) { 
         cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
     }
