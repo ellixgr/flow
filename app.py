@@ -6,35 +6,22 @@ from bson.objectid import ObjectId
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
 
 load_dotenv(override=True)
 app = Flask(__name__)
 
-# ✅ LIMITE FINAL, SEM ERRO, COMPATÍVEL COM SUA VERSÃO!
-limiter = Limiter(
-    key_func=get_remote_address,
-    storage_uri="memory://",
-    app=app
-)
-app.register_error_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-# ✅ CORS LIBERADO EXATAMENTE PARA SEU SITE, SEGURO!
+# ✅ SEM LIMITER/SLOWAPI = ZERO DE ERRO DE PARÂMETRO!
 CORS(app, resources={r"/*": {
     "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
     "methods": ["GET", "POST"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"]
 }})
 
-# ✅ PEGA AS VARIÁVEIS DIRETO DO RENDER!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 TEMPO_IMPULSIONAR = timedelta(hours=3)
 
-# ✅ PLANOS DE VIP COMPLETOS
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
     "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
@@ -42,14 +29,12 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ CONEXÃO ESTÁVEL COM O MONGODB
 client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 denuncias_col = db["denuncias"]
 cliques_col = db["cliques"]
 
-# ✅ CRIA ÍNDICE SEM QUEBRAR SE JÁ EXISTIR!
 try:
     cliques_col.create_index(
         "chave", 
@@ -65,7 +50,6 @@ def index():
     return render_template("index.html")
 
 @app.route("/grupos-dados")
-@limiter.limit("100/minute")
 def grupos_dados():
     try:
         cat = request.args.get("categoria", "Todos")
@@ -112,7 +96,6 @@ def grupos_dados():
         return jsonify([]), 200
 
 @app.route("/clicar/<grupo_id>", methods=["POST"])
-@limiter.limit("30/minute")
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
     if not uid:
@@ -132,7 +115,6 @@ def clicar(grupo_id):
         return jsonify({"sucesso": False, "erro": str(e)}), 500
 
 @app.route("/enviar-grupo", methods=["POST"])
-@limiter.limit("15/minute")
 def enviar_grupo():
     try:
         dados = request.form
@@ -210,7 +192,6 @@ def meus_grupos():
         return jsonify([])
 
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
-@limiter.limit("10/minute")
 def impulsionar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
@@ -224,7 +205,6 @@ def impulsionar(grupo_id):
     return jsonify({"sucesso":True, "mensagem":"Impulsionado com sucesso!"})
 
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
-@limiter.limit("10/minute")
 def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID","").strip()[:64]
     grupos_col.delete_one({"_id":ObjectId(grupo_id),"usuario_id":uid})
@@ -232,7 +212,6 @@ def apagar_grupo(grupo_id):
     return jsonify({"sucesso":True, "mensagem":"Grupo apagado!"})
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
-@limiter.limit("20/minute")
 def denunciar(grupo_id):
     dados=request.json or {}
     motivo = dados.get("motivo","")[:250]
@@ -267,7 +246,6 @@ def adm_desativar(grupo_id):
     return jsonify({"sucesso":True, "mensagem":"Grupo desativado!"})
 
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
-@limiter.limit("8/minute")
 def escolher_plano_vip(grupo_id):
     uid = request.headers.get("X-Usuario-ID","").strip()[:64]
     if not ObjectId.is_valid(grupo_id): return jsonify({"erro":"ID inválido"}),400
