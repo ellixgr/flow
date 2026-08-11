@@ -6,7 +6,7 @@ from bson.objectid import ObjectId
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-import mercadopago
+import requests  # ✅ IGUAL NO BOT — SEM BIBLIOTECA MERCADOPAGO!
 import time
 from collections import defaultdict
 
@@ -43,18 +43,11 @@ CORS(app, resources={r"/*": {
 }})
 
 
-# ✅ Variáveis do ambiente
+# ✅ Variáveis do ambiente — SEM VALIDAÇÃO QUE QUEBRA O SERVIDOR!
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "").strip() # TIRA ESPAÇOS AUTOMATICAMENTE!
-
-# ✅ INICIALIZA DEPOIS, SEM QUEBRAR O SERVIDOR
-sdk = None
-if MP_ACCESS_TOKEN and (MP_ACCESS_TOKEN.startswith("APP_USR-") or MP_ACCESS_TOKEN.startswith("TEST-")):
-    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
-else:
-    print("⚠️ AVISO: MP_ACCESS_TOKEN está vazio ou formato errado!")
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "").strip()  # TIRA ESPAÇOS AUTOMÁTICAMENTE!
 
 TEMPO_IMPULSIONAR = timedelta(hours=2)
 
@@ -64,6 +57,58 @@ PLANOS_VIP = {
     "30": {"valor": 30.00, "dias": 3, "nome": "R$ 30,00 → 3 Dias VIP"},
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
+
+# ✅ FUNÇÃO IGUALZINHA DO SEU BOT — GARANTIDO QUE FUNCIONA!
+def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp"):
+    url = "https://api.mercadopago.com/v1/payments"
+    headers = {
+        "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
+        "Content-Type": "application/json",
+        "X-Idempotency-Key": str(uuid4())
+    }
+    payload = {
+        "transaction_amount": valor,
+        "description": descricao,
+        "payment_method_id": "pix",
+        "payer": {
+            "email": "flow@suporte.com",
+            "first_name": "Usuario",
+            "last_name": "Flow"
+        }
+    }
+
+    try:
+        resp = requests.post(url, json=payload, headers=headers, timeout=15)
+        print(f"[MP] Status: {resp.status_code} | Resposta: {resp.text[:400]}") # LOG COMPLETO NO RENDER!
+
+        if resp.status_code == 201:
+            dados = resp.json()
+            codigo_pix = dados.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code")
+            id_pagamento = dados.get("id")
+            if codigo_pix and id_pagamento:
+                return True, codigo_pix, id_pagamento, None
+            else:
+                return False, None, None, "Retorno da API não tem código PIX"
+        else:
+            return False, None, None, f"Erro API: Status {resp.status_code} — {resp.text[:200]}"
+
+    except Exception as e:
+        print(f"[MP] Erro conexão: {str(e)}")
+        return False, None, None, f"Falha ao conectar: {str(e)}"
+
+# ✅ FUNÇÃO TAMBÉM IGUAL AO BOT PARA VERIFICAR PAGAMENTO
+def verificar_pagamento_mp(pag_id):
+    url = f"https://api.mercadopago.com/v1/payments/{pag_id}"
+    headers = {"Authorization": f"Bearer {MP_ACCESS_TOKEN}"}
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            dados = resp.json()
+            return dados.get("status") == "approved", dados.get("transaction_amount", 0)
+        return False, 0
+    except Exception as e:
+        print(f"[MP] Erro verificar pagamento: {e}")
+        return False, 0
 
 # Conexão MongoDB com estabilidade extra
 client = MongoClient(
@@ -155,8 +200,7 @@ def clicar(grupo_id):
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
-        # 🚨 PRIMEIRO VERIFICA SE O MERCADO PAGO ESTÁ CONFIGURADO
-        if not sdk:
+        if not MP_ACCESS_TOKEN:
             return jsonify({"erro": "❌ Mercado Pago NÃO CONFIGURADO! Verifique o token MP_ACCESS_TOKEN nas variáveis."}), 500
 
         dados = request.form
@@ -186,34 +230,12 @@ def enviar_grupo():
             })
             return jsonify({"sucesso": "✅ Grupo GRÁTIS publicado!", "sem_pix": True})
 
-        # 💳 Gera PIX com LOG DETALHADO DO ERRO
+        # 💳 AGORA USA A FUNÇÃO DO BOT!
         plano = PLANOS_VIP.get(dados.get("plano", "5"))
-        pix_request = {
-            "transaction_amount": plano["valor"],
-            "description": f"Grupo: {nome}",
-            "payment_method_id": "pix",
-            "payer": {"email": "flow@suporte.com"}
-        }
-        
-        # 🚨 IMPRIME RESPOSTA COMPLETA NO LOG DO RENDER
-        pix_response = sdk.payment().create(pix_request)
-        print("=== RESPOSTA MERCADO PAGO ===")
-        print(pix_response) # MOSTRA O MOTIVO EXATO!
+        ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(plano["valor"], f"Grupo: {nome}")
 
-        if "error" in pix_response:
-            return jsonify({"erro": f"Erro MP: {pix_response['error_message']}"}), 500
-
-        if not pix_response or "point_of_interaction" not in pix_response:
-            return jsonify({"erro": "Falha ao gerar pagamento: verifique o token do Mercado Pago"}), 500
-        
-        transaction_data = pix_response["point_of_interaction"].get("transaction_data")
-        if not transaction_data or "qr_code" not in transaction_data:
-            return jsonify({"erro": "Resposta inválida do Mercado Pago"}), 500
-
-        codigo_pix = transaction_data["qr_code"]
-        id_pagamento = pix_response.get("id")
-        if not id_pagamento:
-            return jsonify({"erro": "Não foi possível registrar o pagamento"}), 500
+        if not ok:
+            return jsonify({"erro": f"❌ {erro}"}), 500
 
         # Salva pendente
         pendente = grupos_pendentes_col.insert_one({
@@ -236,7 +258,7 @@ def enviar_grupo():
 @app.route("/verificar-pagamento/<pendente_id>", methods=["POST"])
 def verificar_pagamento(pendente_id):
     try:
-        if not sdk:
+        if not MP_ACCESS_TOKEN:
             return jsonify({"erro": "Mercado Pago não configurado"}),500
 
         if not ObjectId.is_valid(pendente_id):
@@ -246,10 +268,9 @@ def verificar_pagamento(pendente_id):
         if not pendente:
             return jsonify({"erro": "Não encontrado"}), 404
 
-        pagamento = sdk.payment().get(pendente["id_pagamento_mp"])
-        status = pagamento.get("status")
+        aprovado, valor_pago = verificar_pagamento_mp(pendente["id_pagamento_mp"])
 
-        if status == "approved":
+        if aprovado:
             grupos_col.insert_one({
                 "link": pendente["link"], "nome": pendente["nome"], "categoria": pendente["categoria"],
                 "foto": pendente["foto"], "usuario_id": pendente["usuario_id"], "cliques": 0, "ativo": True,
@@ -259,7 +280,7 @@ def verificar_pagamento(pendente_id):
             grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
             return jsonify({"sucesso": True, "mensagem": "✅ Pagamento aprovado! Grupo publicado!"})
         
-        elif status in ["cancelled", "expired"]:
+        elif valor_pago == -1: # Cancelado/expirado
             grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
             return jsonify({"erro": "Pagamento cancelado/expirado"}), 400
         
@@ -395,37 +416,21 @@ def escolher_plano_vip(grupo_id):
     if not grupo:
         return jsonify({"erro": "Não é seu grupo!"}), 404
     
-    if not sdk:
+    if not MP_ACCESS_TOKEN:
         return jsonify({"erro": "Mercado Pago não configurado"}),500
 
     dados = request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano", "5"))
-    try:
-        pix = sdk.payment().create({
-            "transaction_amount": plano["valor"],
-            "description": f"VIP {grupo['nome']}",
-            "payment_method_id": "pix",
-            "payer": {"email": "flow@suporte.com"}
-        })
-        print("Resposta VIP:", pix) # Log de erro
+    
+    ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(plano["valor"], f"VIP {grupo['nome']}")
+    if not ok:
+        return jsonify({"erro": erro}), 500
 
-        if "error" in pix:
-            return jsonify({"erro": f"Erro MP: {pix['error_message']}"}), 500
-
-        if not pix or "point_of_interaction" not in pix:
-            return jsonify({"erro": "Falha ao gerar código PIX"}), 500
-        
-        td = pix["point_of_interaction"].get("transaction_data")
-        if not td or "qr_code" not in td:
-            return jsonify({"erro": "Código PIX indisponível"}), 500
-
-        return jsonify({
-            "codigo_pix": td["qr_code"],
-            "valor": plano["valor"],
-            "dias_vip": plano["dias"]
-        })
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
+    return jsonify({
+        "codigo_pix": codigo_pix,
+        "valor": plano["valor"],
+        "dias_vip": plano["dias"]
+    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
