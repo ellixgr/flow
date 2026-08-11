@@ -380,7 +380,32 @@
 </div>
 
 <script>
-const API_URL = 'https://flow-mohn.onrender.com';
+// Lista todos os seus backends do Render, um após o outro
+const BACKENDS = [
+  'https://flow-mohn.onrender.com',
+  'https://flow-81mj.onrender.com'
+];
+let API_URL = BACKENDS[0]; // Começa pelo primeiro
+
+// Função para trocar automaticamente se um estiver fora do ar
+async function testarBackend() {
+  for (const url of BACKENDS) {
+    try {
+      const res = await fetch(`${url}/grupos-dados`, {method: 'HEAD', cache: 'no-store'});
+      if (res.ok) { API_URL = url; return true; }
+    } catch(e) { continue; }
+  }
+  return false; // Nenhum funcionando
+}
+
+// Executa antes de carregar os grupos
+testarBackend().then(ok => {
+  if(!ok) {
+    document.getElementById('lista-grupos').innerHTML = `<p class="vazio" style="color:#ff6b6b;">❌ Nenhum servidor disponível no momento!</p>`;
+  } else {
+    carregarGrupos(); // Carrega normalmente com o link que estiver online
+  }
+});
 
 let usuarioId = localStorage.getItem("flow_usuario_id");
 if (!usuarioId) { usuarioId = crypto.randomUUID(); localStorage.setItem("flow_usuario_id", usuarioId); }
