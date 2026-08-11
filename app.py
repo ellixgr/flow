@@ -37,15 +37,18 @@ CORS(app, resources={r"/*": {
     "supports_credentials": True
 }})
 
-# ✅ Variáveis do ambiente
+# ✅ Variáveis do ambiente + VALIDAÇÃO OBRIGATÓRIA
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
 MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
-TEMPO_IMPULSIONAR = timedelta(hours=2)
 
-# Inicializa Mercado Pago
+# 🚨 CORREÇÃO CRUCIAL: Verifica token antes de inicializar
+if not MP_ACCESS_TOKEN or not MP_ACCESS_TOKEN.startswith("APP_USR-"):
+    raise ValueError("ERRO: MP_ACCESS_TOKEN ausente ou inválido!")
 sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+
+TEMPO_IMPULSIONAR = timedelta(hours=2)
 
 PLANOS_VIP = {
     "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
@@ -54,8 +57,15 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# Conexão MongoDB
-client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=10000, connectTimeoutMS=20000)
+# Conexão MongoDB com estabilidade extra
+client = MongoClient(
+    MONGO_URI,
+    serverSelectionTimeoutMS=10000,
+    connectTimeoutMS=20000,
+    socketTimeoutMS=45000,
+    retryWrites=True,
+    retryReads=True
+)
 db = client["flow_db"]
 grupos_col = db["grupos"]
 grupos_pendentes_col = db["grupos_pendentes"]
@@ -164,7 +174,7 @@ def enviar_grupo():
             })
             return jsonify({"sucesso": "✅ Grupo GRÁTIS publicado!", "sem_pix": True})
 
-        # 💳 Gera PIX com verificação SEGURA
+        # 💳 Gera PIX com LOG DETALHADO DO ERRO
         plano = PLANOS_VIP.get(dados.get("plano", "5"))
         pix_request = {
             "transaction_amount": plano["valor"],
@@ -172,7 +182,14 @@ def enviar_grupo():
             "payment_method_id": "pix",
             "payer": {"email": "flow@suporte.com"}
         }
+        
+        # 🚨 IMPRIME RESPOSTA COMPLETA NO LOG DO RENDER
         pix_response = sdk.payment().create(pix_request)
+        print("=== RESPOSTA MERCADO PAGO ===")
+        print(pix_response) # VAI MOSTRAR O MOTIVO EXATO DO ERRO!
+
+        if "error" in pix_response:
+            return jsonify({"erro": f"Erro MP: {pix_response['error_message']}"}), 500
 
         if not pix_response or "point_of_interaction" not in pix_response:
             return jsonify({"erro": "Falha ao gerar pagamento: verifique o token do Mercado Pago"}), 500
@@ -201,7 +218,7 @@ def enviar_grupo():
         })
     
     except Exception as e:
-        print("ERRO envio:", str(e))
+        print("ERRO GERAL envio:", str(e))
         return jsonify({"erro": f"Erro: {str(e)}"}), 500
 
 @app.route("/verificar-pagamento/<pendente_id>", methods=["POST"])
@@ -295,7 +312,7 @@ def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
     grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
     cliques_col.delete_many({"grupo_id": grupo_id})
-    denuncias_col.delete_many({"grupo_id": grupo_id}) # Também limpa denúncias do usuário
+    denuncias_col.delete_many({"grupo_id": grupo_id})
     return jsonify({"sucesso": True})
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
@@ -315,7 +332,6 @@ def verificar_senha():
 def adm_grupos():
     if not verificar_senha():
         return jsonify({"erro": "SENHA ERRADA!"}), 403
-    # ✅ Lista TODOS os grupos existentes
     todos = list(grupos_col.find().sort("criado_em", -1))
     for g in todos:
         g["_id"] = str(g["_id"])
@@ -332,7 +348,7 @@ def adm_denuncias():
         obj_grupo_id = ObjectId(d["grupo_id"])
         g = grupos_col.find_one({"_id": obj_grupo_id})
         if not g:
-            denuncias_col.delete_one({"_id": d["_id"]}) # Limpa denúncia de grupo apagado
+            denuncias_col.delete_one({"_id": d["_id"]})
             continue
         res.append({
             "_id": str(d["_id"]),
@@ -345,20 +361,14 @@ def adm_denuncias():
         })
     return jsonify(res)
 
-# ✅ CORRIGIDO: APAGA DEFINITIVAMENTE + LIMPA TUDO
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
     if not verificar_senha():
         return jsonify({"erro": "SENHA ERRADA!"}), 403
-
     obj_id = ObjectId(grupo_id)
-    # Remove o grupo completamente
     grupos_col.delete_one({"_id": obj_id})
-    # Remove denúncias ligadas
     denuncias_col.delete_many({"grupo_id": grupo_id})
-    # Remove registros de cliques
     cliques_col.delete_many({"grupo_id": grupo_id})
-    
     return jsonify({"sucesso": True, "mensagem": "✅ Grupo APAGADO completamente!"})
 
 @app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
@@ -379,6 +389,10 @@ def escolher_plano_vip(grupo_id):
             "payment_method_id": "pix",
             "payer": {"email": "flow@suporte.com"}
         })
+        print("Resposta VIP:", pix) # Log de erro
+
+        if "error" in pix:
+            return jsonify({"erro": f"Erro MP: {pix['error_message']}"}), 500
 
         if not pix or "point_of_interaction" not in pix:
             return jsonify({"erro": "Falha ao gerar código PIX"}), 500
