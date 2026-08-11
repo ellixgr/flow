@@ -29,24 +29,32 @@ def verificar_anti_flood():
             return jsonify({"erro": "⚠️ Muitas requisições! Aguarde 1 minuto antes de enviar novamente."}), 429
         limite_requisitos[ip].append(agora)
 
-# ✅ CORS seguro e liberado
+# ✅ CORS SEGURO E LIBERADO COMPLETAMENTE
 CORS(app, resources={r"/*": {
-    "origins": ["https://ellixgr.github.io", "https://ellixgr.github.io/flow"],
+    "origins": [
+        "https://ellixgr.github.io", 
+        "https://ellixgr.github.io/flow",
+        "https://flow-81mj.onrender.com",
+        "https://flow-mohn.onrender.com"
+    ],
     "methods": ["GET", "POST", "OPTIONS"],
     "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"],
     "supports_credentials": True
 }})
 
-# ✅ Variáveis do ambiente + VALIDAÇÃO OBRIGATÓRIA
+
+# ✅ Variáveis do ambiente
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN")
+MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "").strip() # TIRA ESPAÇOS AUTOMATICAMENTE!
 
-# 🚨 CORREÇÃO CRUCIAL: Verifica token antes de inicializar
-if not MP_ACCESS_TOKEN or not MP_ACCESS_TOKEN.startswith("APP_USR-"):
-    raise ValueError("ERRO: MP_ACCESS_TOKEN ausente ou inválido!")
-sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+# ✅ INICIALIZA DEPOIS, SEM QUEBRAR O SERVIDOR
+sdk = None
+if MP_ACCESS_TOKEN and (MP_ACCESS_TOKEN.startswith("APP_USR-") or MP_ACCESS_TOKEN.startswith("TEST-")):
+    sdk = mercadopago.SDK(MP_ACCESS_TOKEN)
+else:
+    print("⚠️ AVISO: MP_ACCESS_TOKEN está vazio ou formato errado!")
 
 TEMPO_IMPULSIONAR = timedelta(hours=2)
 
@@ -147,6 +155,10 @@ def clicar(grupo_id):
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
+        # 🚨 PRIMEIRO VERIFICA SE O MERCADO PAGO ESTÁ CONFIGURADO
+        if not sdk:
+            return jsonify({"erro": "❌ Mercado Pago NÃO CONFIGURADO! Verifique o token MP_ACCESS_TOKEN nas variáveis."}), 500
+
         dados = request.form
         link = dados.get("link", "").strip()[:256]
         nome = dados.get("nome", "").strip()[:100]
@@ -186,7 +198,7 @@ def enviar_grupo():
         # 🚨 IMPRIME RESPOSTA COMPLETA NO LOG DO RENDER
         pix_response = sdk.payment().create(pix_request)
         print("=== RESPOSTA MERCADO PAGO ===")
-        print(pix_response) # VAI MOSTRAR O MOTIVO EXATO DO ERRO!
+        print(pix_response) # MOSTRA O MOTIVO EXATO!
 
         if "error" in pix_response:
             return jsonify({"erro": f"Erro MP: {pix_response['error_message']}"}), 500
@@ -224,6 +236,9 @@ def enviar_grupo():
 @app.route("/verificar-pagamento/<pendente_id>", methods=["POST"])
 def verificar_pagamento(pendente_id):
     try:
+        if not sdk:
+            return jsonify({"erro": "Mercado Pago não configurado"}),500
+
         if not ObjectId.is_valid(pendente_id):
             return jsonify({"erro": "ID inválido"}), 400
         
@@ -380,6 +395,9 @@ def escolher_plano_vip(grupo_id):
     if not grupo:
         return jsonify({"erro": "Não é seu grupo!"}), 404
     
+    if not sdk:
+        return jsonify({"erro": "Mercado Pago não configurado"}),500
+
     dados = request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano", "5"))
     try:
