@@ -346,10 +346,19 @@ def impulsionar(grupo_id):
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-    grupos_col.delete_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    cliques_col.delete_many({"grupo_id": grupo_id})
-    denuncias_col.delete_many({"grupo_id": grupo_id})
-    return jsonify({"sucesso": True})
+    if not uid or not ObjectId.is_valid(grupo_id):
+        return jsonify({"erro": "Dados inválidos"}), 400
+    obj_id = ObjectId(grupo_id)
+    res_grupo = grupos_col.delete_one({"_id": obj_id, "usuario_id": uid})
+    grupos_pendentes_col.delete_one({"_id": obj_id, "usuario_id": uid})
+
+    if res_grupo.deleted_count == 0:
+        return jsonify({"erro": "Você não é o dono ou grupo não existe!"}), 403
+    grupos_id_str = grupo_id
+    cliques_col.delete_many({"chave": {"$regex": f"\\Q{grupos_id_str}\\E"}})
+    denuncias_col.delete_many({"grupo_id": grupos_id_str})
+    return jsonify({"sucesso": True, "mensagem": "✅ Grupo apagado com sucesso!"})
+
 
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 def denunciar(grupo_id):
