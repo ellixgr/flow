@@ -156,12 +156,16 @@ def grupos_dados():
             dono_grupo = g.get("usuario_id", "")
             g["cliques"] = g.get("cliques", 0)
 
+            dono_grupo = g.get("usuario_id", "")
             if g.get("vip_ate") and agora < g["vip_ate"]:
                 g["vip_ativo"] = True
-                g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
+                if dono_grupo and uid and dono_grupo == uid:
+                    g["vip_restante_segundos"] = int((g["vip_ate"] - agora).total_seconds())
+                else:
+                    g["vip_restante_segundos"] = None
             else:
                 g["vip_ativo"] = False
-                g["vip_restante_segundos"] = 0
+                g["vip_restante_segundos"] = None
                 g["vip"] = False
 
             if dono_grupo and uid and dono_grupo == uid:
