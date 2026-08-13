@@ -157,7 +157,7 @@
         
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
-        .btn-adm {font-size:10px; opacity:0.3; margin-left:8px; color:#888; text-decoration:none;}
+        .btn-adm {font-size:10px; opacity:0.12; margin-left:8px; color:#666; text-decoration:none; user-select:none;}
         
         .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
         .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
@@ -221,13 +221,12 @@
         <div class="nome-time">Team Flow</div>
         <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados. Links verificados e atualizados diariamente!</p>
     </div>
-
-
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
-        <video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
-            <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
-        </video>
+<video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
+    <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
+</video>
+
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
@@ -259,12 +258,17 @@
 </main>
 
 <footer>
-    © 2020-2026 FLOW — 
+    © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
-    <a href="#" onclick="mostrarPrivacidade()">Privacidade</a> |
-    <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">Parceiros</a>
-    <a href="#" class="btn-adm" onclick="abrirPainelAdm(); return false;">⚙️</a>
+    <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
+    <a id="btnAdmTrigger" class="btn-adm" href="#">⚙️</a>
 </footer>
+
+<script>
+// Define o ano atual automaticamente
+document.getElementById('ano-atual').textContent = new Date().getFullYear();
+</script>
+
 
 <!-- FORM ENVIAR GRUPO -->
 <div id="formModal" class="modal" onclick="fecharFormulario()">
@@ -747,25 +751,44 @@ function fecharTermos() { document.getElementById('termosModal').style.display =
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = "flex"; }
 function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = "none"; }
 
-function abrirPainelAdm() {
-    senhaAdm = prompt("🔐 Digite a senha de administração:");
-    if(!senhaAdm) return;
+// ✅ SISTEMA DE CLIQUE TRIPLO RÁPIDO NO ÍCONE ⚙️
+let contadorCliquesAdm = 0;
+let tempoUltimoCliqueAdm = 0;
+const INTERVALO_CLIQUE_RAPIDO = 400; // milissegundos entre cliques
+
+document.getElementById('btnAdmTrigger').addEventListener('click', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    const agora = Date.now();
     
-    fetch(`${API_URL}/adm/grupos`, {
-        headers: { "X-Adm-Senha": senhaAdm }
-    }).then(res => {
-        if(res.status === 403) {
-            alert("❌ SENHA ERRADA!");
-            senhaAdm = "";
-            return;
-        }
-        document.getElementById('admModal').style.display = "flex";
-        document.getElementById('admConteudo').innerHTML = "<p>🔄 Carregando...</p>";
-        admVerGrupos();
-    }).catch(() => {
-        alert("❌ Erro ao verificar senha");
-    });
-}
+    if (agora - tempoUltimoCliqueAdm > INTERVALO_CLIQUE_RAPIDO) {
+        contadorCliquesAdm = 1; // reinicia se demorar muito
+    } else {
+        contadorCliquesAdm++;
+    }
+    tempoUltimoCliqueAdm = agora;
+
+    if (contadorCliquesAdm === 3) {
+        contadorCliquesAdm = 0; // reseta
+        // Abre a caixa de senha só após 3 cliques rápidos
+        senhaAdm = prompt("🔐 Digite a senha de administração:");
+        if(!senhaAdm) return;
+        
+        fetch(`${API_URL}/adm/grupos`, {
+            headers: { "X-Adm-Senha": senhaAdm }
+        }).then(res => {
+            if(res.status === 403) {
+                alert("❌ SENHA ERRADA!");
+                senhaAdm = "";
+                return;
+            }
+            document.getElementById('admModal').style.display = "flex";
+            document.getElementById('admConteudo').innerHTML = "<p>🔄 Carregando...</p>";
+            admVerGrupos();
+        }).catch(() => {
+            alert("❌ Erro ao verificar senha");
+        });
+    }
+});
 function fecharPainelAdm() { document.getElementById('admModal').style.display = "none"; }
 
 async function admVerGrupos() {
