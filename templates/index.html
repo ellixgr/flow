@@ -491,7 +491,7 @@ async function carregarGrupos() {
     }
 
     let tempoVip = "";
-    if(g.vip_ativo && g.vip_restante_segundos) {
+    if(g.vip_ativo && g.vip_restante_segundos != null) {
         const h = Math.floor(g.vip_restante_segundos / 3600);
         tempoVip = `<div class="cronometro-vip">⭐ VIP: ${h}h restantes</div>`;
     }
