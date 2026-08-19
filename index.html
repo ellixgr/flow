@@ -206,7 +206,7 @@
 
     <!-- 📋 LISTA DE GRUPOS -->
     <div class="lista" id="lista-grupos">
-        <p class="vazio">Nenhum grupo cadastrado ainda.<br>Você pode cadastrar pelo Painel ADM! 💻</p>
+        <p class="vazio">Carregando grupos...</p>
     </div>
 </main>
 
@@ -280,8 +280,8 @@
         <h2>🔒 Política de Privacidade</h2>
         <p style="font-size:14px; line-height:1.7; color:#333;">
             🔒 Seus dados estão protegidos!<br><br>
-            📋 Armazenamos apenas: link, nome e categoria dos grupos.<br>
-            ❌ Não coletamos dados pessoais dos visitantes.<br>
+            📋 Armazenamos apenas: link, nome e categoria dos grupos.<br><br>
+            ❌ Não coletamos dados pessoais dos visitantes.<br><br>
             🛡️ O site não armazena conversas ou mensagens privadas.
         </p>
         <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
@@ -292,16 +292,19 @@
 // ANO ATUAL NO RODAPÉ
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
-// DADOS DOS GRUPOS — SALVO LOCALMENTE
-let grupos = JSON.parse(localStorage.getItem('flow_grupos') || '[]');
+// 🔗 URL DO BACKEND
+const API_URL = 'https://flow-81mj.onrender.com';
+
+let grupos = [];
 let categoriaAtual = 'Todos';
-let senhaAdmDefinida = localStorage.getItem('flow_senha_adm') || null;
+let chaveAdm = localStorage.getItem('chave_adm_flow') || null;
 let painelAberto = false;
 
-// SALVAR GRUPOS NO LOCALSTORAGE
-function salvarGrupos() {
-    localStorage.setItem('flow_grupos', JSON.stringify(grupos));
-    carregarGrupos();
+// 📲 GERAR ID DO USUÁRIO
+let usuarioId = localStorage.getItem('usuario_id_flow');
+if (!usuarioId) {
+    usuarioId = 'usr_' + Math.random().toString(36).substring(2, 15);
+    localStorage.setItem('usuario_id_flow', usuarioId);
 }
 
 // ABRIR E FECHAR MENU
@@ -337,79 +340,98 @@ function trocarCategoria(cat) {
     carregarGrupos();
 }
 
-// CARREGAR GRUPOS NA TELA
-function carregarGrupos() {
+// 📥 CARREGAR GRUPOS DO BACKEND
+async function carregarGrupos() {
     const lista = document.getElementById('lista-grupos');
-    
-    let filtrados = grupos;
-    if(categoriaAtual !== 'Todos') {
-        filtrados = grupos.filter(g => g.categoria === categoriaAtual);
-    }
-    
-    if(filtrados.length === 0) {
-        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Cadastre pelo Painel ADM! 💻</p>';
-        return;
-    }
-    
-    lista.innerHTML = filtrados.map(g => `
-        <div class="card">
-            <img src="${g.foto}" alt="Foto do grupo">
-            <div class="card-info">
-                <div class="card-nome">${g.nome}</div>
-                <div class="card-cat">${g.categoria}</div>
+    try {
+        const res = await fetch(`${API_URL}/grupos-dados?categoria=${encodeURIComponent(categoriaAtual)}`, {
+            headers: { 'X-Usuario-ID': usuarioId }
+        });
+        if (!res.ok) throw new Error('Erro ao buscar');
+        grupos = await res.json();
+        
+        if (!Array.isArray(grupos) || grupos.length === 0) {
+            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<p>Seja o primeiro a enviar! 🎉</p>';
+            return;
+        }
+
+        lista.innerHTML = grupos.map(g => `
+            <div class="card">
+                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
+                <div class="card-info">
+                    <div class="card-nome">${g.nome} ${g.vip_ativo ? ' ⭐VIP' : ''}</div>
+                    <div class="card-cat">${g.categoria} • 👁️ ${g.cliques || 0} cliques</div>
+                </div>
+                <a href="${g.link}" target="_blank" class="btn-entrar" onclick="contarClique('${g._id}')">👉 Entrar</a>
             </div>
-            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
-        </div>
-    `).join('');
-}
-
-// 🔐 SISTEMA DE SENHA — SEM SENHA NO CÓDIGO!
-function abrirPainelComSenha() {
-    // Se NÃO tem senha definida → pedir para criar uma
-    if(!senhaAdmDefinida) {
-        const novaSenha1 = prompt("🔐 PRIMEIRO ACESSO — Crie uma senha de Administrador:\n(Guarde bem, não aparece no código!)");
-        if(!novaSenha1 || novaSenha1.length < 4) {
-            alert("❌ Senha muito curta! Mínimo 4 caracteres.");
-            return;
-        }
-        const novaSenha2 = prompt("🔐 Confirme a senha:");
-        if(novaSenha1 !== novaSenha2) {
-            alert("❌ As senhas NÃO coincidem!");
-            return;
-        }
-        senhaAdmDefinida = novaSenha1;
-        localStorage.setItem('flow_senha_adm', senhaAdmDefinida);
-        alert("✅ Senha criada com sucesso! Guarde bem!");
-        painelAberto = true;
-        document.getElementById('admModal').style.display = "flex";
-        abaCadastrar();
-        return;
-    }
-    
-    // Se JÁ tem senha → pedir para entrar
-    const senhaDigitada = prompt("🔐 Digite a senha de Administrador:");
-    if(senhaDigitada === senhaAdmDefinida) {
-        painelAberto = true;
-        document.getElementById('admModal').style.display = "flex";
-        abaCadastrar();
-    } else if(senhaDigitada) {
-        alert("❌ Senha INCORRETA!");
+        `).join('');
+    } catch (erro) {
+        console.error(erro);
+        lista.innerHTML = '<p class="vazio">❌ Erro ao carregar grupos.<br>Verifique se o backend está online.</p>';
     }
 }
 
-// ABRIR PAINEL ADM — 3 CLIQUES RÁPIDOS NO ⚙️
+// 👆 CONTAR CLIQUE
+async function contarClique(grupoId) {
+    try {
+        await fetch(`${API_URL}/clicar/${grupoId}`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Usuario-ID': usuarioId 
+            }
+        });
+    } catch (e) {}
+}
+
+// 🔐 LOGIN ADM — COMPARA CHAVE COM O RENDER!
+async function loginAdm(chave) {
+    try {
+        const res = await fetch(`${API_URL}/adm/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chave_adm: chave })
+        });
+        if (res.ok) {
+            chaveAdm = chave;
+            localStorage.setItem('chave_adm_flow', chave);
+            return true;
+        }
+        return false;
+    } catch { return false; }
+}
+
+// 🔐 ABRIR PAINEL — 3 CLIQUES RÁPIDOS NO ⚙️
 let cliquesAdm = 0;
 let ultimoCliqueAdm = 0;
-document.getElementById('btnAdmTrigger').addEventListener('click', e => {
+document.getElementById('btnAdmTrigger').addEventListener('click', async e => {
     e.preventDefault();
     const agora = Date.now();
-    if(agora - ultimoCliqueAdm > 400) cliquesAdm = 1;
+    if (agora - ultimoCliqueAdm > 400) cliquesAdm = 1;
     else cliquesAdm++;
     ultimoCliqueAdm = agora;
     
-    if(cliquesAdm === 3) {
+    if (cliquesAdm === 3) {
         cliquesAdm = 0;
-        abrirPainelComSenha();
+        let chave;
+        if (chaveAdm) {
+            chave = chaveAdm;
+        } else {
+            chave = prompt("🔐 Digite a CHAVE DE ADMINISTRADOR:");
+            if (!chave) return;
+        }
+        
+        const ok = await loginAdm(chave);
+        if (ok) {
+            painelAberto = true;
+            document.getElementById('admModal').style.display = "flex";
+            abaCadastrar();
+            atualizarListaGrupos();
+        } else {
+            alert("❌ CHAVE ERRADA!");
+            chaveAdm = null;
+            localStorage.removeItem('chave_adm_flow');
+        }
     }
 });
 
@@ -429,57 +451,96 @@ function abaListaGrupos() {
     atualizarListaGrupos();
 }
 
-function atualizarListaGrupos() {
+// 📋 ATUALIZAR LISTA DO PAINEL ADM
+async function atualizarListaGrupos() {
     const conteudo = document.getElementById('conteudoGrupos');
-    if(grupos.length === 0) {
-        conteudo.innerHTML = '<p style="text-align:center; color:#888;">Nenhum grupo cadastrado.</p>';
-        return;
-    }
-    conteudo.innerHTML = grupos.map((g, i) => `
-        <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <img src="${g.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-            <div style="flex:1; min-width:150px;">
-                <strong>${g.nome}</strong><br>
-                <small style="color:#666;">${g.categoria}</small>
+    try {
+        const res = await fetch(`${API_URL}/adm/grupos`, {
+            headers: { 'X-Chave-Adm': chaveAdm }
+        });
+        if (!res.ok) throw new Error('Sem permissão');
+        const lista = await res.json();
+        
+        if (!lista.length) {
+            conteudo.innerHTML = '<p style="text-align:center; color:#888;">Nenhum grupo cadastrado.</p>';
+            return;
+        }
+        
+        conteudo.innerHTML = lista.map(g => `
+            <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                <div style="flex:1; min-width:150px;">
+                    <strong>${g.nome}</strong><br>
+                    <small style="color:#666;">${g.categoria} • 👁️ ${g.cliques || 0}</small>
+                </div>
+                <button onclick="apagarGrupoAdm('${g._id}')" style="background:#ff4444; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">🗑️</button>
             </div>
-            <button onclick="excluirGrupo(${i})" style="background:#ff4444; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">🗑️</button>
-        </div>
-    `).join('');
+        `).join('');
+    } catch {
+        conteudo.innerHTML = '<p style="text-align:center; color:red;">❌ Erro ao carregar.</p>';
+    }
 }
 
-function cadastrarGrupo() {
+// ✅ CADASTRAR GRUPO — DIRETO NO BANCO!
+async function cadastrarGrupo() {
     const link = document.getElementById('admLink').value.trim();
     const nome = document.getElementById('admnome').value.trim();
     const categoria = document.getElementById('admCategoria').value;
     const foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
     const resp = document.getElementById('respAdm');
     
-    if(!link || !nome) {
+    if (!link || !nome) {
         resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
         return;
     }
-    if(!link.startsWith('https://chat.whatsapp.com/')) {
+    if (!link.startsWith('https://chat.whatsapp.com/')) {
         resp.innerHTML = '<p class="erro">❌ Link inválido! Use link do WhatsApp.</p>';
         return;
     }
     
-    grupos.unshift({ link, nome, categoria, foto });
-    salvarGrupos();
-    
-    resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
-    
-    // Limpar campos
-    document.getElementById('admLink').value = '';
-    document.getElementById('admnome').value = '';
-    
-    setTimeout(() => { resp.innerHTML = ''; }, 3000);
+    try {
+        const res = await fetch(`${API_URL}/adm/cadastrar-grupo`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Chave-Adm': chaveAdm 
+            },
+            body: JSON.stringify({ link, nome, categoria, foto })
+        });
+        const dados = await res.json();
+        
+        if (res.ok && dados.sucesso) {
+            resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
+            document.getElementById('admLink').value = '';
+            document.getElementById('admnome').value = '';
+            carregarGrupos();
+            setTimeout(() => { resp.innerHTML = ''; }, 3000);
+        } else {
+            resp.innerHTML = `<p class="erro">${dados.erro || 'Erro ao cadastrar!'}</p>`;
+        }
+    } catch {
+        resp.innerHTML = '<p class="erro">❌ Erro de conexão com o servidor!</p>';
+    }
 }
 
-function excluirGrupo(indice) {
-    if(!confirm('Tem certeza que deseja excluir este grupo?')) return;
-    grupos.splice(indice, 1);
-    salvarGrupos();
-    atualizarListaGrupos();
+// 🗑️ APAGAR GRUPO — ADM
+async function apagarGrupoAdm(grupoId) {
+    if (!confirm('Tem certeza que deseja APAGAR este grupo?')) return;
+    try {
+        const res = await fetch(`${API_URL}/adm/apagar-grupo/${grupoId}`, {
+            method: 'POST',
+            headers: { 'X-Chave-Adm': chaveAdm }
+        });
+        const dados = await res.json();
+        if (res.ok && dados.sucesso) {
+            atualizarListaGrupos();
+            carregarGrupos();
+        } else {
+            alert(dados.erro || 'Erro ao apagar!');
+        }
+    } catch {
+        alert('❌ Erro de conexão!');
+    }
 }
 
 // TERMOS E PRIVACIDADE
