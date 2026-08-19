@@ -37,17 +37,19 @@ CORS(app, resources={r"/*": {
         "https://flow-mohn.onrender.com"
     ],
     "methods": ["GET", "POST", "OPTIONS"],
-    "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Adm-Senha"],
+    "allow_headers": ["Content-Type", "X-Usuario-ID", "X-Chave-Adm"],
     "supports_credentials": True
 }})
 
-# 🔑 VARIÁVEIS DO RENDER
+# 🔑 VARIÁVEIS DO RENDER — NADA EXPOSTO!
 MONGO_URI = os.getenv("MONGO_URI")
+CHAVE_ADM = os.getenv("CHAVE_ADM")  # ✅ NOME CORRETO DO RENDER
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
-SENHA_ADM = os.getenv("SENHA_ADM")
 
 if not MONGO_URI:
     print("⚠️ AVISO: MONGO_URI não configurada!")
+if not CHAVE_ADM:
+    print("⚠️ AVISO: CHAVE_ADM não configurada no Render!")
 
 TEMPO_IMPULSIONAR = timedelta(hours=2)
 
@@ -71,7 +73,11 @@ try:
 except Exception as e:
     print(f"⚠️ ERRO CONEXÃO BANCO: {e}")
 
-# 📄 ROTAS
+def verificar_chave_adm():
+    recebida = (request.headers.get("X-Chave-Adm") or "").strip()
+    return bool(CHAVE_ADM and recebida == CHAVE_ADM)
+
+# 📄 ROTAS PÚBLICAS
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -140,7 +146,7 @@ def clicar(grupo_id):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# ✅ ENVIAR GRUPO — GRÁTIS, SEM PIX, SEM PAGAMENTO!
+# ✅ ENVIAR GRUPO — GRÁTIS, SEM PIX, JÁ APARECE!
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -151,7 +157,7 @@ def enviar_grupo():
         link = dados.get("link", "").strip()[:256]
         nome = dados.get("nome", "").strip()[:100]
         categoria = dados.get("categoria", "Outros")[:50]
-        foto = dados.get("foto_base64", "")[:200000]
+        foto = dados.get("foto", "").strip() or "https://files.catbox.moe/0aa6f2.png"
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "").strip()[:64] or str(uuid4())
 
@@ -164,7 +170,7 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
 
-        # 🎁 Código VIP grátis — 1 dia VIP
+        # 🎁 Código VIP grátis
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             grupos_col.insert_one({
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
@@ -174,7 +180,7 @@ def enviar_grupo():
             })
             return jsonify({"sucesso": "✅ Grupo publicado com VIP grátis!", "vip": True})
 
-        # ✅ CADASTRO NORMAL — GRÁTIS, SEM PAGAMENTO, JÁ APARECE!
+        # ✅ CADASTRO NORMAL — GRÁTIS, JÁ APARECE!
         grupos_col.insert_one({
             "link": link, "nome": nome, "categoria": categoria, "foto": foto,
             "usuario_id": uid, "cliques": 0, "ativo": True,
@@ -254,27 +260,68 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": True})
 
-# 🔐 VERIFICAR SENHA ADM
-def verificar_senha():
-    recebida = (request.headers.get("X-Adm-Senha") or "").strip()
-    return bool(SENHA_ADM and recebida == SENHA_ADM)
+# 🔐 PAINEL ADM — VERIFICAR CHAVE DO RENDER!
+@app.route("/adm/login", methods=["POST"])
+def adm_login():
+    dados = request.json or {}
+    chave_digitada = (dados.get("chave_adm", "") or "").strip()
+    if CHAVE_ADM and chave_digitada == CHAVE_ADM:
+        return jsonify({"sucesso": True, "mensagem": "✅ Acesso liberado!"})
+    return jsonify({"erro": "❌ CHAVE ERRADA!"}), 403
 
-# 🔐 PAINEL ADM — Ver todos os grupos
 @app.route("/adm/grupos")
 def adm_grupos():
-    if not verificar_senha():
-        return jsonify({"erro": "SENHA ERRADA!"}), 403
+    if not verificar_chave_adm():
+        return jsonify({"erro": "❌ CHAVE ERRADA!"}), 403
     todos = list(grupos_col.find().sort("criado_em", -1))
     for g in todos:
         g["_id"] = str(g["_id"])
         g["cliques"] = g.get("cliques", 0)
     return jsonify(todos)
 
-# 🔐 PAINEL ADM — Ver denúncias
+@app.route("/adm/cadastrar-grupo", methods=["POST"])
+def adm_cadastrar_grupo():
+    if not verificar_chave_adm():
+        return jsonify({"erro": "❌ CHAVE ERRADA!"}), 403
+    try:
+        dados = request.json or {}
+        link = dados.get("link", "").strip()[:256]
+        nome = dados.get("nome", "").strip()[:100]
+        categoria = dados.get("categoria", "Outros")[:50]
+        foto = dados.get("foto", "").strip() or "https://files.catbox.moe/0aa6f2.png"
+
+        if not link or not nome:
+            return jsonify({"erro": "Preencha link e nome!"}), 400
+        if not link.startswith("https://chat.whatsapp.com/"):
+            return jsonify({"erro": "Link só do WhatsApp!"}), 400
+        if grupos_col.find_one({"link": link, "ativo": True}):
+            return jsonify({"erro": "Esse grupo já está cadastrado!"}), 400
+
+        grupos_col.insert_one({
+            "link": link, "nome": nome, "categoria": categoria, "foto": foto,
+            "usuario_id": "ADM", "cliques": 0, "ativo": True,
+            "vip": False, "ultimo_impulso": datetime.utcnow(), "criado_em": datetime.utcnow()
+        })
+        return jsonify({"sucesso": "✅ Grupo cadastrado com sucesso!"})
+    except Exception as e:
+        return jsonify({"erro": str(e)}), 500
+
+@app.route("/adm/apagar-grupo/<grupo_id>", methods=["POST"])
+def adm_apagar_grupo(grupo_id):
+    if not verificar_chave_adm():
+        return jsonify({"erro": "❌ CHAVE ERRADA!"}), 403
+    if not ObjectId.is_valid(grupo_id):
+        return jsonify({"erro": "ID inválido"}), 400
+    obj_id = ObjectId(grupo_id)
+    grupos_col.delete_one({"_id": obj_id})
+    denuncias_col.delete_many({"grupo_id": grupo_id})
+    cliques_col.delete_many({"chave": {"$regex": f"\\Q{grupo_id}\\E"}})
+    return jsonify({"sucesso": True, "mensagem": "✅ Grupo APAGADO completamente!"})
+
 @app.route("/adm/denuncias")
 def adm_denuncias():
-    if not verificar_senha():
-        return jsonify({"erro": "SENHA ERRADA!"}), 403
+    if not verificar_chave_adm():
+        return jsonify({"erro": "❌ CHAVE ERRADA!"}), 403
     den = list(denuncias_col.find({"lida": False}).sort("data", -1))
     res = []
     for d in den:
@@ -296,17 +343,6 @@ def adm_denuncias():
         except:
             continue
     return jsonify(res)
-
-# 🔐 PAINEL ADM — Apagar grupo
-@app.route("/adm/desativar/<grupo_id>", methods=["POST"])
-def adm_desativar(grupo_id):
-    if not verificar_senha():
-        return jsonify({"erro": "SENHA ERRADA!"}), 403
-    obj_id = ObjectId(grupo_id)
-    grupos_col.delete_one({"_id": obj_id})
-    denuncias_col.delete_many({"grupo_id": grupo_id})
-    cliques_col.delete_many({"grupo_id": grupo_id})
-    return jsonify({"sucesso": True, "mensagem": "✅ Grupo APAGADO completamente!"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
