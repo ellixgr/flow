@@ -378,7 +378,7 @@ async function carregarGrupos() {
         grupos = await res.json();
         
         if (!Array.isArray(grupos) || grupos.length === 0) {
-            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<p>Seja o primeiro a enviar! 🎉</p>';
+            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<p></p>';
             return;
         }
 
