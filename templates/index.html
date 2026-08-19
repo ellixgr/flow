@@ -392,25 +392,33 @@ const BACKENDS = [
 ];
 let API_URL = BACKENDS[0]; // Começa pelo primeiro
 
-// Função para trocar automaticamente se um estiver fora do ar
 async function testarBackend() {
   for (const url of BACKENDS) {
     try {
-      const res = await fetch(`${url}/grupos-dados`, {method: 'HEAD', cache: 'no-store'});
-      if (res.ok) { API_URL = url; return true; }
+      const res = await fetch(`${url}/grupos-dados?categoria=Todos`, {
+        method: 'GET',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(8000)
+      });
+      if (res.ok) { 
+        API_URL = url; 
+        console.log("✅ Usando:", API_URL);
+        return true; 
+      }
     } catch(e) { continue; }
   }
-  return false; // Nenhum funcionando
+  return false;
 }
 
-// Executa antes de carregar os grupos
+
 testarBackend().then(ok => {
   if(!ok) {
     document.getElementById('lista-grupos').innerHTML = `<p class="vazio" style="color:#ff6b6b;">❌ Nenhum servidor disponível no momento!</p>`;
   } else {
-    carregarGrupos(); // Carrega normalmente com o link que estiver online
+    carregarGrupos(); // ✅ ADICIONA ESSA LINHA!
   }
 });
+
 
 let usuarioId = localStorage.getItem("flow_usuario_id");
 if (!usuarioId) { usuarioId = crypto.randomUUID(); localStorage.setItem("flow_usuario_id", usuarioId); }
@@ -439,6 +447,8 @@ function abrirFormulario() {
     document.getElementById('respForm').innerHTML = "";
     document.getElementById('areaPix').style.display = "none";
     document.getElementById('inpCodigo').value = "";
+fotoBase64 = "";
+document.getElementById('previewFoto').src = "https://files.catbox.moe/0aa6f2.png";
 }
 
 function fecharFormulario() {
@@ -558,10 +568,12 @@ async function enviarGrupo() {
     try {
         const form = new FormData();
         form.append("link", link);
-        form.append("nome", nome);
-        form.append("categoria", cat);
-        form.append("codigo_adm", codigo);
-        form.append("foto_base64", fotoBase64);
+form.append("nome", nome);
+form.append("categoria", cat);
+form.append("codigo_adm", codigo);
+form.append("foto_base64", fotoBase64);
+form.append("plano", plano);
+
 
         const res = await fetch(`${API_URL}/enviar-grupo`, {
             method: "POST",
@@ -580,7 +592,7 @@ async function enviarGrupo() {
         if(dados.codigo_pix) {
             areaPix.style.display = "block";
             document.getElementById('codigoPix').value = dados.codigo_pix;
-            respDiv.innerHTML = `<div style="color:orange;">💳 Valor: R$ ${valores[plano]}</div>`;
+            respDiv.innerHTML = `<div style="color:orange;">💳 Valor: R$ ${dados.valor.toFixed(2).replace('.', ',')}</div>`;
 
          const btnVerificar = document.createElement('button');
          btnVerificar.style = "width:100%; padding:10px; margin-top:10px;background:#25d366; color:white; border:none; border-radius:8px; font-weight:bold;";
@@ -840,7 +852,7 @@ async function escolherPlano(grupoId, plano) {
         if(dados.erro) { alert(dados.erro); return; }
         if(dados.codigo_pix) {
             await navigator.clipboard.writeText(dados.codigo_pix);
-            alert(`💳 PIX COPIADO! Valor: R$${dados.valor.toFixed(2)}\n⏳ Válido por ${dados.dias_vip} dia(s)\n✅ Após pagamento, o grupo fica VIP!`);
+            alert(`💳 PIX COPIADO! Valor: R$${dados.valor.toFixed(2).replace('.', ',')}\n⏳ Válido por ${dados.dias_vip} dia(s)\n✅ Após pagamento, o grupo fica VIP!`);
         }
     } catch(e) {
         document.body.style.cursor = "default";
@@ -905,12 +917,6 @@ async function admDesativar(id) {
         admVerGrupos();
     } catch(e) { alert("❌ Erro: " + e.message); }
 }
-
-// ✅ CARREGA GRUPOS AO ABRIR A PÁGINA
-document.addEventListener("DOMContentLoaded", function() {
-    carregarGrupos();
-});
-
 </script>
 </body>
 </html>
