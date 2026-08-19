@@ -63,14 +63,17 @@ PLANOS_VIP = {
     "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
 }
 
-# ✅ FUNÇÃO CORRIGIDA DE GERAÇÃO DO PIX — resolve erro 403
-def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp", external_id: str = None):
+# ✅ FUNÇÃO CORRIGIDA — EMAIL ÚNICO POR USUÁRIO (IGUAL AO BOT!)
+def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp", user_id: str = None):
     if not MP_ACCESS_TOKEN:
         return False, None, None, "Mercado Pago não configurado no servidor."
 
     url = "https://api.mercadopago.com/v1/payments"
     idempotency_key = str(uuid4())
-    external_reference = external_id or f"flow_{idempotency_key[:12]}"
+    external_reference = f"flow_{idempotency_key[:12]}"
+    
+    # ✅ EMAIL ÚNICO — IGUAL AO BOT DO TELEGRAM! Isso resolve o erro 403!
+    email_unico = f"user_{user_id or idempotency_key[:8]}@flow-site.com"
 
     headers = {
         "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
@@ -85,7 +88,7 @@ def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp", exter
         "installments": 1,
         "external_reference": external_reference,
         "payer": {
-            "email": "usuario@flow.local",
+            "email": email_unico,  # ✅ MUDANÇA PRINCIPAL — EMAIL ÚNICO!
             "first_name": "Usuario",
             "last_name": "Flow"
         },
@@ -105,16 +108,16 @@ def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp", exter
             else:
                 return False, None, None, "Resposta da API não contém código PIX."
         elif resp.status_code == 403:
-            return False, None, None, "❌ Erro 403 — Conta do Mercado Pago restrita ou token inválido. Verifique sua conta."
+            return False, None, None, "❌ Erro 403 — Tente novamente em alguns minutos ou verifique sua conta do Mercado Pago."
         elif resp.status_code == 401:
-            return False, None, None, "❌ Token do Mercado Pago inválido ou expirado!"
+            return False, None, None, "❌ Token do Mercado Pago inválido! Atualize no Render."
         else:
-            return False, None, None, f"Erro API: Status {resp.status_code} — {resp.text[:200]}"
+            return False, None, None, f"Erro API: Status {resp.status_code}"
 
     except requests.exceptions.Timeout:
         return False, None, None, "⏱️ Tempo esgotado ao conectar com Mercado Pago."
     except Exception as e:
-        print(f"[MP] Erro conexão: {str(e)}")
+        print(f"[MP] Erro: {str(e)}")
         return False, None, None, f"Falha de conexão: {str(e)}"
 
 def verificar_pagamento_mp(pag_id):
@@ -271,9 +274,9 @@ def enviar_grupo():
         if not plano:
             return jsonify({"erro": "Plano inválido!"}), 400
 
-        # ✅ Gera PIX corrigido
+        # ✅ Passa o UID para gerar email único — IGUAL AO BOT!
         ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(
-            plano["valor"], f"Grupo: {nome}", f"grupo_{uid[:8]}"
+            plano["valor"], f"Grupo: {nome}", uid
         )
         if not ok:
             return jsonify({"erro": erro}), 400
@@ -455,8 +458,9 @@ def escolher_plano_vip(grupo_id):
         return jsonify({"erro": "Mercado Pago não configurado"}), 500
     dados = request.json or {}
     plano = PLANOS_VIP.get(dados.get("plano", "5"))
+    # ✅ Passa o UID para email único
     ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(
-        plano["valor"], f"VIP {grupo['nome']}"
+        plano["valor"], f"VIP {grupo['nome']}", uid
     )
     if not ok:
         return jsonify({"erro": erro}), 500
