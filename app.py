@@ -43,7 +43,7 @@ CORS(app, resources={r"/*": {
 
 # 🔑 VARIÁVEIS DO RENDER — NADA EXPOSTO!
 MONGO_URI = os.getenv("MONGO_URI")
-CHAVE_ADM = os.getenv("CHAVE_ADM")  # ✅ NOME CORRETO DO RENDER
+CHAVE_ADM = os.getenv("CHAVE_ADM")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 
 if not MONGO_URI:
@@ -146,7 +146,7 @@ def clicar(grupo_id):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
-# ✅ ENVIAR GRUPO — GRÁTIS, SEM PIX, JÁ APARECE!
+# ✅ ENVIAR GRUPO — LINK LIVRE, SEM RESTRIÇÃO!
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -163,8 +163,7 @@ def enviar_grupo():
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
-        if not link.startswith("https://chat.whatsapp.com/"):
-            return jsonify({"erro": "Link só do WhatsApp!"}), 400
+        # ✅ REMOVIDA VALIDAÇÃO — ACEITA QUALQUER LINK!
         if grupos_col.find_one({"link": link, "ativo": True}):
             return jsonify({"erro": "Esse grupo já está cadastrado!"}), 400
 
@@ -260,7 +259,7 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": True})
 
-# 🔐 PAINEL ADM — VERIFICAR CHAVE DO RENDER!
+# 🔐 PAINEL ADM — SEM VALIDAÇÃO DE WHATSAPP!
 @app.route("/adm/login", methods=["POST"])
 def adm_login():
     dados = request.json or {}
@@ -292,8 +291,7 @@ def adm_cadastrar_grupo():
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
-        if not link.startswith("https://chat.whatsapp.com/"):
-            return jsonify({"erro": "Link só do WhatsApp!"}), 400
+        # ✅ ACEITA QUALQUER LINK — REMOVIDA A VALIDAÇÃO!
         if grupos_col.find_one({"link": link, "ativo": True}):
             return jsonify({"erro": "Esse grupo já está cadastrado!"}), 400
 
