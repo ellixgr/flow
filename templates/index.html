@@ -67,12 +67,6 @@
             align-items: center;
             justify-content: center;
         }
-        .anuncio-rotulo {
-            font-size: 10px;
-            color: #888;
-            text-align: right;
-            margin-bottom: 4px;
-        }
         
         .menu-btn { 
             position: fixed; top: 15px; right: 15px; font-size: 24px; 
@@ -115,45 +109,14 @@
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
-        .btn-meus {position:fixed; top:15px; left:15px; background:#ffd700; color:#000; border:none; padding:8px 12px; border-radius:10px; font-weight:bold; cursor:pointer; z-index:100;}
-        
         .lista {display:flex; flex-direction:column; gap:12px;}
-        .card {background:rgba(255,255,255,0.05); border:2px solid #ffd700; border-radius:15px; padding: 35px 12px 12px 12px; display:flex; align-items:center; gap:10px; position:relative;}
-        .card.vip {box-shadow:0 0 20px rgba(255,215,0,0.4); border-color:#ffd700;}
-        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366; position:relative;}
-        .sela-vip {position:absolute; top:0; left:45px; font-size:18px; z-index:10;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px; position:relative;}
+        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
         .card-info {flex:1;}
         .card-nome {font-weight:bold; font-size:15px;}
         .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
-        .card-cliques {font-size:11px; color:#aaa; margin-top:4px;}
         
         .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
-        .btn-denunciar {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 50%;
-  background: rgba(255, 68, 68, 0.85);
-  color: #fff;
-  border: none;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-}
-.btn-denunciar:hover {background:#ff0000;}
-        .btn-apagar {background:#ff4444; color:#fff; border:none; padding:8px 14px; border-radius:8px; font-size:13px; cursor:pointer; margin-top:6px; font-weight:bold; width:100%;}
-        .btn-impulsionar {background:#ffd700; color:#000; border:none; padding:10px 14px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:6px; width:100%; font-size:14px;}
-        .btn-impulsionar:disabled {background:#555; color:#aaa; cursor:not-allowed; opacity:0.7;}
-        .btn-impulsionar-vip {background:linear-gradient(135deg, #ffd700, #ff8c00); color:#000; border:none; padding:10px 14px; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:6px; width:100%; font-size:14px;}
-        .btn-impulsionar-vip:disabled {background:#555; color:#aaa; cursor:not-allowed; opacity:0.7;}
-        .cronometro {font-size:11px; color:#ffd700; margin-top:4px; font-weight:bold;}
-        .cronometro-vip {color:#ffd700; font-size:11px; margin-top:4px; font-weight:bold;}
         
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
@@ -164,32 +127,20 @@
         .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
         .modal-content label {font-weight:600; font-size:14px; display:block; margin:10px 0 4px;}
         .modal-content input, .modal-content select {width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:14px;}
-        .preview-foto {width:100px; height:100px; border-radius:50%; object-fit:cover; margin:10px auto; display:block; border:2px solid #25d366;}
         .btn-enviar {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:12px; cursor:pointer; font-size:15px;}
         .btn-cancelar {width:100%; padding:12px; background:#eee; border:none; border-radius:10px; margin-top:8px; cursor:pointer; font-size:14px; font-weight:bold;}
-        .erro {color:red; text-align:center; margin-top:10px; font-weight:bold;}
-        .sucesso {color:green; text-align:center; margin-top:10px; font-weight:bold;}
-        .area-pix {margin-top:15px; padding:15px; background:#f0fdf4; border-radius:10px; display:none;}
-        .codigo-pix {width:100%; height:80px; padding:10px; border-radius:6px; border:1px solid #ccc; margin:8px 0; font-size:12px;}
         .vazio {text-align:center; color:#aaa; padding:40px 20px; font-size:15px;}
-        .aviso-btn {width: 100%; text-align: center; font-size: 14px; color: #fff; margin-bottom: 15px; opacity: 0.9;}
-        .painel-adm-item {padding:12px 0; border-bottom:1px solid #eee; font-size:14px; margin-bottom:10px;}
-        .painel-adm-item b {display:block; margin-bottom:6px; font-size:15px;}
-        .outro-motivo {margin-top:10px; display:none;}
-        .outro-motivo.visivel {display:block;}
-        .codigo-vip-caixa {margin-top: 15px; padding: 10px; background: #fff8e1; border-radius: 8px; border: 1px solid #ffd700; display:block;}
-        .aviso-codigo {font-size:12px; margin-top:4px; color:#666;}
-        .aviso-link {font-size:12px; color:#25d366; margin-top:4px;}
+        .sucesso {color:green; text-align:center; margin-top:10px; font-weight:bold;}
+        .erro {color:red; text-align:center; margin-top:10px; font-weight:bold;}
     </style>
 </head>
 <body>
 
-<button class="btn-meus" onclick="abrirMeusGrupos()">👤 Meus Grupos</button>
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 
 <div class="side-menu" id="sideMenu">
     <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
-    <a href="#" onclick="abrirFormulario(); return false;" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+    <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
@@ -219,31 +170,32 @@
     <div class="perfil-topo">
         <img src="https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg" class="foto-perfil" alt="Logo Team Flow">
         <div class="nome-time">Team Flow</div>
-        <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados. Links verificados e atualizados diariamente!</p>
+        <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
+    
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
-<video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
-    <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
-</video>
-
+        <video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
+            <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
+        </video>
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
+    <!-- 🔔 ANÚNCIO ADSTERRA -->
     <div class="anuncio-box">
-        <div class="anuncio-rotulo">🔞</div>
         <script>
-          atOptions = {
-            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
+            atOptions = {
+                'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
         </script>
         <script src="https://www.highperformanceformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
 
+    <!-- 📂 ABAS DE CATEGORIAS -->
     <div class="abas" id="abas">
         <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
         <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
@@ -252,11 +204,13 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
+    <!-- 📋 LISTA DE GRUPOS -->
     <div class="lista" id="lista-grupos">
-        <p class="vazio">Carregando...</p>
+        <p class="vazio">Nenhum grupo cadastrado ainda.<br>Você pode cadastrar pelo Painel ADM! 💻</p>
     </div>
 </main>
 
+<!-- 📌 RODAPÉ -->
 <footer>
     © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
@@ -264,169 +218,99 @@
     <a id="btnAdmTrigger" class="btn-adm" href="#">⚙️</a>
 </footer>
 
-<script>
-// Define o ano atual automaticamente
-document.getElementById('ano-atual').textContent = new Date().getFullYear();
-</script>
-
-
-<!-- FORM ENVIAR GRUPO -->
-<div id="formModal" class="modal" onclick="fecharFormulario()">
+<!-- 🔐 PAINEL ADMINISTRATIVO -->
+<div id="admModal" class="modal" onclick="fecharPainelAdm()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>📤 Enviar Grupo</h2>
-        <label>🔗 Link WhatsApp:</label>
-        <input type="url" id="inpLink" placeholder="https://chat.whatsapp.com/K7ai1KeLMiZCsaZ3ni04Zq" required>
-        <div class="aviso-link">⚠️ Coloque o link COMPLETO com o código no final!</div>
-        <label>📛 Nome do Grupo:</label>
-        <input type="text" id="inpNome" placeholder="Nome do grupo" required>
-        <label>📂 Categoria:</label>
-        <select id="inpCat">
-            <option value="Amizade">🤝 Amizade</option>
-            <option value="Namoro">❤️ Namoro</option>
-            <option value="Zoeira">😂 Zoeira</option>
-            <option value="Outros">📌 Outros</option>
-        </select>
-        <label>🖼️ Foto (clica para escolher):</label>
-        <input type="file" id="inpFotoArquivo" accept="image/*" onchange="processarFoto(event)">
-        <img id="previewFoto" class="preview-foto" src="https://files.catbox.moe/0aa6f2.png" alt="Prévia">
-        <label>🥇 Plano VIP:</label>
-<select id="inpPlano">
-    <option value="5">R$ 5,00 → 1 Dia VIP</option>
-    <option value="10">R$ 10,00 → 2 Dias VIP</option>
-    <option value="30">R$ 30,00 → 3 Dias VIP</option>
-    <option value="100">R$ 100,00 → 1 MÊS VIP</option>
-</select>
-
-        <div class="codigo-vip-caixa">
-            <label>🔑 Código VIP (OPCIONAL):</label>
-            <input type="text" id="inpCodigo" placeholder="Digite se tiver código">
-            <div id="avisoCodigo" class="aviso-codigo"></div>
+        <h2>🔐 Painel Administrativo</h2>
+        
+        <div style="display:flex; gap:8px; margin-bottom:15px;">
+            <button style="flex:1; padding:10px; background:#25d366; color:white; border:none; border-radius:8px; font-size:14px;" onclick="abaCadastrar()">📝 Cadastrar</button>
+            <button style="flex:1; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-size:14px;" onclick="abaListaGrupos()">📋 Grupos</button>
         </div>
-        <div id="respForm"></div>
-        <div id="areaPix" class="area-pix">
-            <strong>💳 CÓDIGO PIX:</strong>
-            <textarea id="codigoPix" readonly class="codigo-pix"></textarea>
-            <button class="btn-enviar" onclick="copiarPix()">📋 Copiar PIX</button>
-            <small>✅ Após pagar, o grupo aparece automaticamente!</small>
+        
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <div id="formCadastro">
+            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📝 Cadastrar Novo Grupo</h3>
+            <label>🔗 Link WhatsApp:</label>
+            <input type="url" id="admLink" placeholder="https://chat.whatsapp.com/..." required>
+            
+            <label>📛 Nome do Grupo:</label>
+            <input type="text" id="admnome" placeholder="Nome do grupo" required>
+            
+            <label>📂 Categoria:</label>
+            <select id="admCategoria">
+                <option value="Amizade">🤝 Amizade</option>
+                <option value="Namoro">❤️ Namoro</option>
+                <option value="Zoeira">😂 Zoeira</option>
+                <option value="Outros">📌 Outros</option>
+            </select>
+            
+            <label>🖼️ Link da Foto:</label>
+            <input type="url" id="admFoto" placeholder="https://exemplo.com/imagem.jpg" value="https://files.catbox.moe/0aa6f2.png">
+            
+            <button class="btn-enviar" onclick="cadastrarGrupo()">✅ CADASTRAR GRUPO</button>
+            <div id="respAdm" style="margin-top:10px;"></div>
         </div>
-        <button class="btn-enviar" id="btnEnviar" onclick="enviarGrupo()">📤 ENVIAR GRUPO</button>
-        <button class="btn-cancelar" onclick="fecharFormulario()">❌ CANCELAR</button>
-    </div>
-</div>
-
-<!-- MEUS GRUPOS -->
-<div id="meusModal" class="modal" onclick="fecharMeusGrupos()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>👤 Meus Grupos</h2>
-        <div id="lista-meus"><p class="vazio">⏳ Carregando...</p></div>
-        <button class="btn-cancelar" onclick="fecharMeusGrupos()">FECHAR</button>
-    </div>
-</div>
-
-<!-- DENÚNCIA -->
-<div id="denunciaModal" class="modal" onclick="fecharDenuncia()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>🚩 Denunciar Grupo</h2>
-        <label>Motivo da Denúncia:</label>
-        <select id="selMotivo" onchange="trocarMotivo()">
-            <option value="link_invalido">🔗 Link inválido / Não funciona</option>
-            <option value="conteudo_improprio">⚠️ Conteúdo impróprio</option>
-            <option value="spam">📧 Spam / Divulgação abusiva</option>
-            <option value="outro">❌ Outro motivo</option>
-        </select>
-        <div id="divOutroMotivo" class="outro-motivo">
-            <label>Escreva o motivo:</label>
-            <input type="text" id="inpOutroMotivo" placeholder="Descreva o motivo">
+        
+        <!-- LISTA DE GRUPOS CADASTRADOS -->
+        <div id="listaGrupos" style="display:none;">
+            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📋 Grupos Cadastrados</h3>
+            <div id="conteudoGrupos"></div>
         </div>
-        <div id="respDenuncia" style="margin-top:15px;"></div>
-        <button class="btn-enviar" onclick="enviarDenuncia()">🚩 ENVIAR DENÚNCIA</button>
-        <button class="btn-cancelar" onclick="fecharDenuncia()">❌ CANCELAR</button>
+        
+        <button class="btn-cancelar" onclick="fecharPainelAdm()">FECHAR</button>
     </div>
 </div>
 
-<!-- PRIVACIDADE -->
-<div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>🔒 Política de Privacidade</h2>
-        <p style="font-size:14px; line-height:1.7; color:#333;">
-            🔒 <strong>Seus dados estão protegidos!</strong><br><br>
-            📋 <strong>O que armazenamos:</strong><br>• Link do grupo enviado<br>• Nome do grupo<br>• Foto enviada por você<br>• Identificador anônimo<br><br>
-            ❌ <strong>NÃO armazenamos:</strong><br>• Seu nome verdadeiro<br>• Seu telefone ou e-mail<br>• Mensagens ou conversas privadas<br><br>
-            🛡️ Seus dados são usados <strong>apenas</strong> para exibir os grupos e gerenciar denúncias.
-        </p>
-        <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
-    </div>
-</div>
-
-<!-- TERMOS -->
+<!-- TERMOS E PRIVACIDADE -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
         <p style="font-size:14px; line-height:1.7; color:#333;">
             ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
-            ⚠️ Se você enviar um grupo com imagem imprópria e alguém denunciar, o grupo será APAGADO imediatamente e NÃO haverá reembolso.<br><br>
-            📋 Dados: link, nome, foto e identificador anônimo — apenas para gerenciar os grupos.
+            ⚠️ Os grupos são de responsabilidade dos criadores. Não nos responsabilizamos pelo conteúdo.<br><br>
+            📋 Ao enviar um grupo, você concorda com estes termos.
         </p>
         <button class="btn-enviar" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
 
-<!-- PAINEL ADM -->
-<div id="admModal" class="modal" onclick="fecharPainelAdm()">
+<div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>🔐 Painel Administrativo</h2>
-        <div style="display:flex; gap:8px; margin-bottom:15px;">
-            <button style="flex:1; padding:10px; background:#25d366; color:white; border:none; border-radius:8px; font-size:14px;" onclick="admVerGrupos()">📋 Grupos</button>
-            <button style="flex:1; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-size:14px;" onclick="admVerDenuncias()">⚠️ Denúncias</button>
-        </div>
-        <div id="admConteudo"></div>
-        <button class="btn-cancelar" onclick="fecharPainelAdm()">FECHAR</button>
+        <h2>🔒 Política de Privacidade</h2>
+        <p style="font-size:14px; line-height:1.7; color:#333;">
+            🔒 Seus dados estão protegidos!<br><br>
+            📋 Armazenamos apenas: link, nome e categoria dos grupos.<br>
+            ❌ Não coletamos dados pessoais dos visitantes.<br>
+            🛡️ O site não armazena conversas ou mensagens privadas.
+        </p>
+        <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
 
 <script>
-// Lista todos os seus backends do Render, um após o outro
-const BACKENDS = [
-  'https://flow-mohn.onrender.com',
-  'https://flow-81mj.onrender.com'
-];
-let API_URL = BACKENDS[0]; // Começa pelo primeiro
+// ANO ATUAL NO RODAPÉ
+document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
-async function testarBackend() {
-  for (const url of BACKENDS) {
-    try {
-      const res = await fetch(`${url}/grupos-dados?categoria=Todos`, {
-        method: 'GET',
-        cache: 'no-store',
-        signal: AbortSignal.timeout(8000)
-      });
-      if (res.ok) { 
-        API_URL = url; 
-        console.log("✅ Usando:", API_URL);
-        return true; 
-      }
-    } catch(e) { continue; }
-  }
-  return false;
+// DADOS DOS GRUPOS — SALVO LOCALMENTE
+let grupos = JSON.parse(localStorage.getItem('flow_grupos') || '[]');
+let categoriaAtual = 'Todos';
+let senhaAdmDefinida = localStorage.getItem('flow_senha_adm') || null;
+let painelAberto = false;
+
+// SALVAR GRUPOS NO LOCALSTORAGE
+function salvarGrupos() {
+    localStorage.setItem('flow_grupos', JSON.stringify(grupos));
+    carregarGrupos();
 }
 
+// ABRIR E FECHAR MENU
+function toggleMenu(e) { 
+    if(e) e.stopPropagation(); 
+    document.getElementById('sideMenu').classList.toggle('active'); 
+}
 
-testarBackend().then(ok => {
-  if(!ok) {
-    document.getElementById('lista-grupos').innerHTML = `<p class="vazio" style="color:#ff6b6b;">❌ Nenhum servidor disponível no momento!</p>`;
-  } else {
-    carregarGrupos(); // ✅ ADICIONA ESSA LINHA!
-  }
-});
-
-
-let usuarioId = localStorage.getItem("flow_usuario_id");
-if (!usuarioId) { usuarioId = crypto.randomUUID(); localStorage.setItem("flow_usuario_id", usuarioId); }
-let fotoBase64 = "";
-let categoriaAtual = "Todos";
-let senhaAdm = "";
-let grupoDenunciadoId = "";
-
+// CONTROLE DO VÍDEO
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { 
@@ -435,26 +319,7 @@ function toggleMute(e) {
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
 
-function toggleMenu(e) { 
-    if(e) e.stopPropagation(); 
-    document.getElementById('sideMenu').classList.toggle('active'); 
-}
-
-function abrirFormulario() { 
-    document.getElementById('sideMenu').classList.remove('active'); 
-    document.getElementById('formModal').style.display = "flex";
-    document.getElementById('avisoCodigo').innerHTML = "";
-    document.getElementById('respForm').innerHTML = "";
-    document.getElementById('areaPix').style.display = "none";
-    document.getElementById('inpCodigo').value = "";
-fotoBase64 = "";
-document.getElementById('previewFoto').src = "https://files.catbox.moe/0aa6f2.png";
-}
-
-function fecharFormulario() {
-    document.getElementById('formModal').style.display = "none";
-}
-
+// DROPDOWN TELAS
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
@@ -462,6 +327,7 @@ function toggleDropdown() {
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
 
+// TROCAR CATEGORIA
 function trocarCategoria(cat) {
     categoriaAtual = cat;
     document.querySelectorAll('.aba').forEach(a => {
@@ -471,452 +337,160 @@ function trocarCategoria(cat) {
     carregarGrupos();
 }
 
-async function carregarGrupos() {
+// CARREGAR GRUPOS NA TELA
+function carregarGrupos() {
     const lista = document.getElementById('lista-grupos');
-    lista.innerHTML = '<p class="vazio">⏳ Carregando...</p>';
-
-    try {
-        const res = await fetch(`${API_URL}/grupos-dados?categoria=${encodeURIComponent(categoriaAtual)}`, {
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-
-        if(!res.ok) throw new Error("Erro na resposta");
-        
-        const grupos = await res.json();
-
-        if(!grupos || grupos.length === 0) {
-            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Seja o primeiro a enviar! 🎉</p>';
-            return;
-        }
-
-        lista.innerHTML = grupos.map(g => {
-    let seloVip = "";
-    if(g.vip_ativo) seloVip = '<span class="sela-vip">⭐</span>';
-
-    let tempoImpulso = "";
-    if(g.tempo_restante_impulso !== null && !g.pode_impulsionar && g.tempo_restante_impulso) {
-        const h = Math.floor(g.tempo_restante_impulso / 3600);
-        const m = Math.floor((g.tempo_restante_impulso % 3600) / 60);
-        tempoImpulso = `<div class="cronometro">⏰ Impulso em: ${h}h ${m}min</div>`;
+    
+    let filtrados = grupos;
+    if(categoriaAtual !== 'Todos') {
+        filtrados = grupos.filter(g => g.categoria === categoriaAtual);
     }
-
-    let tempoVip = "";
-    if(g.vip_ativo && g.vip_restante_segundos != null) {
-        const h = Math.floor(g.vip_restante_segundos / 3600);
-        tempoVip = `<div class="cronometro-vip">⭐ VIP: ${h}h restantes</div>`;
+    
+    if(filtrados.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Cadastre pelo Painel ADM! 💻</p>';
+        return;
     }
-
-    return `
-        <div class="card ${g.vip_ativo ? 'vip' : ''}">
-            ${seloVip}
-            <!-- ✅ BOTÃO DENUNCIA NO CANTO SUPERIOR DIREITO, SÓ ÍCONE -->
-            <button class="btn-denunciar" onclick="abrirDenuncia('${g._id}')">🚩</button>
-            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
+    
+    lista.innerHTML = filtrados.map(g => `
+        <div class="card">
+            <img src="${g.foto}" alt="Foto do grupo">
             <div class="card-info">
                 <div class="card-nome">${g.nome}</div>
                 <div class="card-cat">${g.categoria}</div>
-                <div class="card-cliques">👁️ ${g.cliques || 0} cliques</div>
-                ${tempoImpulso}
-                ${tempoVip}
             </div>
-            <a href="${g.link}" target="_blank" class="btn-entrar" onclick="registrarClique('${g._id}')">👉 Entrar</a>
+            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
         </div>
-    `;
-}).join("");
-
-
-    } catch (erro) {
-        lista.innerHTML = `<p class="vazio" style="color:#ff6b6b;">❌ Erro ao carregar: ${erro.message}<br>Verifique se o backend está online.</p>`;
-        console.error("Erro:", erro);
-    }
+    `).join('');
 }
 
-function processarFoto(e) {
-    const arquivo = e.target.files[0];
-    if(!arquivo) return;
-
-    const leitor = new FileReader();
-    leitor.onload = function(ev) {
-        fotoBase64 = ev.target.result;
-        document.getElementById('previewFoto').src = fotoBase64;
-    };
-    leitor.readAsDataURL(arquivo);
-}
-
-async function enviarGrupo() {
-    const link = document.getElementById('inpLink').value.trim();
-    const nome = document.getElementById('inpNome').value.trim();
-    const cat = document.getElementById('inpCat').value;
-    const plano = document.getElementById('inpPlano').value;
-    const codigo = document.getElementById('inpCodigo').value.trim();
-    const respDiv = document.getElementById('respForm');
-    const areaPix = document.getElementById('areaPix');
-
-    if(!link || !nome) {
-        respDiv.innerHTML = '<div class="erro">❌ Preencha link e nome!</div>';
-        return;
-    }
-
-    if(!link.startsWith("https://chat.whatsapp.com/")) {
-        respDiv.innerHTML = '<div class="erro">❌ Link INVÁLIDO! Use o link completo do WhatsApp</div>';
-        return;
-    }
-
-    respDiv.innerHTML = '<div style="color:#25d366;">🔄 Enviando...</div>';
-    areaPix.style.display = "none";
-
-    try {
-        const form = new FormData();
-        form.append("link", link);
-form.append("nome", nome);
-form.append("categoria", cat);
-form.append("codigo_adm", codigo);
-form.append("foto_base64", fotoBase64);
-form.append("plano", plano);
-
-
-        const res = await fetch(`${API_URL}/enviar-grupo`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId },
-            body: form
-        });
-
-        const dados = await res.json();
-
-        if(dados.erro) {
-            respDiv.innerHTML = `<div class="erro">❌ ${dados.erro}</div>`;
+// 🔐 SISTEMA DE SENHA — SEM SENHA NO CÓDIGO!
+function abrirPainelComSenha() {
+    // Se NÃO tem senha definida → pedir para criar uma
+    if(!senhaAdmDefinida) {
+        const novaSenha1 = prompt("🔐 PRIMEIRO ACESSO — Crie uma senha de Administrador:\n(Guarde bem, não aparece no código!)");
+        if(!novaSenha1 || novaSenha1.length < 4) {
+            alert("❌ Senha muito curta! Mínimo 4 caracteres.");
             return;
         }
-
-        const valores = { '5':'5,00', '10':'10,00', '30':'30,00', '100':'100,00' };
-        if(dados.codigo_pix) {
-            areaPix.style.display = "block";
-            document.getElementById('codigoPix').value = dados.codigo_pix;
-            respDiv.innerHTML = `<div style="color:orange;">💳 Valor: R$ ${dados.valor.toFixed(2).replace('.', ',')}</div>`;
-
-         const btnVerificar = document.createElement('button');
-         btnVerificar.style = "width:100%; padding:10px; margin-top:10px;background:#25d366; color:white; border:none; border-radius:8px; font-weight:bold;";
-         btnVerificar.innerText = "✅ Já Paguei! Verificar";
-         btnVerificar.onclick = async () => {
-         respDiv.innerHTML = '<div style="color:#25d366;">🔄 Verificando...</div>';
-         setTimeout(() => {
-         fecharFormulario();
-         carregarGrupos();
-         carregarMeusGrupos();
-     }, 800);
-};
-areaPix.appendChild(btnVerificar);
-                
-        } else if(dados.sucesso) {
-            respDiv.innerHTML = `<div class="sucesso">✅ ${dados.sucesso}</div>`;
-            document.getElementById('inpLink').value = "";
-            document.getElementById('inpNome').value = "";
-            document.getElementById('inpCodigo').value = "";
-            fotoBase64 = "";
-            document.getElementById('previewFoto').src = "https://files.catbox.moe/0aa6f2.png";
-            setTimeout(() => { fecharFormulario(); carregarGrupos(); }, 1500);
-        }
-
-    } catch(erro) {
-        respDiv.innerHTML = `<div class="erro">❌ Erro de conexão: ${erro.message}</div>`;
-    }
-}
-
-function copiarPix() {
-    const cod = document.getElementById('codigoPix').value;
-    navigator.clipboard.writeText(cod).then(() => {
-        alert("✅ Código PIX copiado! Pague pelo app do seu banco.");
-    }).catch(() => {
-        alert("Não consegui copiar — selecione e copie manualmente");
-    });
-}
-
-function abrirMeusGrupos() {
-    document.getElementById('meusModal').style.display = "flex";
-    carregarMeusGrupos();
-}
-
-function fecharMeusGrupos() {
-    document.getElementById('meusModal').style.display = "none";
-}
-
-async function carregarMeusGrupos() {
-    const lista = document.getElementById('lista-meus');
-    lista.innerHTML = '<p class="vazio">⏳ Carregando...</p>';
-
-    try {
-        const res = await fetch(`${API_URL}/meus-grupos`, {
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-        const grupos = await res.json();
-
-        if(!grupos || grupos.length === 0) {
-            lista.innerHTML = '<p class="vazio">Você ainda não enviou nenhum grupo.</p>';
+        const novaSenha2 = prompt("🔐 Confirme a senha:");
+        if(novaSenha1 !== novaSenha2) {
+            alert("❌ As senhas NÃO coincidem!");
             return;
         }
-
-        lista.innerHTML = grupos.map(g => {
-            // Marca grupo pendente de pagamento com cor amarela
-            if(g.status === "aguardando_pagamento") {
-                return `
-                    <div style="padding:10px; border-bottom:1px solid #eee; background:#fff9c4; border-radius:8px;">
-                        <strong>⏳ ${g.nome}</strong><br>
-                        <span style="color:#f57f17">Aguardando pagamento...</span>
-                        <button class="btn-apagar" onclick="apagarGrupo('${g._id}')">🗑️ Apagar</button>
-                    </div>
-                `;
-            }
-
-            let seloVip = "";
-            let botaoImp = "";
-            let botaoVip = "";
-
-            if(g.vip_ativo) {
-                seloVip = `<span style="color:gold;">⭐ VIP (${Math.floor(g.vip_restante_segundos/3600)}h)</span>`;
-            }
-
-            if(g.pode_impulsionar) {
-                botaoImp = `<button class="btn-impulsionar" onclick="impulsionar('${g._id}')">🔄 Impulsionar Grátis</button>`;
-            } else {
-                const h = Math.floor(g.proximo_impulso_segundos / 3600);
-                const m = Math.floor((g.proximo_impulso_segundos % 3600) / 60);
-                botaoImp = `<button class="btn-impulsionar" disabled>⏰ Aguarde ${h}h ${m}min</button>`;
-            }
-
-            if(!g.vip_ativo) {
-                botaoVip = `<button class="btn-impulsionar-vip" onclick="abrirPainelVip('${g._id}')">⭐ Comprar VIP</button>`;
-            } else {
-                botaoVip = `<button class="btn-impulsionar-vip" disabled>⭐ VIP Ativo</button>`;
-            }
-
-            return `
-                <div style="padding:10px; border-bottom:1px solid #eee;">
-                    <strong>${g.nome}</strong> ${seloVip}<br>
-                    <a href="${g.link}" target="_blank" style="color:#25d366; font-size:12px;">👉 Abrir grupo</a>
-                    ${botaoImp}
-                    ${botaoVip}
-                    <button class="btn-apagar" onclick="apagarGrupo('${g._id}')">🗑️ Apagar</button>
-                </div>
-            `;
-        }).join("");
-
-    } catch(erro) {
-        lista.innerHTML = `<p class="vazio" style="color:red;">❌ Erro: ${erro.message}</p>`;
+        senhaAdmDefinida = novaSenha1;
+        localStorage.setItem('flow_senha_adm', senhaAdmDefinida);
+        alert("✅ Senha criada com sucesso! Guarde bem!");
+        painelAberto = true;
+        document.getElementById('admModal').style.display = "flex";
+        abaCadastrar();
+        return;
     }
-}
-async function impulsionar(id) {
-    try {
-        const res = await fetch(`${API_URL}/impulsionar/${id}`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-        const dados = await res.json();
-        if(dados.erro) alert(dados.erro);
-        else alert("✅ Impulsionado! Grupo foi pro TOPO!");
-        carregarMeusGrupos();
-        carregarGrupos();
-    } catch(e) { alert("❌ Erro: " + e.message); }
-}
-async function apagarGrupo(id) {
-    if(!confirm("Tem certeza que quer apagar?")) return;
-    try {
-        await fetch(`${API_URL}/apagar-grupo/${id}`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-        alert("✅ Apagado!");
-        carregarMeusGrupos();
-        carregarGrupos();
-    } catch(e) { alert("❌ Erro: " + e.message); }
-}
-function trocarMotivo() {
-    const sel = document.getElementById('selMotivo').value;
-    document.getElementById('divOutroMotivo').classList.toggle('visivel', sel === 'outro');
-}
-function abrirDenuncia(grupoId) {
-    grupoDenunciadoId = grupoId;
-    document.getElementById('denunciaModal').style.display = "flex";
-    document.getElementById('respDenuncia').innerHTML = "";
-}
-function fecharDenuncia() {
-    document.getElementById('denunciaModal').style.display = "none";
-}
-async function enviarDenuncia() {
-    const motivo = document.getElementById('selMotivo').value;
-    const outro = document.getElementById('inpOutroMotivo').value.trim();
-    const respDiv = document.getElementById('respDenuncia');
-
-    try {
-        await fetch(`${API_URL}/denunciar/${grupoDenunciadoId}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "X-Usuario-ID": usuarioId },
-            body: JSON.stringify({ motivo: motivo === 'outro' ? outro : motivo })
-        });
-        respDiv.innerHTML = '<div style="color:green;">✅ Denunciado! Obrigado pelo aviso.</div>';
-        setTimeout(fecharDenuncia, 1500);
-    } catch(e) {
-        respDiv.innerHTML = '<div style="color:red;">❌ Erro ao denunciar.</div>';
-    }
-}
-function mostrarTermos() { document.getElementById('termosModal').style.display = "flex"; }
-function fecharTermos() { document.getElementById('termosModal').style.display = "none"; }
-function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = "flex"; }
-function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = "none"; }
-
-// ✅ SISTEMA DE CLIQUE TRIPLO RÁPIDO NO ÍCONE ⚙️
-let contadorCliquesAdm = 0;
-let tempoUltimoCliqueAdm = 0;
-const INTERVALO_CLIQUE_RAPIDO = 400; // milissegundos entre cliques
-
-document.getElementById('btnAdmTrigger').addEventListener('click', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    const agora = Date.now();
     
-    if (agora - tempoUltimoCliqueAdm > INTERVALO_CLIQUE_RAPIDO) {
-        contadorCliquesAdm = 1; // reinicia se demorar muito
-    } else {
-        contadorCliquesAdm++;
+    // Se JÁ tem senha → pedir para entrar
+    const senhaDigitada = prompt("🔐 Digite a senha de Administrador:");
+    if(senhaDigitada === senhaAdmDefinida) {
+        painelAberto = true;
+        document.getElementById('admModal').style.display = "flex";
+        abaCadastrar();
+    } else if(senhaDigitada) {
+        alert("❌ Senha INCORRETA!");
     }
-    tempoUltimoCliqueAdm = agora;
+}
 
-    if (contadorCliquesAdm === 3) {
-        contadorCliquesAdm = 0; // reseta
-        // Abre a caixa de senha só após 3 cliques rápidos
-        senhaAdm = prompt("🔐 Digite a senha de administração:");
-        if(!senhaAdm) return;
-        
-        fetch(`${API_URL}/adm/grupos`, {
-            headers: { "X-Adm-Senha": senhaAdm }
-        }).then(res => {
-            if(res.status === 403) {
-                alert("❌ SENHA ERRADA!");
-                senhaAdm = "";
-                return;
-            }
-            document.getElementById('admModal').style.display = "flex";
-            document.getElementById('admConteudo').innerHTML = "<p>🔄 Carregando...</p>";
-            admVerGrupos();
-        }).catch(() => {
-            alert("❌ Erro ao verificar senha");
-        });
+// ABRIR PAINEL ADM — 3 CLIQUES RÁPIDOS NO ⚙️
+let cliquesAdm = 0;
+let ultimoCliqueAdm = 0;
+document.getElementById('btnAdmTrigger').addEventListener('click', e => {
+    e.preventDefault();
+    const agora = Date.now();
+    if(agora - ultimoCliqueAdm > 400) cliquesAdm = 1;
+    else cliquesAdm++;
+    ultimoCliqueAdm = agora;
+    
+    if(cliquesAdm === 3) {
+        cliquesAdm = 0;
+        abrirPainelComSenha();
     }
 });
-function fecharPainelAdm() { document.getElementById('admModal').style.display = "none"; }
 
-async function admVerGrupos() {
-    const cont = document.getElementById('admConteudo');
-    try {
-        const res = await fetch(`${API_URL}/adm/grupos`, {
-            headers: { "X-Adm-Senha": senhaAdm }
-        });
-        if(res.status === 403) { cont.innerHTML = "<p style='color:red;'>❌ SENHA ERRADA!</p>"; return; }
-        const grupos = await res.json();
-        cont.innerHTML = grupos.map(g => `
-            <div class="painel-adm-item">
-                <b>${g.nome} ${g.vip ? '⭐' : ''}</b>
-                ${g.link}<br>
-                Cliques: ${g.cliques || 0} | Ativo: ${g.ativo ? '✅' : '❌'}
-                <button class="btn-denunciar" onclick="admDesativar('${g._id}')">❌ Desativar</button>
+function fecharPainelAdm() {
+    document.getElementById('admModal').style.display = "none";
+    painelAberto = false;
+}
+
+function abaCadastrar() {
+    document.getElementById('formCadastro').style.display = 'block';
+    document.getElementById('listaGrupos').style.display = 'none';
+}
+
+function abaListaGrupos() {
+    document.getElementById('formCadastro').style.display = 'none';
+    document.getElementById('listaGrupos').style.display = 'block';
+    atualizarListaGrupos();
+}
+
+function atualizarListaGrupos() {
+    const conteudo = document.getElementById('conteudoGrupos');
+    if(grupos.length === 0) {
+        conteudo.innerHTML = '<p style="text-align:center; color:#888;">Nenhum grupo cadastrado.</p>';
+        return;
+    }
+    conteudo.innerHTML = grupos.map((g, i) => `
+        <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <img src="${g.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+            <div style="flex:1; min-width:150px;">
+                <strong>${g.nome}</strong><br>
+                <small style="color:#666;">${g.categoria}</small>
             </div>
-        `).join("");
-    } catch(e) { cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; }
-}
-
-async function abrirPainelVip(grupoId) {
-    const painel = document.createElement("div");
-    painel.style = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px;`;
-    painel.innerHTML = `
-        <div style="background:#fff;color:#000;padding:25px;border-radius:16px;max-width:400px;width:100%;">
-            <h2 style="text-align:center;margin-bottom:20px;">⭐ Escolha o Plano VIP</h2>
-            <button onclick="escolherPlano('${grupoId}', '5')" style="width:100%;padding:12px;margin:8px 0;background:#ffd700;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">R$ 5,00 → 1 Dia VIP</button>
-            <button onclick="escolherPlano('${grupoId}', '10')" style="width:100%;padding:12px;margin:8px 0;background:#ffb300;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">R$ 10,00 → 2 Dias VIP</button>
-            <button onclick="escolherPlano('${grupoId}', '30')" style="width:100%;padding:12px;margin:8px 0;background:#ff8c00;border:none;border-radius:8px;font-weight:bold;cursor:pointer;">R$ 30,00 → 3 Dias VIP</button>
-            <button onclick="escolherPlano('${grupoId}', '100')" style="width:100%;padding:12px;margin:8px 0;background:linear-gradient(45deg,#ffd700,#ff4500);border:none;border-radius:8px;font-weight:bold;cursor:pointer;color:white;">🎁 R$ 100,00 → 1 MÊS VIP</button>
-            <button onclick="this.parentElement.parentElement.remove()" style="width:100%;padding:10px;margin-top:12px;background:#eee;border:none;border-radius:8px;cursor:pointer;">❌ Cancelar</button>
+            <button onclick="excluirGrupo(${i})" style="background:#ff4444; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">🗑️</button>
         </div>
-    `;
-    document.body.appendChild(painel);
+    `).join('');
 }
 
-async function escolherPlano(grupoId, plano) {
-    document.body.style.cursor = "wait";
-    try {
-        const res = await fetch(`${API_URL}/escolher-plano-vip/${grupoId}`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId, "Content-Type": "application/json" },
-            body: JSON.stringify({ plano: plano })
-        });
-        const dados = await res.json();
-        document.body.style.cursor = "default";
-        
-        if(dados.erro) { alert(dados.erro); return; }
-        if(dados.codigo_pix) {
-            await navigator.clipboard.writeText(dados.codigo_pix);
-            alert(`💳 PIX COPIADO! Valor: R$${dados.valor.toFixed(2).replace('.', ',')}\n⏳ Válido por ${dados.dias_vip} dia(s)\n✅ Após pagamento, o grupo fica VIP!`);
-        }
-    } catch(e) {
-        document.body.style.cursor = "default";
-        alert("❌ Erro: " + e.message);
+function cadastrarGrupo() {
+    const link = document.getElementById('admLink').value.trim();
+    const nome = document.getElementById('admnome').value.trim();
+    const categoria = document.getElementById('admCategoria').value;
+    const foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
+    const resp = document.getElementById('respAdm');
+    
+    if(!link || !nome) {
+        resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
+        return;
     }
-    document.querySelector('[style*="position:fixed"]')?.remove();
+    if(!link.startsWith('https://chat.whatsapp.com/')) {
+        resp.innerHTML = '<p class="erro">❌ Link inválido! Use link do WhatsApp.</p>';
+        return;
+    }
+    
+    grupos.unshift({ link, nome, categoria, foto });
+    salvarGrupos();
+    
+    resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
+    
+    // Limpar campos
+    document.getElementById('admLink').value = '';
+    document.getElementById('admnome').value = '';
+    
+    setTimeout(() => { resp.innerHTML = ''; }, 3000);
 }
 
-async function admVerDenuncias() {
-    const cont = document.getElementById('admConteudo');
-    try {
-        const res = await fetch(`${API_URL}/adm/denuncias`, {
-            headers: { "X-Adm-Senha": senhaAdm }
-        });
-        if(res.status === 403) { 
-            cont.innerHTML = "<p style='color:red;'>❌ SENHA ERRADA!</p>"; 
-            return; 
-        }
-        const den = await res.json();
-        if(!den.length) { 
-            cont.innerHTML = "<p>✅ Sem denúncias novas</p>"; 
-            return; 
-        }
-        cont.innerHTML = den.map(d => `
-    <div class="painel-adm-item" style="display:flex;gap:10px;align-items:flex-start;">
-        <img src="${d.grupo_foto || 'https://files.catbox.moe/0aa6f2.png'}" width="45" height="45" style="border-radius:8px;object-fit:cover;">
-        <div>
-            <b>${d.grupo_nome}</b><br>
-            <a href="${d.grupo_link}" target="_blank" style="color:#25d366;font-size:12px;">${d.grupo_link}</a><br>
-            Motivo: <span style="color:#ff5555">${d.motivo}</span>
-            <button class="btn-apagar" onclick="admDesativar('${d.grupo_id}')">🗑️ Apagar/Desativar</button>
-        </div>
-    </div>
-`).join("");
+function excluirGrupo(indice) {
+    if(!confirm('Tem certeza que deseja excluir este grupo?')) return;
+    grupos.splice(indice, 1);
+    salvarGrupos();
+    atualizarListaGrupos();
+}
 
-    } catch(e) { 
-        cont.innerHTML = "<p style='color:red;'>❌ Erro: " + e.message + "</p>"; 
-    }
-}
-async function registrarClique(grupoId) {
-    try {
-        await fetch(`${API_URL}/clicar/${grupoId}`, {
-            method: "POST",
-            headers: { "X-Usuario-ID": usuarioId }
-        });
-        // Atualiza a lista para mostrar o número novo na hora
-        carregarGrupos();
-    } catch (e) {
-        console.log("Erro ao registrar clique:", e);
-    }
-}
-async function admDesativar(id) {
-    if(!confirm("Tem certeza que quer DESATIVAR este grupo?")) return;
-    try {
-        const res = await fetch(`${API_URL}/adm/desativar/${id}`, {
-            method: "POST",
-            headers: { "X-Adm-Senha": senhaAdm }
-        });
-        const dados = await res.json();
-        if(dados.erro) { alert(dados.erro); return; }
-        alert("✅ Desativado!");
-        admVerGrupos();
-    } catch(e) { alert("❌ Erro: " + e.message); }
-}
+// TERMOS E PRIVACIDADE
+function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
+function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
+function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
+function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
+
+// INICIALIZAR
+carregarGrupos();
 </script>
+
 </body>
 </html>
