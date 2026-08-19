@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Lista de Grupos de WhatsApp - FLOW</title>
+    <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
+    <link rel="canonical" href="https://ellixgr.github.io/flow/" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ellixgr.github.io/flow/">
+    <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
+    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
+    <meta property="og:image" content="https://files.catbox.moe/0aa6f2.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta name="robots" content="index, follow">
+    <script>if (top !== self) {top.location = self.location;}</script>
+    
+    <style>
+        :root { 
+            --primary-green: #25d366; --dark-green: #128c7e;
+            --text-color: #fff; --card-bg: rgba(255,255,255,0.08);
+        }
+        * {box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;}
+        html {scroll-behavior: smooth;}
+        body { 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column;
+            padding-bottom: 100px; padding-top: 70px;
+        }
+        body::before {
+            content:""; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity:0.4; z-index:-1; pointer-events:none;
+        }
+        main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
+        .perfil-topo {text-align:center; margin-bottom:20px;}
+        .foto-perfil {width:80px; height:80px; border-radius:50%; border:3px solid #25d366;}
+        .nome-time {font-size:20px; font-weight:800; color:#25d366; margin-top:8px;}
+        
+        .video-container { 
+            width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
+            background: #000; margin-bottom: 15px;
+        }
+        .video-container video { width: 100%; height: auto; display: block; }
+        .mute-btn { 
+            position: absolute; top: 15px; left: 15px; z-index: 15; 
+            background: rgba(255,255,255,0.3); border-radius: 50%; 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer;
+        }
+        .tiktok-icon { 
+            position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
+            background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
+        }
+        
+        .anuncio-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 12px 0;
+            text-align: center;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-btn { 
+            position: fixed; top: 15px; right: 15px; font-size: 24px; 
+            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 9999; 
+            border: 2px solid var(--primary-green); color: #000; 
+        }
+        .side-menu { 
+            position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
+            background: #ffffff; padding: 60px 20px; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 9998; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
+        }
+        .side-menu.active { right: 0; }
+        .side-menu a, .side-menu .dropdown-btn { 
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            text-decoration: none; color: #000; padding: 14px; margin-bottom: 18px; 
+            border-radius: 12px; background: #f0f0f0; font-weight: 600; gap: 6px;
+            border: none; width: 100%; font-size: inherit; cursor: pointer;
+        }
+        .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; }
+        .dropdown-content {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+            background: #f9f9f9; border-radius: 12px; margin-bottom: 18px; padding: 0 14px;
+        }
+        .dropdown-content.active {
+            max-height: 420px; padding: 14px; border: 1px solid #eee;
+        }
+        .servico-item {
+            display: flex; justify-content: space-between; padding: 8px 0;
+            font-size: 14px; border-bottom: 1px solid #eee;
+        }
+        .servico-item:last-child { border-bottom: none; padding-bottom: 10px; }
+        .btn-contato {
+            margin-top: 15px; background: var(--primary-green) !important;
+            color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
+        }
+        
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin:15px 0;}
+        .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
+        .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
+        
+        .lista {display:flex; flex-direction:column; gap:12px;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px; position:relative;}
+        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
+        .card-info {flex:1;}
+        .card-nome {font-weight:bold; font-size:15px;}
+        .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
+        
+        .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
+        
+        footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
+        footer a {color:#25d366; text-decoration:none; margin:0 4px;}
+        .btn-adm {font-size:10px; opacity:0.12; margin-left:8px; color:#666; text-decoration:none; user-select:none;}
+        
+        .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
+        .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
+        .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
+        .modal-content label {font-weight:600; font-size:14px; display:block; margin:10px 0 4px;}
+        .modal-content input, .modal-content select {width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:14px;}
+        .btn-enviar {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:12px; cursor:pointer; font-size:15px;}
+        .btn-cancelar {width:100%; padding:12px; background:#eee; border:none; border-radius:10px; margin-top:8px; cursor:pointer; font-size:14px; font-weight:bold;}
+        .vazio {text-align:center; color:#aaa; padding:40px 20px; font-size:15px;}
+        .sucesso {color:green; text-align:center; margin-top:10px; font-weight:bold;}
+        .erro {color:red; text-align:center; margin-top:10px; font-weight:bold;}
+    </style>
+</head>
+<body>
+
+<div class="menu-btn" onclick="toggleMenu(event)">☰</div>
+
+<div class="side-menu" id="sideMenu">
+    <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
+    <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+    <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
+    <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
+    <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
+    <div class="dropdown-content" id="telasDropdown">
+        <div class="servico-item"><span>NETFLIX</span><span>11,00</span></div>
+        <div class="servico-item"><span>GLOBO PLAY</span><span>5,50</span></div>
+        <div class="servico-item"><span>DISNEY PLUS</span><span>8,00</span></div>
+        <div class="servico-item"><span>STAR+</span><span>8,00</span></div>
+        <div class="servico-item"><span>TELECINE</span><span>5,00</span></div>
+        <div class="servico-item"><span>PRIME VIDEO</span><span>6,00</span></div>
+        <div class="servico-item"><span>CRUNCHYROLL</span><span>5,00</span></div>
+        <div class="servico-item"><span>SPOTIFY</span><span>9,00</span></div>
+        <div class="servico-item"><span>YOUTUBE INDIVIDUAL</span><span>5,00</span></div>
+        <a href="https://wa.me/5521977231625?text=Olá,%20tenho%20interesse%20nas%20telas!" class="btn-contato" target="_blank" rel="noopener">📲 CONTATO</a>
+    </div>
+    <a href="https://soupopular.net/ref/bagau" target="_blank" rel="noopener">
+        <img src="https://files.catbox.moe/eognmj.png" alt="Sou Popular" class="mini-img">
+        📈 Serviços Redes Sociais
+    </a>
+    <a href="https://www.tiktok.com/d/4/ZS9YHN1LsY5mU-LXTZE/" target="_blank" rel="noopener">
+        <img src="https://files.catbox.moe/d0otxm.png" alt="TikTok Lite" class="mini-img">
+        🎁 Ganhe 20,00 🎉 Baixe tiktok
+    </a>
+</div>
+
+<main>
+    <div class="perfil-topo">
+        <img src="https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg" class="foto-perfil" alt="Logo Team Flow">
+        <div class="nome-time">Team Flow</div>
+        <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
+    </div>
+    
+    <div class="video-container">
+        <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
+        <video id="meuVideo" autoplay loop playsinline muted preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
+            <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
+        </video>
+        <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
+    </div>
+
+    <!-- 🔔 ANÚNCIO ADSTERRA -->
+    <div class="anuncio-box">
+        <script>
+            atOptions = {
+                'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+            };
+        </script>
+        <script src="https://www.highperformanceformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
+    </div>
+
+    <!-- 📂 ABAS DE CATEGORIAS -->
+    <div class="abas" id="abas">
+        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
+        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
+        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
+        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
+        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
+    </div>
+
+    <!-- 📋 LISTA DE GRUPOS -->
+    <div class="lista" id="lista-grupos">
+        <p class="vazio">Nenhum grupo cadastrado ainda.<br>Você pode cadastrar pelo Painel ADM! 💻</p>
+    </div>
+</main>
+
+<!-- 📌 RODAPÉ -->
+<footer>
+    © 2020-<span id="ano-atual"></span> FLOW — 
+    <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
+    <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
+    <a id="btnAdmTrigger" class="btn-adm" href="#">⚙️</a>
+</footer>
+
+<!-- 🔐 PAINEL ADMINISTRATIVO -->
+<div id="admModal" class="modal" onclick="fecharPainelAdm()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>🔐 Painel Administrativo</h2>
+        
+        <div style="display:flex; gap:8px; margin-bottom:15px;">
+            <button style="flex:1; padding:10px; background:#25d366; color:white; border:none; border-radius:8px; font-size:14px;" onclick="abaCadastrar()">📝 Cadastrar</button>
+            <button style="flex:1; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-size:14px;" onclick="abaListaGrupos()">📋 Grupos</button>
+        </div>
+        
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <div id="formCadastro">
+            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📝 Cadastrar Novo Grupo</h3>
+            <label>🔗 Link WhatsApp:</label>
+            <input type="url" id="admLink" placeholder="https://chat.whatsapp.com/..." required>
+            
+            <label>📛 Nome do Grupo:</label>
+            <input type="text" id="admnome" placeholder="Nome do grupo" required>
+            
+            <label>📂 Categoria:</label>
+            <select id="admCategoria">
+                <option value="Amizade">🤝 Amizade</option>
+                <option value="Namoro">❤️ Namoro</option>
+                <option value="Zoeira">😂 Zoeira</option>
+                <option value="Outros">📌 Outros</option>
+            </select>
+            
+            <label>🖼️ Link da Foto:</label>
+            <input type="url" id="admFoto" placeholder="https://exemplo.com/imagem.jpg" value="https://files.catbox.moe/0aa6f2.png">
+            
+            <button class="btn-enviar" onclick="cadastrarGrupo()">✅ CADASTRAR GRUPO</button>
+            <div id="respAdm" style="margin-top:10px;"></div>
+        </div>
+        
+        <!-- LISTA DE GRUPOS CADASTRADOS -->
+        <div id="listaGrupos" style="display:none;">
+            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📋 Grupos Cadastrados</h3>
+            <div id="conteudoGrupos"></div>
+        </div>
+        
+        <button class="btn-cancelar" onclick="fecharPainelAdm()">FECHAR</button>
+    </div>
+</div>
+
+<!-- TERMOS E PRIVACIDADE -->
+<div id="termosModal" class="modal" onclick="fecharTermos()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>📜 Termos de Uso</h2>
+        <p style="font-size:14px; line-height:1.7; color:#333;">
+            ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
+            ⚠️ Os grupos são de responsabilidade dos criadores. Não nos responsabilizamos pelo conteúdo.<br><br>
+            📋 Ao enviar um grupo, você concorda com estes termos.
+        </p>
+        <button class="btn-enviar" onclick="fecharTermos()">✅ ENTENDI</button>
+    </div>
+</div>
+
+<div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2>🔒 Política de Privacidade</h2>
+        <p style="font-size:14px; line-height:1.7; color:#333;">
+            🔒 Seus dados estão protegidos!<br><br>
+            📋 Armazenamos apenas: link, nome e categoria dos grupos.<br>
+            ❌ Não coletamos dados pessoais dos visitantes.<br>
+            🛡️ O site não armazena conversas ou mensagens privadas.
+        </p>
+        <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
+    </div>
+</div>
+
+<script>
+// ANO ATUAL NO RODAPÉ
+document.getElementById('ano-atual').textContent = new Date().getFullYear();
+
+// DADOS DOS GRUPOS — SALVO LOCALMENTE
+let grupos = JSON.parse(localStorage.getItem('flow_grupos') || '[]');
+let categoriaAtual = 'Todos';
+let senhaAdmDefinida = localStorage.getItem('flow_senha_adm') || null;
+let painelAberto = false;
+
+// SALVAR GRUPOS NO LOCALSTORAGE
+function salvarGrupos() {
+    localStorage.setItem('flow_grupos', JSON.stringify(grupos));
+    carregarGrupos();
+}
+
+// ABRIR E FECHAR MENU
+function toggleMenu(e) { 
+    if(e) e.stopPropagation(); 
+    document.getElementById('sideMenu').classList.toggle('active'); 
+}
+
+// CONTROLE DO VÍDEO
+const video = document.getElementById('meuVideo');
+const muteIcon = document.getElementById('muteIcon');
+function toggleMute(e) { 
+    if(e) { e.preventDefault(); e.stopPropagation(); } 
+    video.muted = !video.muted; 
+    muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
+}
+
+// DROPDOWN TELAS
+function toggleDropdown() { 
+    const d = document.getElementById('telasDropdown');
+    const b = document.getElementById('btnTelas');
+    d.classList.toggle('active'); 
+    b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
+}
+
+// TROCAR CATEGORIA
+function trocarCategoria(cat) {
+    categoriaAtual = cat;
+    document.querySelectorAll('.aba').forEach(a => {
+        a.classList.remove('ativa');
+        if(a.dataset.cat === cat) a.classList.add('ativa');
+    });
+    carregarGrupos();
+}
+
+// CARREGAR GRUPOS NA TELA
+function carregarGrupos() {
+    const lista = document.getElementById('lista-grupos');
+    
+    let filtrados = grupos;
+    if(categoriaAtual !== 'Todos') {
+        filtrados = grupos.filter(g => g.categoria === categoriaAtual);
+    }
+    
+    if(filtrados.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Cadastre pelo Painel ADM! 💻</p>';
+        return;
+    }
+    
+    lista.innerHTML = filtrados.map(g => `
+        <div class="card">
+            <img src="${g.foto}" alt="Foto do grupo">
+            <div class="card-info">
+                <div class="card-nome">${g.nome}</div>
+                <div class="card-cat">${g.categoria}</div>
+            </div>
+            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+        </div>
+    `).join('');
+}
+
+// 🔐 SISTEMA DE SENHA — SEM SENHA NO CÓDIGO!
+function abrirPainelComSenha() {
+    // Se NÃO tem senha definida → pedir para criar uma
+    if(!senhaAdmDefinida) {
+        const novaSenha1 = prompt("🔐 PRIMEIRO ACESSO — Crie uma senha de Administrador:\n(Guarde bem, não aparece no código!)");
+        if(!novaSenha1 || novaSenha1.length < 4) {
+            alert("❌ Senha muito curta! Mínimo 4 caracteres.");
+            return;
+        }
+        const novaSenha2 = prompt("🔐 Confirme a senha:");
+        if(novaSenha1 !== novaSenha2) {
+            alert("❌ As senhas NÃO coincidem!");
+            return;
+        }
+        senhaAdmDefinida = novaSenha1;
+        localStorage.setItem('flow_senha_adm', senhaAdmDefinida);
+        alert("✅ Senha criada com sucesso! Guarde bem!");
+        painelAberto = true;
+        document.getElementById('admModal').style.display = "flex";
+        abaCadastrar();
+        return;
+    }
+    
+    // Se JÁ tem senha → pedir para entrar
+    const senhaDigitada = prompt("🔐 Digite a senha de Administrador:");
+    if(senhaDigitada === senhaAdmDefinida) {
+        painelAberto = true;
+        document.getElementById('admModal').style.display = "flex";
+        abaCadastrar();
+    } else if(senhaDigitada) {
+        alert("❌ Senha INCORRETA!");
+    }
+}
+
+// ABRIR PAINEL ADM — 3 CLIQUES RÁPIDOS NO ⚙️
+let cliquesAdm = 0;
+let ultimoCliqueAdm = 0;
+document.getElementById('btnAdmTrigger').addEventListener('click', e => {
+    e.preventDefault();
+    const agora = Date.now();
+    if(agora - ultimoCliqueAdm > 400) cliquesAdm = 1;
+    else cliquesAdm++;
+    ultimoCliqueAdm = agora;
+    
+    if(cliquesAdm === 3) {
+        cliquesAdm = 0;
+        abrirPainelComSenha();
+    }
+});
+
+function fecharPainelAdm() {
+    document.getElementById('admModal').style.display = "none";
+    painelAberto = false;
+}
+
+function abaCadastrar() {
+    document.getElementById('formCadastro').style.display = 'block';
+    document.getElementById('listaGrupos').style.display = 'none';
+}
+
+function abaListaGrupos() {
+    document.getElementById('formCadastro').style.display = 'none';
+    document.getElementById('listaGrupos').style.display = 'block';
+    atualizarListaGrupos();
+}
+
+function atualizarListaGrupos() {
+    const conteudo = document.getElementById('conteudoGrupos');
+    if(grupos.length === 0) {
+        conteudo.innerHTML = '<p style="text-align:center; color:#888;">Nenhum grupo cadastrado.</p>';
+        return;
+    }
+    conteudo.innerHTML = grupos.map((g, i) => `
+        <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <img src="${g.foto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+            <div style="flex:1; min-width:150px;">
+                <strong>${g.nome}</strong><br>
+                <small style="color:#666;">${g.categoria}</small>
+            </div>
+            <button onclick="excluirGrupo(${i})" style="background:#ff4444; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">🗑️</button>
+        </div>
+    `).join('');
+}
+
+function cadastrarGrupo() {
+    const link = document.getElementById('admLink').value.trim();
+    const nome = document.getElementById('admnome').value.trim();
+    const categoria = document.getElementById('admCategoria').value;
+    const foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
+    const resp = document.getElementById('respAdm');
+    
+    if(!link || !nome) {
+        resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
+        return;
+    }
+    if(!link.startsWith('https://chat.whatsapp.com/')) {
+        resp.innerHTML = '<p class="erro">❌ Link inválido! Use link do WhatsApp.</p>';
+        return;
+    }
+    
+    grupos.unshift({ link, nome, categoria, foto });
+    salvarGrupos();
+    
+    resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
+    
+    // Limpar campos
+    document.getElementById('admLink').value = '';
+    document.getElementById('admnome').value = '';
+    
+    setTimeout(() => { resp.innerHTML = ''; }, 3000);
+}
+
+function excluirGrupo(indice) {
+    if(!confirm('Tem certeza que deseja excluir este grupo?')) return;
+    grupos.splice(indice, 1);
+    salvarGrupos();
+    atualizarListaGrupos();
+}
+
+// TERMOS E PRIVACIDADE
+function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
+function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
+function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
+function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
+
+// INICIALIZAR
+carregarGrupos();
+</script>
+
+</body>
+</html>
