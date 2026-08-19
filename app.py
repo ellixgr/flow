@@ -6,7 +6,6 @@ from bson.objectid import ObjectId
 import os
 from uuid import uuid4
 from dotenv import load_dotenv
-import requests
 import time
 from collections import defaultdict
 
@@ -29,7 +28,7 @@ def verificar_anti_flood():
             return jsonify({"erro": "⚠️ Muitas requisições! Aguarde 1 minuto antes de enviar novamente."}), 429
         limite_requisitos[ip].append(agora)
 
-# ✅ CORS — GARANTINDO ACESSO DO GITHUB
+# ✅ CORS — GitHub + 2 servidores Render
 CORS(app, resources={r"/*": {
     "origins": [
         "https://ellixgr.github.io",
@@ -42,106 +41,17 @@ CORS(app, resources={r"/*": {
     "supports_credentials": True
 }})
 
-# 🔑 VARIÁVEIS DE AMBIENTE
+# 🔑 VARIÁVEIS DO RENDER
 MONGO_URI = os.getenv("MONGO_URI")
 CODIGO_VIP_SECRETO = os.getenv("CODIGO_VIP")
 SENHA_ADM = os.getenv("SENHA_ADM")
-MP_ACCESS_TOKEN = os.getenv("MP_ACCESS_TOKEN", "").strip()
 
-# ⚠️ AVISO SE FALTAR CONFIGURAÇÃO
-if not MP_ACCESS_TOKEN:
-    print("⚠️ AVISO: MP_ACCESS_TOKEN não configurado! Pagamentos estarão desativados.")
 if not MONGO_URI:
     print("⚠️ AVISO: MONGO_URI não configurada!")
 
 TEMPO_IMPULSIONAR = timedelta(hours=2)
 
-PLANOS_VIP = {
-    "5": {"valor": 5.00, "dias": 1, "nome": "R$ 5,00 → 1 Dia VIP"},
-    "10": {"valor": 10.00, "dias": 2, "nome": "R$ 10,00 → 2 Dias VIP"},
-    "30": {"valor": 30.00, "dias": 3, "nome": "R$ 30,00 → 3 Dias VIP"},
-    "100": {"valor": 100.00, "dias": 30, "nome": "🎁 R$ 100,00 → 1 MÊS VIP"}
-}
-
-# ✅ FUNÇÃO CORRIGIDA — EMAIL ÚNICO POR USUÁRIO (IGUAL AO BOT!)
-def gerar_pix_mercadopago(valor: float, descricao: str = "Grupo WhatsApp", user_id: str = None):
-    if not MP_ACCESS_TOKEN:
-        return False, None, None, "Mercado Pago não configurado no servidor."
-
-    url = "https://api.mercadopago.com/v1/payments"
-    idempotency_key = str(uuid4())
-    external_reference = f"flow_{idempotency_key[:12]}"
-    
-    # ✅ EMAIL ÚNICO — IGUAL AO BOT DO TELEGRAM! Isso resolve o erro 403!
-    email_unico = f"user_{user_id or idempotency_key[:8]}@flow-site.com"
-
-    headers = {
-        "Authorization": f"Bearer {MP_ACCESS_TOKEN}",
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": idempotency_key
-    }
-
-    payload = {
-        "transaction_amount": round(valor, 2),
-        "description": descricao,
-        "payment_method_id": "pix",
-        "installments": 1,
-        "external_reference": external_reference,
-        "payer": {
-            "email": email_unico,  # ✅ MUDANÇA PRINCIPAL — EMAIL ÚNICO!
-            "first_name": "Usuario",
-            "last_name": "Flow"
-        },
-        "notification_url": "https://flow-81mj.onrender.com/webhook-mercadopago"
-    }
-
-    try:
-        resp = requests.post(url, json=payload, headers=headers, timeout=20)
-        print(f"[MP] Status: {resp.status_code} | Resposta: {resp.text[:500]}")
-
-        if resp.status_code == 201:
-            dados = resp.json()
-            codigo_pix = dados.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code")
-            id_pagamento = dados.get("id")
-            if codigo_pix and id_pagamento:
-                return True, codigo_pix, id_pagamento, None
-            else:
-                return False, None, None, "Resposta da API não contém código PIX."
-        elif resp.status_code == 403:
-            return False, None, None, "❌ Erro 403 — Tente novamente em alguns minutos ou verifique sua conta do Mercado Pago."
-        elif resp.status_code == 401:
-            return False, None, None, "❌ Token do Mercado Pago inválido! Atualize no Render."
-        else:
-            return False, None, None, f"Erro API: Status {resp.status_code}"
-
-    except requests.exceptions.Timeout:
-        return False, None, None, "⏱️ Tempo esgotado ao conectar com Mercado Pago."
-    except Exception as e:
-        print(f"[MP] Erro: {str(e)}")
-        return False, None, None, f"Falha de conexão: {str(e)}"
-
-def verificar_pagamento_mp(pag_id):
-    if not MP_ACCESS_TOKEN:
-        return False, 0
-    url = f"https://api.mercadopago.com/v1/payments/{pag_id}"
-    headers = {"Authorization": f"Bearer {MP_ACCESS_TOKEN}"}
-    try:
-        resp = requests.get(url, headers=headers, timeout=10)
-        if resp.status_code == 200:
-            dados = resp.json()
-            status = dados.get("status")
-            valor = dados.get("transaction_amount", 0)
-            if status == "approved":
-                return True, valor
-            elif status in ["cancelled", "expired", "rejected"]:
-                return False, -1
-            return False, 0
-        return False, 0
-    except Exception as e:
-        print(f"[MP] Erro verificar pagamento: {e}")
-        return False, 0
-
-# 🗄️ BANCO DE DADOS
+# 🗄️ CONEXÃO BANCO
 try:
     client = MongoClient(
         MONGO_URI,
@@ -153,14 +63,11 @@ try:
     )
     db = client["flow_db"]
     grupos_col = db["grupos"]
-    grupos_pendentes_col = db["grupos_pendentes"]
     denuncias_col = db["denuncias"]
     cliques_col = db["cliques"]
-    pagamentos_col = db["pagamentos"]
 
-    # Índices
-    cliques_col.create_index("chave", unique=True, name="idx_chave_unica", partialFilterExpression={"chave": {"$exists": True}})
-    pagamentos_col.create_index("codigo_pix", unique=True)
+    cliques_col.create_index("chave", unique=True, name="idx_chave_unica",
+                             partialFilterExpression={"chave": {"$exists": True}})
 except Exception as e:
     print(f"⚠️ ERRO CONEXÃO BANCO: {e}")
 
@@ -217,6 +124,7 @@ def grupos_dados():
         print("ERRO grupos-dados:", str(e))
         return jsonify({"erro": str(e)}), 500
 
+# ✅ CONTAR CLIQUES — 1 por usuário
 @app.route("/clicar/<grupo_id>", methods=["POST"])
 def clicar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64] or str(uuid4())
@@ -232,6 +140,7 @@ def clicar(grupo_id):
     except Exception as e:
         return jsonify({"erro": str(e)}), 500
 
+# ✅ ENVIAR GRUPO — GRÁTIS, SEM PIX, SEM PAGAMENTO!
 @app.route("/enviar-grupo", methods=["POST"])
 def enviar_grupo():
     try:
@@ -245,7 +154,6 @@ def enviar_grupo():
         foto = dados.get("foto_base64", "")[:200000]
         codigo = dados.get("codigo_adm", "").strip()[:64]
         uid = request.headers.get("X-Usuario-ID", "").strip()[:64] or str(uuid4())
-        plano_escolhido = dados.get("plano", "5")
 
         if not link or not nome:
             return jsonify({"erro": "Preencha link e nome!"}), 400
@@ -256,7 +164,7 @@ def enviar_grupo():
 
         agora = datetime.utcnow()
 
-        # ✅ Código VIP grátis
+        # 🎁 Código VIP grátis — 1 dia VIP
         if CODIGO_VIP_SECRETO and codigo == CODIGO_VIP_SECRETO:
             grupos_col.insert_one({
                 "link": link, "nome": nome, "categoria": categoria, "foto": foto,
@@ -264,68 +172,21 @@ def enviar_grupo():
                 "vip": True, "vip_ate": agora + timedelta(days=1),
                 "ultimo_impulso": agora, "criado_em": agora
             })
-            return jsonify({"sucesso": "✅ Grupo publicado com VIP grátis!", "sem_pix": True})
+            return jsonify({"sucesso": "✅ Grupo publicado com VIP grátis!", "vip": True})
 
-        # ✅ Sem token do MP = avisa
-        if not MP_ACCESS_TOKEN:
-            return jsonify({"erro": "❌ Pagamento temporariamente indisponível. Tente novamente mais tarde."}), 503
-
-        plano = PLANOS_VIP.get(plano_escolhido)
-        if not plano:
-            return jsonify({"erro": "Plano inválido!"}), 400
-
-        # ✅ Passa o UID para gerar email único — IGUAL AO BOT!
-        ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(
-            plano["valor"], f"Grupo: {nome}", uid
-        )
-        if not ok:
-            return jsonify({"erro": erro}), 400
-
-        pendente = grupos_pendentes_col.insert_one({
+        # ✅ CADASTRO NORMAL — GRÁTIS, SEM PAGAMENTO, JÁ APARECE!
+        grupos_col.insert_one({
             "link": link, "nome": nome, "categoria": categoria, "foto": foto,
-            "usuario_id": uid, "plano": plano, "id_pagamento_mp": id_pagamento,
-            "criado_em": agora
+            "usuario_id": uid, "cliques": 0, "ativo": True,
+            "vip": False, "ultimo_impulso": agora, "criado_em": agora
         })
-
-        return jsonify({
-            "pendente_id": str(pendente.inserted_id),
-            "codigo_pix": codigo_pix,
-            "valor": plano["valor"],
-            "dias_vip": plano["dias"]
-        })
+        return jsonify({"sucesso": "✅ Grupo publicado com sucesso! 🎉"})
 
     except Exception as e:
-        print("ERRO GERAL envio:", str(e))
+        print("ERRO envio:", str(e))
         return jsonify({"erro": f"Erro interno: {str(e)}"}), 500
 
-@app.route("/verificar-pagamento/<pendente_id>", methods=["POST"])
-def verificar_pagamento(pendente_id):
-    try:
-        if not ObjectId.is_valid(pendente_id):
-            return jsonify({"erro": "ID inválido"}), 400
-
-        pendente = grupos_pendentes_col.find_one({"_id": ObjectId(pendente_id)})
-        if not pendente:
-            return jsonify({"erro": "Não encontrado"}), 404
-
-        aprovado, valor_pago = verificar_pagamento_mp(pendente["id_pagamento_mp"])
-        if aprovado:
-            grupos_col.insert_one({
-                "link": pendente["link"], "nome": pendente["nome"], "categoria": pendente["categoria"],
-                "foto": pendente["foto"], "usuario_id": pendente["usuario_id"], "cliques": 0, "ativo": True,
-                "vip": True, "vip_ate": datetime.utcnow() + timedelta(days=pendente["plano"]["dias"]),
-                "ultimo_impulso": datetime.utcnow(), "criado_em": datetime.utcnow()
-            })
-            grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
-            return jsonify({"sucesso": True, "mensagem": "✅ Pagamento aprovado! Grupo publicado!"})
-        elif valor_pago == -1:
-            grupos_pendentes_col.delete_one({"_id": pendente["_id"]})
-            return jsonify({"erro": "Pagamento cancelado/expirado"}), 400
-        else:
-            return jsonify({"status": "pendente", "mensagem": "Aguardando pagamento..."})
-    except Exception as e:
-        return jsonify({"erro": str(e)}), 500
-
+# ✅ MEUS GRUPOS
 @app.route("/meus-grupos")
 def meus_grupos():
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
@@ -334,7 +195,6 @@ def meus_grupos():
     try:
         agora = datetime.utcnow()
         grupos = list(grupos_col.find({"usuario_id": uid}).sort("ultimo_impulso", -1))
-        pendentes = list(grupos_pendentes_col.find({"usuario_id": uid}))
         todos = []
         for g in grupos:
             g["_id"] = str(g["_id"])
@@ -347,15 +207,12 @@ def meus_grupos():
             if not g["pode_impulsionar"]:
                 g["proximo_impulso_segundos"] = int((ultimo + TEMPO_IMPULSIONAR - agora).total_seconds())
             todos.append(g)
-        for p in pendentes:
-            p["_id"] = str(p["_id"])
-            p["status"] = "aguardando_pagamento"
-            todos.append(p)
         return jsonify(todos)
     except Exception as e:
         print("Erro meus-grupos:", e)
         return jsonify([])
 
+# ✅ IMPULSIONAR — a cada 2h
 @app.route("/impulsionar/<grupo_id>", methods=["POST"])
 def impulsionar(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
@@ -371,6 +228,7 @@ def impulsionar(grupo_id):
     grupos_col.update_one({"_id": ObjectId(grupo_id)}, {"$set": {"ultimo_impulso": datetime.utcnow()}})
     return jsonify({"sucesso": True, "mensagem": "✅ Impulsionado!"})
 
+# ✅ APAGAR GRUPO — só o dono
 @app.route("/apagar-grupo/<grupo_id>", methods=["POST"])
 def apagar_grupo(grupo_id):
     uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
@@ -378,13 +236,13 @@ def apagar_grupo(grupo_id):
         return jsonify({"erro": "Dados inválidos"}), 400
     obj_id = ObjectId(grupo_id)
     res_grupo = grupos_col.delete_one({"_id": obj_id, "usuario_id": uid})
-    grupos_pendentes_col.delete_one({"_id": obj_id, "usuario_id": uid})
     if res_grupo.deleted_count == 0:
         return jsonify({"erro": "Você não é o dono ou grupo não existe!"}), 403
     cliques_col.delete_many({"chave": {"$regex": f"\\Q{grupo_id}\\E"}})
     denuncias_col.delete_many({"grupo_id": grupo_id})
     return jsonify({"sucesso": True, "mensagem": "✅ Grupo apagado com sucesso!"})
 
+# ✅ DENUNCIAR
 @app.route("/denunciar/<grupo_id>", methods=["POST"])
 def denunciar(grupo_id):
     dados = request.json or {}
@@ -396,10 +254,12 @@ def denunciar(grupo_id):
     })
     return jsonify({"sucesso": True})
 
+# 🔐 VERIFICAR SENHA ADM
 def verificar_senha():
     recebida = (request.headers.get("X-Adm-Senha") or "").strip()
     return bool(SENHA_ADM and recebida == SENHA_ADM)
 
+# 🔐 PAINEL ADM — Ver todos os grupos
 @app.route("/adm/grupos")
 def adm_grupos():
     if not verificar_senha():
@@ -410,6 +270,7 @@ def adm_grupos():
         g["cliques"] = g.get("cliques", 0)
     return jsonify(todos)
 
+# 🔐 PAINEL ADM — Ver denúncias
 @app.route("/adm/denuncias")
 def adm_denuncias():
     if not verificar_senha():
@@ -436,6 +297,7 @@ def adm_denuncias():
             continue
     return jsonify(res)
 
+# 🔐 PAINEL ADM — Apagar grupo
 @app.route("/adm/desativar/<grupo_id>", methods=["POST"])
 def adm_desativar(grupo_id):
     if not verificar_senha():
@@ -445,30 +307,6 @@ def adm_desativar(grupo_id):
     denuncias_col.delete_many({"grupo_id": grupo_id})
     cliques_col.delete_many({"grupo_id": grupo_id})
     return jsonify({"sucesso": True, "mensagem": "✅ Grupo APAGADO completamente!"})
-
-@app.route("/escolher-plano-vip/<grupo_id>", methods=["POST"])
-def escolher_plano_vip(grupo_id):
-    uid = request.headers.get("X-Usuario-ID", "").strip()[:64]
-    if not ObjectId.is_valid(grupo_id):
-        return jsonify({"erro": "ID inválido"}), 400
-    grupo = grupos_col.find_one({"_id": ObjectId(grupo_id), "usuario_id": uid})
-    if not grupo:
-        return jsonify({"erro": "Não é seu grupo!"}), 404
-    if not MP_ACCESS_TOKEN:
-        return jsonify({"erro": "Mercado Pago não configurado"}), 500
-    dados = request.json or {}
-    plano = PLANOS_VIP.get(dados.get("plano", "5"))
-    # ✅ Passa o UID para email único
-    ok, codigo_pix, id_pagamento, erro = gerar_pix_mercadopago(
-        plano["valor"], f"VIP {grupo['nome']}", uid
-    )
-    if not ok:
-        return jsonify({"erro": erro}), 500
-    return jsonify({
-        "codigo_pix": codigo_pix,
-        "valor": plano["valor"],
-        "dias_vip": plano["dias"]
-    })
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
