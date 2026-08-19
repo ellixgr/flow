@@ -101,7 +101,7 @@
         }
         .servico-item:last-child { border-bottom: none; padding-bottom: 10px; }
         .btn-contato {
-            margin-top: 15px; background: var(--primary-green) !important;
+            margin-top: 15px background: var(--primary-green) !important;
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
@@ -127,11 +127,17 @@
         .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
         .modal-content label {font-weight:600; font-size:14px; display:block; margin:10px 0 4px;}
         .modal-content input, .modal-content select {width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:14px;}
+        .upload-area {border:2px dashed #25d366; border-radius:8px; padding:15px; text-align:center; cursor:pointer; margin-top:5px; transition:0.2s;}
+        .upload-area:hover {background:rgba(37,211,102,0.1);}
+        .preview-img {width:80px; height:80px; border-radius:50%; object-fit:cover; margin:10px auto; display:block; border:2px solid #25d366;}
         .btn-enviar {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:12px; cursor:pointer; font-size:15px;}
         .btn-cancelar {width:100%; padding:12px; background:#eee; border:none; border-radius:10px; margin-top:8px; cursor:pointer; font-size:14px; font-weight:bold;}
         .vazio {text-align:center; color:#aaa; padding:40px 20px; font-size:15px;}
         .sucesso {color:green; text-align:center; margin-top:10px; font-weight:bold;}
         .erro {color:red; text-align:center; margin-top:10px; font-weight:bold;}
+        .opcao-foto {display:flex; gap:10px; margin:10px 0;}
+        .opcao-foto button {flex:1; padding:10px; border:1px solid #ccc; background:#f5f5f5; border-radius:8px; cursor:pointer; font-size:13px;}
+        .opcao-foto button.ativa {background:#25d366; color:white; border-color:#25d366;}
     </style>
 </head>
 <body>
@@ -231,8 +237,8 @@
         <!-- FORMULÁRIO DE CADASTRO -->
         <div id="formCadastro">
             <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📝 Cadastrar Novo Grupo</h3>
-            <label>🔗 Link WhatsApp:</label>
-            <input type="url" id="admLink" placeholder="https://chat.whatsapp.com/..." required>
+            <label>🔗 Link (qualquer link):</label>
+            <input type="text" id="admLink" placeholder="Cole o link aqui — aceito qualquer link!" required>
             
             <label>📛 Nome do Grupo:</label>
             <input type="text" id="admnome" placeholder="Nome do grupo" required>
@@ -245,8 +251,27 @@
                 <option value="Outros">📌 Outros</option>
             </select>
             
-            <label>🖼️ Link da Foto:</label>
-            <input type="url" id="admFoto" placeholder="https://exemplo.com/imagem.jpg" value="https://files.catbox.moe/0aa6f2.png">
+            <label>🖼️ Foto do Grupo:</label>
+            <div class="opcao-foto">
+                <button type="button" id="btnLinkFoto" class="ativa" onclick="escolherModoFoto('link')">🔗 Usar Link</button>
+                <button type="button" id="btnUploadFoto" onclick="escolherModoFoto('upload')">📷 Galeria</button>
+            </div>
+            
+            <!-- MODO LINK -->
+            <div id="linkFotoGroup" style="display:block;">
+                <input type="url" id="admFoto" placeholder="https://exemplo.com/imagem.jpg" value="https://files.catbox.moe/0aa6f2.png" oninput="atualizarPreview()">
+            </div>
+            
+            <!-- MODO UPLOAD -->
+            <div id="uploadFotoGroup" style="display:none;">
+                <div class="upload-area" onclick="document.getElementById('inputFotoUpload').click()">
+                    📷 Clique para escolher da galeria
+                    <input type="file" id="inputFotoUpload" accept="image/*" style="display:none;" onchange="processarFoto(event)">
+                </div>
+            </div>
+            
+            <!-- PREVIEW DA FOTO -->
+            <img id="previewFoto" class="preview-img" src="https://files.catbox.moe/0aa6f2.png" alt="Preview da foto">
             
             <button class="btn-enviar" onclick="cadastrarGrupo()">✅ CADASTRAR GRUPO</button>
             <div id="respAdm" style="margin-top:10px;"></div>
@@ -299,6 +324,8 @@ let grupos = [];
 let categoriaAtual = 'Todos';
 let chaveAdm = localStorage.getItem('chave_adm_flow') || null;
 let painelAberto = false;
+let modoFoto = 'link';
+let fotoBase64 = '';
 
 // 📲 GERAR ID DO USUÁRIO
 let usuarioId = localStorage.getItem('usuario_id_flow');
@@ -384,7 +411,7 @@ async function contarClique(grupoId) {
     } catch (e) {}
 }
 
-// 🔐 LOGIN ADM — COMPARA CHAVE COM O RENDER!
+// 🔐 LOGIN ADM
 async function loginAdm(chave) {
     try {
         const res = await fetch(`${API_URL}/adm/login`, {
@@ -401,7 +428,7 @@ async function loginAdm(chave) {
     } catch { return false; }
 }
 
-// 🔐 ABRIR PAINEL — 3 CLIQUES RÁPIDOS NO ⚙️
+// 🔐 ABRIR PAINEL — 3 CLIQUES NO ⚙️
 let cliquesAdm = 0;
 let ultimoCliqueAdm = 0;
 document.getElementById('btnAdmTrigger').addEventListener('click', async e => {
@@ -443,12 +470,105 @@ function fecharPainelAdm() {
 function abaCadastrar() {
     document.getElementById('formCadastro').style.display = 'block';
     document.getElementById('listaGrupos').style.display = 'none';
+    fotoBase64 = '';
+    modoFoto = 'link';
+    document.getElementById('btnLinkFoto').classList.add('ativa');
+    document.getElementById('btnUploadFoto').classList.remove('ativa');
+    document.getElementById('linkFotoGroup').style.display = 'block';
+    document.getElementById('uploadFotoGroup').style.display = 'none';
+    document.getElementById('previewFoto').src = 'https://files.catbox.moe/0aa6f2.png';
+    document.getElementById('admFoto').value = 'https://files.catbox.moe/0aa6f2.png';
 }
 
 function abaListaGrupos() {
     document.getElementById('formCadastro').style.display = 'none';
     document.getElementById('listaGrupos').style.display = 'block';
     atualizarListaGrupos();
+}
+
+// 🖼️ ESCOLHER MODO DE FOTO
+function escolherModoFoto(modo) {
+    modoFoto = modo;
+    const btnLink = document.getElementById('btnLinkFoto');
+    const btnUpload = document.getElementById('btnUploadFoto');
+    const groupLink = document.getElementById('linkFotoGroup');
+    const groupUpload = document.getElementById('uploadFotoGroup');
+    
+    btnLink.classList.toggle('ativa', modo === 'link');
+    btnUpload.classList.toggle('ativa', modo === 'upload');
+    groupLink.style.display = modo === 'link' ? 'block' : 'none';
+    groupUpload.style.display = modo === 'upload' ? 'block' : 'none';
+    
+    if (modo === 'link') atualizarPreview();
+}
+
+// 📷 PROCESSAR FOTO DA GALERIA
+function processarFoto(event) {
+    const arquivo = event.target.files[0];
+    if (!arquivo) return;
+    
+    const leitor = new FileReader();
+    leitor.onload = function(e) {
+        fotoBase64 = e.target.result;
+        document.getElementById('previewFoto').src = fotoBase64;
+    };
+    leitor.readAsDataURL(arquivo);
+}
+
+// 👁️ ATUALIZAR PREVIEW DO LINK
+function atualizarPreview() {
+    const link = document.getElementById('admFoto').value.trim();
+    if (link) {
+        document.getElementById('previewFoto').src = link;
+    }
+}
+
+// ✅ CADASTRAR GRUPO — LINK LIVRE, SEM VALIDAÇÃO DE WHATSAPP!
+async function cadastrarGrupo() {
+    const link = document.getElementById('admLink').value.trim();
+    const nome = document.getElementById('admnome').value.trim();
+    const categoria = document.getElementById('admCategoria').value;
+    const resp = document.getElementById('respAdm');
+    
+    // PEGAR FOTO: link ou base64
+    let foto;
+    if (modoFoto === 'upload' && fotoBase64) {
+        foto = fotoBase64;
+    } else {
+        foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
+    }
+    
+    if (!link || !nome) {
+        resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
+        return;
+    }
+    
+    // ✅ QUALQUER LINK É ACEITO — NÃO EXIGE WHATSAPP!
+    
+    try {
+        const res = await fetch(`${API_URL}/adm/cadastrar-grupo`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-Chave-Adm': chaveAdm 
+            },
+            body: JSON.stringify({ link, nome, categoria, foto })
+        });
+        const dados = await res.json();
+        
+        if (res.ok && dados.sucesso) {
+            resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
+            document.getElementById('admLink').value = '';
+            document.getElementById('admnome').value = '';
+            fotoBase64 = '';
+            carregarGrupos();
+            setTimeout(() => { resp.innerHTML = ''; }, 3000);
+        } else {
+            resp.innerHTML = `<p class="erro">${dados.erro || 'Erro ao cadastrar!'}</p>`;
+        }
+    } catch {
+        resp.innerHTML = '<p class="erro">❌ Erro de conexão com o servidor!</p>';
+    }
 }
 
 // 📋 ATUALIZAR LISTA DO PAINEL ADM
@@ -478,48 +598,6 @@ async function atualizarListaGrupos() {
         `).join('');
     } catch {
         conteudo.innerHTML = '<p style="text-align:center; color:red;">❌ Erro ao carregar.</p>';
-    }
-}
-
-// ✅ CADASTRAR GRUPO — DIRETO NO BANCO!
-async function cadastrarGrupo() {
-    const link = document.getElementById('admLink').value.trim();
-    const nome = document.getElementById('admnome').value.trim();
-    const categoria = document.getElementById('admCategoria').value;
-    const foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
-    const resp = document.getElementById('respAdm');
-    
-    if (!link || !nome) {
-        resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
-        return;
-    }
-    if (!link.startsWith('https://chat.whatsapp.com/')) {
-        resp.innerHTML = '<p class="erro">❌ Link inválido! Use link do WhatsApp.</p>';
-        return;
-    }
-    
-    try {
-        const res = await fetch(`${API_URL}/adm/cadastrar-grupo`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-Chave-Adm': chaveAdm 
-            },
-            body: JSON.stringify({ link, nome, categoria, foto })
-        });
-        const dados = await res.json();
-        
-        if (res.ok && dados.sucesso) {
-            resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
-            document.getElementById('admLink').value = '';
-            document.getElementById('admnome').value = '';
-            carregarGrupos();
-            setTimeout(() => { resp.innerHTML = ''; }, 3000);
-        } else {
-            resp.innerHTML = `<p class="erro">${dados.erro || 'Erro ao cadastrar!'}</p>`;
-        }
-    } catch {
-        resp.innerHTML = '<p class="erro">❌ Erro de conexão com o servidor!</p>';
     }
 }
 
