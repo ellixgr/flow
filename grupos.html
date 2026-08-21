@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Grupos - FLOW</title>
+    <meta name="description" content="Lista de grupos de WhatsApp por categoria.">
+    <link rel="canonical" href="https://ellixgr.github.io/flow/grupos.html" />
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://ellixgr.github.io/flow/grupos.html">
+    <meta property="og:title" content="Grupos 💬 FLOW">
+    <meta property="og:description" content="Grupos de WhatsApp — Amizade, Namoro, Zoeira e mais!">
+    <meta property="og:image" content="https://files.catbox.moe/0aa6f2.png">
+    <meta name="robots" content="index, follow">
+    
+    <style>
+        :root { --primary-green: #25d366; }
+        * {box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;}
+        html {scroll-behavior: smooth;}
+        body { 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            color: #fff; min-height: 100vh; padding-bottom: 100px; padding-top: 20px;
+        }
+        body::before {
+            content:""; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:url('https://www.transparenttextures.com/patterns/stardust.png');
+            opacity:0.4; z-index:-1; pointer-events:none;
+        }
+        main {max-width:420px; margin:0 auto; width:100%; padding:0 12px;}
+        
+        .voltar {
+            display: inline-flex; align-items: center; gap: 6px; color: #25d366; 
+            text-decoration: none; font-size: 15px; margin-bottom: 20px; font-weight: 600;
+        }
+        
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:20px; position:sticky; top:0; background:transparent; z-index:10; padding-top:8px;}
+        .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
+        .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
+        
+        .lista {display:flex; flex-direction:column; gap:12px;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px;}
+        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
+        .card-info {flex:1;}
+        .card-nome {font-weight:bold; font-size:15px;}
+        .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
+        .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
+        .vazio {text-align:center; color:#aaa; padding:60px 20px; font-size:15px;}
+        
+        footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333;}
+        footer a {color:#25d366; text-decoration:none; margin:0 4px;}
+    </style>
+</head>
+<body>
+
+<main>
+    <a href="index.html" class="voltar">← Voltar para página inicial</a>
+    
+    <!-- 📂 ABAS DE CATEGORIAS -->
+    <div class="abas" id="abas">
+        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
+        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
+        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
+        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
+        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
+    </div>
+
+    <!-- 📋 LISTA DE GRUPOS — EDITE AQUI OS GRUPOS! -->
+    <div class="lista" id="lista-grupos">
+        <p class="vazio">Carregando grupos...</p>
+    </div>
+</main>
+
+<footer>
+    © 2020-<span id="ano-atual"></span> FLOW — 
+    <a href="index.html">Termos de Uso</a> & 
+    <a href="index.html">Privacidade</a>
+</footer>
+
+<script>
+document.getElementById('ano-atual').textContent = new Date().getFullYear();
+
+// ==================================================
+// 📲 SEUS GRUPOS — EDITE AQUI! NÃO MEXE NO RESTO!
+// ==================================================
+const GRUPOS = [
+    // 📌 FORMATO:
+    // { nome: "NOME", categoria: "Amizade/Namoro/Zoeira/Outros", link: "URL", foto: "URL DA IMAGEM" }
+    
+    // EXEMPLO — APAGA E COLOCA SEUS GRUPOS:
+    // {
+    //     nome: "Galera Amigável",
+    //     categoria: "Amizade",
+    //     link: "https://chat.whatsapp.com/EXEMPLO123",
+    //     foto: "https://files.catbox.moe/0aa6f2.png"
+    // },
+    // {
+    //     nome: "Amor e Conversa",
+    //     categoria: "Namoro",
+    //     link: "https://chat.whatsapp.com/EXEMPLO456",
+    //     foto: "https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg"
+    // }
+    
+    // 👇 COLOCA SEUS GRUPOS AQUI EMBAIXO 👇
+    
+];
+
+let categoriaAtual = 'Todos';
+
+function trocarCategoria(cat) {
+    categoriaAtual = cat;
+    document.querySelectorAll('.aba').forEach(a => {
+        a.classList.remove('ativa');
+        if(a.dataset.cat === cat) a.classList.add('ativa');
+    });
+    carregarGrupos();
+}
+
+function carregarGrupos() {
+    const lista = document.getElementById('lista-grupos');
+    const filtrados = categoriaAtual === 'Todos' 
+        ? GRUPOS 
+        : GRUPOS.filter(g => g.categoria === categoriaAtual);
+    
+    if (filtrados.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Volte em breve!</p>';
+        return;
+    }
+
+    lista.innerHTML = filtrados.map(g => `
+        <div class="card">
+            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
+            <div class="card-info">
+                <div class="card-nome">${g.nome}</div>
+                <div class="card-cat">${g.categoria}</div>
+            </div>
+            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+        </div>
+    `).join('');
+}
+
+carregarGrupos();
+</script>
+
+</body>
+</html>
