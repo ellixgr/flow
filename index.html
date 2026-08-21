@@ -101,43 +101,24 @@
         }
         .servico-item:last-child { border-bottom: none; padding-bottom: 10px; }
         .btn-contato {
-            margin-top: 15px background: var(--primary-green) !important;
+            margin-top: 15px; background: var(--primary-green) !important;
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
-        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin:15px 0;}
-        .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
-        .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
-        
-        .lista {display:flex; flex-direction:column; gap:12px;}
-        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px; position:relative;}
-        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
-        .card-info {flex:1;}
-        .card-nome {font-weight:bold; font-size:15px;}
-        .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
-        
-        .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
+        .btn-ver-grupos {
+            display: block; background: #25d366; color: #000; padding: 16px; 
+            border-radius: 12px; text-align: center; font-weight: bold; 
+            font-size: 16px; text-decoration: none; margin: 25px 0;
+        }
         
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
-        .btn-adm {font-size:10px; opacity:0.12; margin-left:8px; color:#666; text-decoration:none; user-select:none;}
         
         .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
         .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
         .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
-        .modal-content label {font-weight:600; font-size:14px; display:block; margin:10px 0 4px;}
-        .modal-content input, .modal-content select {width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; font-size:14px;}
-        .upload-area {border:2px dashed #25d366; border-radius:8px; padding:15px; text-align:center; cursor:pointer; margin-top:5px; transition:0.2s;}
-        .upload-area:hover {background:rgba(37,211,102,0.1);}
-        .preview-img {width:80px; height:80px; border-radius:50%; object-fit:cover; margin:10px auto; display:block; border:2px solid #25d366;}
-        .btn-enviar {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:12px; cursor:pointer; font-size:15px;}
-        .btn-cancelar {width:100%; padding:12px; background:#eee; border:none; border-radius:10px; margin-top:8px; cursor:pointer; font-size:14px; font-weight:bold;}
-        .vazio {text-align:center; color:#aaa; padding:40px 20px; font-size:15px;}
-        .sucesso {color:green; text-align:center; margin-top:10px; font-weight:bold;}
-        .erro {color:red; text-align:center; margin-top:10px; font-weight:bold;}
-        .opcao-foto {display:flex; gap:10px; margin:10px 0;}
-        .opcao-foto button {flex:1; padding:10px; border:1px solid #ccc; background:#f5f5f5; border-radius:8px; cursor:pointer; font-size:13px;}
-        .opcao-foto button.ativa {background:#25d366; color:white; border-color:#25d366;}
+        .modal-content p {font-size:14px; line-height:1.7; color:#333;}
+        .btn-fechar-modal {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer; font-size:15px;}
     </style>
 </head>
 <body>
@@ -147,6 +128,7 @@
 <div class="side-menu" id="sideMenu">
     <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
     <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+    <a href="grupos.html" style="background:#000; color:white;">💬 VER TODOS OS GRUPOS</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
@@ -201,19 +183,8 @@
         <script src="https://www.highperformanceformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
 
-    <!-- 📂 ABAS DE CATEGORIAS -->
-    <div class="abas" id="abas">
-        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
-        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
-        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
-        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
-        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
-    </div>
-
-    <!-- 📋 LISTA DE GRUPOS -->
-    <div class="lista" id="lista-grupos">
-        <p class="vazio">Carregando grupos...</p>
-    </div>
+    <!-- 🔗 BOTÃO PARA GRUPOS -->
+    <a href="grupos.html" class="btn-ver-grupos">💬 VER TODOS OS GRUPOS</a>
 </main>
 
 <!-- 📌 RODAPÉ -->
@@ -221,126 +192,42 @@
     © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
-    <a id="btnAdmTrigger" class="btn-adm" href="#">⚙️</a>
 </footer>
-
-<!-- 🔐 PAINEL ADMINISTRATIVO -->
-<div id="admModal" class="modal" onclick="fecharPainelAdm()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <h2>🔐 Painel Administrativo</h2>
-        
-        <div style="display:flex; gap:8px; margin-bottom:15px;">
-            <button style="flex:1; padding:10px; background:#25d366; color:white; border:none; border-radius:8px; font-size:14px;" onclick="abaCadastrar()">📝 Cadastrar</button>
-            <button style="flex:1; padding:10px; background:#ffd700; color:#000; border:none; border-radius:8px; font-size:14px;" onclick="abaListaGrupos()">📋 Grupos</button>
-        </div>
-        
-        <!-- FORMULÁRIO DE CADASTRO -->
-        <div id="formCadastro">
-            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📝 Cadastrar Novo Grupo</h3>
-            <label>🔗 Link (qualquer link):</label>
-            <input type="text" id="admLink" placeholder="Cole o link aqui — aceito qualquer link!" required>
-            
-            <label>📛 Nome do Grupo:</label>
-            <input type="text" id="admnome" placeholder="Nome do grupo" required>
-            
-            <label>📂 Categoria:</label>
-            <select id="admCategoria">
-                <option value="Amizade">🤝 Amizade</option>
-                <option value="Namoro">❤️ Namoro</option>
-                <option value="Zoeira">😂 Zoeira</option>
-                <option value="Outros">📌 Outros</option>
-            </select>
-            
-            <label>🖼️ Foto do Grupo:</label>
-            <div class="opcao-foto">
-                <button type="button" id="btnLinkFoto" class="ativa" onclick="escolherModoFoto('link')">🔗 Usar Link</button>
-                <button type="button" id="btnUploadFoto" onclick="escolherModoFoto('upload')">📷 Galeria</button>
-            </div>
-            
-            <!-- MODO LINK -->
-            <div id="linkFotoGroup" style="display:block;">
-                <input type="url" id="admFoto" placeholder="https://exemplo.com/imagem.jpg" value="https://files.catbox.moe/0aa6f2.png" oninput="atualizarPreview()">
-            </div>
-            
-            <!-- MODO UPLOAD -->
-            <div id="uploadFotoGroup" style="display:none;">
-                <div class="upload-area" onclick="document.getElementById('inputFotoUpload').click()">
-                    📷 Clique para escolher da galeria
-                    <input type="file" id="inputFotoUpload" accept="image/*" style="display:none;" onchange="processarFoto(event)">
-                </div>
-            </div>
-            
-            <!-- PREVIEW DA FOTO -->
-            <img id="previewFoto" class="preview-img" src="https://files.catbox.moe/0aa6f2.png" alt="Preview da foto">
-            
-            <button class="btn-enviar" onclick="cadastrarGrupo()">✅ CADASTRAR GRUPO</button>
-            <div id="respAdm" style="margin-top:10px;"></div>
-        </div>
-        
-        <!-- LISTA DE GRUPOS CADASTRADOS -->
-        <div id="listaGrupos" style="display:none;">
-            <h3 style="text-align:center; margin-bottom:15px; color:#25d366;">📋 Grupos Cadastrados</h3>
-            <div id="conteudoGrupos"></div>
-        </div>
-        
-        <button class="btn-cancelar" onclick="fecharPainelAdm()">FECHAR</button>
-    </div>
-</div>
 
 <!-- TERMOS E PRIVACIDADE -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
-        <p style="font-size:14px; line-height:1.7; color:#333;">
+        <p>
             ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
             ⚠️ Os grupos são de responsabilidade dos criadores. Não nos responsabilizamos pelo conteúdo.<br><br>
             📋 Ao enviar um grupo, você concorda com estes termos.
         </p>
-        <button class="btn-enviar" onclick="fecharTermos()">✅ ENTENDI</button>
+        <button class="btn-fechar-modal" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
 
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
-        <p style="font-size:14px; line-height:1.7; color:#333;">
+        <p>
             🔒 Seus dados estão protegidos!<br><br>
             📋 Armazenamos apenas: link, nome e categoria dos grupos.<br><br>
             ❌ Não coletamos dados pessoais dos visitantes.<br><br>
             🛡️ O site não armazena conversas ou mensagens privadas.
         </p>
-        <button class="btn-enviar" onclick="fecharPrivacidade()">✅ ENTENDI</button>
+        <button class="btn-fechar-modal" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
 
 <script>
-// ANO ATUAL NO RODAPÉ
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
-// 🔗 URL DO BACKEND
-const API_URL = 'https://flow-81mj.onrender.com';
-
-let grupos = [];
-let categoriaAtual = 'Todos';
-let chaveAdm = localStorage.getItem('chave_adm_flow') || null;
-let painelAberto = false;
-let modoFoto = 'link';
-let fotoBase64 = '';
-
-// 📲 GERAR ID DO USUÁRIO
-let usuarioId = localStorage.getItem('usuario_id_flow');
-if (!usuarioId) {
-    usuarioId = 'usr_' + Math.random().toString(36).substring(2, 15);
-    localStorage.setItem('usuario_id_flow', usuarioId);
-}
-
-// ABRIR E FECHAR MENU
 function toggleMenu(e) { 
     if(e) e.stopPropagation(); 
     document.getElementById('sideMenu').classList.toggle('active'); 
 }
 
-// CONTROLE DO VÍDEO
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { 
@@ -349,7 +236,6 @@ function toggleMute(e) {
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
 
-// DROPDOWN TELAS
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
@@ -357,278 +243,10 @@ function toggleDropdown() {
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
 
-// TROCAR CATEGORIA
-function trocarCategoria(cat) {
-    categoriaAtual = cat;
-    document.querySelectorAll('.aba').forEach(a => {
-        a.classList.remove('ativa');
-        if(a.dataset.cat === cat) a.classList.add('ativa');
-    });
-    carregarGrupos();
-}
-
-// 📥 CARREGAR GRUPOS DO BACKEND
-async function carregarGrupos() {
-    const lista = document.getElementById('lista-grupos');
-    try {
-        const res = await fetch(`${API_URL}/grupos-dados?categoria=${encodeURIComponent(categoriaAtual)}`, {
-            headers: { 'X-Usuario-ID': usuarioId }
-        });
-        if (!res.ok) throw new Error('Erro ao buscar');
-        grupos = await res.json();
-        
-        if (!Array.isArray(grupos) || grupos.length === 0) {
-            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<p></p>';
-            return;
-        }
-
-        lista.innerHTML = grupos.map(g => `
-            <div class="card">
-                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
-                <div class="card-info">
-                    <div class="card-nome">${g.nome} ${g.vip_ativo ? ' ⭐VIP' : ''}</div>
-                    <div class="card-cat">${g.categoria} • 👁️ ${g.cliques || 0} cliques</div>
-                </div>
-                <a href="${g.link}" target="_blank" class="btn-entrar" onclick="contarClique('${g._id}')">👉 Entrar</a>
-            </div>
-        `).join('');
-    } catch (erro) {
-        console.error(erro);
-        lista.innerHTML = '<p class="vazio">❌ Erro ao carregar grupos.<br>Verifique se o backend está online.</p>';
-    }
-}
-
-// 👆 CONTAR CLIQUE
-async function contarClique(grupoId) {
-    try {
-        await fetch(`${API_URL}/clicar/${grupoId}`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-Usuario-ID': usuarioId 
-            }
-        });
-    } catch (e) {}
-}
-
-// 🔐 LOGIN ADM
-async function loginAdm(chave) {
-    try {
-        const res = await fetch(`${API_URL}/adm/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chave_adm: chave })
-        });
-        if (res.ok) {
-            chaveAdm = chave;
-            localStorage.setItem('chave_adm_flow', chave);
-            return true;
-        }
-        return false;
-    } catch { return false; }
-}
-
-// 🔐 ABRIR PAINEL — 3 CLIQUES NO ⚙️
-let cliquesAdm = 0;
-let ultimoCliqueAdm = 0;
-document.getElementById('btnAdmTrigger').addEventListener('click', async e => {
-    e.preventDefault();
-    const agora = Date.now();
-    if (agora - ultimoCliqueAdm > 400) cliquesAdm = 1;
-    else cliquesAdm++;
-    ultimoCliqueAdm = agora;
-    
-    if (cliquesAdm === 3) {
-        cliquesAdm = 0;
-        let chave;
-        if (chaveAdm) {
-            chave = chaveAdm;
-        } else {
-            chave = prompt("🔐 Digite a CHAVE DE ADMINISTRADOR:");
-            if (!chave) return;
-        }
-        
-        const ok = await loginAdm(chave);
-        if (ok) {
-            painelAberto = true;
-            document.getElementById('admModal').style.display = "flex";
-            abaCadastrar();
-            atualizarListaGrupos();
-        } else {
-            alert("❌ CHAVE ERRADA!");
-            chaveAdm = null;
-            localStorage.removeItem('chave_adm_flow');
-        }
-    }
-});
-
-function fecharPainelAdm() {
-    document.getElementById('admModal').style.display = "none";
-    painelAberto = false;
-}
-
-function abaCadastrar() {
-    document.getElementById('formCadastro').style.display = 'block';
-    document.getElementById('listaGrupos').style.display = 'none';
-    fotoBase64 = '';
-    modoFoto = 'link';
-    document.getElementById('btnLinkFoto').classList.add('ativa');
-    document.getElementById('btnUploadFoto').classList.remove('ativa');
-    document.getElementById('linkFotoGroup').style.display = 'block';
-    document.getElementById('uploadFotoGroup').style.display = 'none';
-    document.getElementById('previewFoto').src = 'https://files.catbox.moe/0aa6f2.png';
-    document.getElementById('admFoto').value = 'https://files.catbox.moe/0aa6f2.png';
-}
-
-function abaListaGrupos() {
-    document.getElementById('formCadastro').style.display = 'none';
-    document.getElementById('listaGrupos').style.display = 'block';
-    atualizarListaGrupos();
-}
-
-// 🖼️ ESCOLHER MODO DE FOTO
-function escolherModoFoto(modo) {
-    modoFoto = modo;
-    const btnLink = document.getElementById('btnLinkFoto');
-    const btnUpload = document.getElementById('btnUploadFoto');
-    const groupLink = document.getElementById('linkFotoGroup');
-    const groupUpload = document.getElementById('uploadFotoGroup');
-    
-    btnLink.classList.toggle('ativa', modo === 'link');
-    btnUpload.classList.toggle('ativa', modo === 'upload');
-    groupLink.style.display = modo === 'link' ? 'block' : 'none';
-    groupUpload.style.display = modo === 'upload' ? 'block' : 'none';
-    
-    if (modo === 'link') atualizarPreview();
-}
-
-// 📷 PROCESSAR FOTO DA GALERIA
-function processarFoto(event) {
-    const arquivo = event.target.files[0];
-    if (!arquivo) return;
-    
-    const leitor = new FileReader();
-    leitor.onload = function(e) {
-        fotoBase64 = e.target.result;
-        document.getElementById('previewFoto').src = fotoBase64;
-    };
-    leitor.readAsDataURL(arquivo);
-}
-
-// 👁️ ATUALIZAR PREVIEW DO LINK
-function atualizarPreview() {
-    const link = document.getElementById('admFoto').value.trim();
-    if (link) {
-        document.getElementById('previewFoto').src = link;
-    }
-}
-
-// ✅ CADASTRAR GRUPO — LINK LIVRE, SEM VALIDAÇÃO DE WHATSAPP!
-async function cadastrarGrupo() {
-    const link = document.getElementById('admLink').value.trim();
-    const nome = document.getElementById('admnome').value.trim();
-    const categoria = document.getElementById('admCategoria').value;
-    const resp = document.getElementById('respAdm');
-    
-    // PEGAR FOTO: link ou base64
-    let foto;
-    if (modoFoto === 'upload' && fotoBase64) {
-        foto = fotoBase64;
-    } else {
-        foto = document.getElementById('admFoto').value.trim() || 'https://files.catbox.moe/0aa6f2.png';
-    }
-    
-    if (!link || !nome) {
-        resp.innerHTML = '<p class="erro">❌ Preencha link e nome!</p>';
-        return;
-    }
-    
-    // ✅ QUALQUER LINK É ACEITO — NÃO EXIGE WHATSAPP!
-    
-    try {
-        const res = await fetch(`${API_URL}/adm/cadastrar-grupo`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-Chave-Adm': chaveAdm 
-            },
-            body: JSON.stringify({ link, nome, categoria, foto })
-        });
-        const dados = await res.json();
-        
-        if (res.ok && dados.sucesso) {
-            resp.innerHTML = '<p class="sucesso">✅ Grupo cadastrado com sucesso!</p>';
-            document.getElementById('admLink').value = '';
-            document.getElementById('admnome').value = '';
-            fotoBase64 = '';
-            carregarGrupos();
-            setTimeout(() => { resp.innerHTML = ''; }, 3000);
-        } else {
-            resp.innerHTML = `<p class="erro">${dados.erro || 'Erro ao cadastrar!'}</p>`;
-        }
-    } catch {
-        resp.innerHTML = '<p class="erro">❌ Erro de conexão com o servidor!</p>';
-    }
-}
-
-// 📋 ATUALIZAR LISTA DO PAINEL ADM
-async function atualizarListaGrupos() {
-    const conteudo = document.getElementById('conteudoGrupos');
-    try {
-        const res = await fetch(`${API_URL}/adm/grupos`, {
-            headers: { 'X-Chave-Adm': chaveAdm }
-        });
-        if (!res.ok) throw new Error('Sem permissão');
-        const lista = await res.json();
-        
-        if (!lista.length) {
-            conteudo.innerHTML = '<p style="text-align:center; color:#888;">Nenhum grupo cadastrado.</p>';
-            return;
-        }
-        
-        conteudo.innerHTML = lista.map(g => `
-            <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
-                <div style="flex:1; min-width:150px;">
-                    <strong>${g.nome}</strong><br>
-                    <small style="color:#666;">${g.categoria} • 👁️ ${g.cliques || 0}</small>
-                </div>
-                <button onclick="apagarGrupoAdm('${g._id}')" style="background:#ff4444; color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer;">🗑️</button>
-            </div>
-        `).join('');
-    } catch {
-        conteudo.innerHTML = '<p style="text-align:center; color:red;">❌ Erro ao carregar.</p>';
-    }
-}
-
-// 🗑️ APAGAR GRUPO — ADM
-async function apagarGrupoAdm(grupoId) {
-    if (!confirm('Tem certeza que deseja APAGAR este grupo?')) return;
-    try {
-        const res = await fetch(`${API_URL}/adm/apagar-grupo/${grupoId}`, {
-            method: 'POST',
-            headers: { 'X-Chave-Adm': chaveAdm }
-        });
-        const dados = await res.json();
-        if (res.ok && dados.sucesso) {
-            atualizarListaGrupos();
-            carregarGrupos();
-        } else {
-            alert(dados.erro || 'Erro ao apagar!');
-        }
-    } catch {
-        alert('❌ Erro de conexão!');
-    }
-}
-
-// TERMOS E PRIVACIDADE
 function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
 function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
-
-// INICIALIZAR
-carregarGrupos();
 </script>
 
 </body>
