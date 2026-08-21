@@ -64,7 +64,7 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- 📋 LISTA DE GRUPOS → JÁ COM SEU GRUPO ADICIONADO! -->
+    <!-- 📋 LISTA DE GRUPOS → CORRIGIDO! -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos...</p>
     </div>
@@ -80,7 +80,7 @@
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
 // ==================================================
-// 📲 SEUS GRUPOS — JÁ TEM O SEU AQUI!
+// ✅ CORRIGIDO — FALTAVA VÍRGULA ENTRE OS GRUPOS!
 // ==================================================
 const GRUPOS = [
     {
@@ -88,7 +88,7 @@ const GRUPOS = [
         categoria: "Amizade",
         link: "https://chat.whatsapp.com/K7ai1KeLMiZCsaZ3ni04Zq?s=cl&p=a&mlu=4",
         foto: "https://files.catbox.moe/0aa6f2.png"
-    }
+    },  // ← AQUI ESTAVA O ERRO — FALTAVA A VÍRGULA!
     {
         nome: "💗😈GRUPO🔞🔥",
         categoria: "Namoro",
@@ -96,7 +96,7 @@ const GRUPOS = [
         foto: "https://i.postimg.cc/nzXv9hxq/Screenshot-20260821-013113-(1).jpg"
     }
     
-    // 👇 COLOCA MAIS GRUPOS AQUI EMBAIXO, SE QUISER 👇
+    // 👇 COLOCA MAIS GRUPOS AQUI EMBAIXO, SEMPRE COM VÍRGULA ENTRE {} 👇
     
 ];
 
