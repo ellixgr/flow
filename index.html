@@ -62,10 +62,19 @@
             padding: 12px;
             margin: 12px 0;
             text-align: center;
-            min-height: 70px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+        .anuncio-imagem {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            animation: pulsar 2s ease-in-out infinite;
+        }
+        @keyframes pulsar {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
         }
         
         .menu-btn { 
@@ -169,18 +178,11 @@
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
-    <!-- 🔔 ANÚNCIO ADSTERRA -->
+    <!-- 🔔 ANÚNCIO MÉLIUZ -->
     <div class="anuncio-box">
-        <script>
-            atOptions = {
-                'key' : 'e64f39c609130dc8030efa1e7737a3bd',
-                'format' : 'iframe',
-                'height' : 50,
-                'width' : 320,
-                'params' : {}
-            };
-        </script>
-        <script src="https://www.highperformanceformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
+        <a href="https://www.meliuz.com.br/i/ref_2256e026?ref_source=81" target="_blank" rel="noopener">
+            <img src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Ganhe R$5 ao se cadastrar no Méliuz" class="anuncio-imagem">
+        </a>
     </div>
 
     <!-- 🔗 BOTÃO PARA GRUPOS -->
