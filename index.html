@@ -64,6 +64,20 @@
             width: 100%;
         }
         
+        /* Estilos das Abas e da Lista de Grupos */
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:transparent; z-index:10; padding-top:8px;}
+        .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
+        .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
+        
+        .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px;}
+        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
+        .card-info {flex:1;}
+        .card-nome {font-weight:bold; font-size:15px;}
+        .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
+        .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
+        .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
+
         .anuncio-box {
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
@@ -124,12 +138,6 @@
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
-        .btn-ver-grupos {
-            display: block; background: #25d366; color: #000; padding: 16px; 
-            border-radius: 12px; text-align: center; font-weight: bold; 
-            font-size: 16px; text-decoration: none; margin: 20px 0;
-        }
-        
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         
@@ -147,7 +155,7 @@
 <div class="side-menu" id="sideMenu">
     <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
     <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
-    <a href="grupos.html" style="background:#000; color:white;">💬 VER TODOS OS GRUPOS</a>
+    <a href="#lista-grupos" onclick="toggleMenu(event)" style="background:#000; color:white;">💬 VER TODOS OS GRUPOS</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
@@ -202,8 +210,19 @@
         <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
 
-    <!-- 🔗 BOTÃO PARA GRUPOS -->
-    <a href="grupos.html" class="btn-ver-grupos">💬 VER TODOS OS GRUPOS</a>
+    <!-- 📂 ABAS DE CATEGORIAS -->
+    <div class="abas" id="abas">
+        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
+        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
+        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
+        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
+        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
+    </div>
+
+    <!-- 📋 LISTA DE GRUPOS -->
+    <div class="lista" id="lista-grupos">
+        <p class="vazio">Carregando grupos...</p>
+    </div>
 
     <!-- 🔔 ANÚNCIO MÉLIUZ -->
     <div class="anuncio-box">
@@ -273,6 +292,58 @@ function mostrarTermos() { document.getElementById('termosModal').style.display 
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
 function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
+
+// LÓGICA DOS GRUPOS
+const GRUPOS = [
+    {
+        nome: "💗𝑾𝑬𝑩|🌬️𝑪𝑯𝑨𝑻💬࿐",
+        categoria: "Amizade",
+        link: "https://chat.whatsapp.com/ElBXZwLluVu63IbvJv5hni",
+        foto: "https://files.catbox.moe/0aa6f2.png"
+    },
+    {
+        nome: "💗😈GRUPO🔞🔥",
+        categoria: "Namoro",
+        link: "https://ellixgr.github.io/x23wzp/video",
+        foto: "https://i.postimg.cc/nzXv9hxq/Screenshot-20260821-013113-(1).jpg"
+    }
+];
+
+let categoriaAtual = 'Todos';
+
+function trocarCategoria(cat) {
+    categoriaAtual = cat;
+    document.querySelectorAll('.aba').forEach(a => {
+        a.classList.remove('ativa');
+        if(a.dataset.cat === cat) a.classList.add('ativa');
+    });
+    carregarGrupos();
+}
+
+function carregarGrupos() {
+    const lista = document.getElementById('lista-grupos');
+    const filtrados = categoriaAtual === 'Todos' 
+        ? GRUPOS 
+        : GRUPOS.filter(g => g.categoria === categoriaAtual);
+    
+    if (filtrados.length === 0) {
+        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Volte em breve!</p>';
+        return;
+    }
+
+    lista.innerHTML = filtrados.map(g => `
+        <div class="card">
+            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
+            <div class="card-info">
+                <div class="card-nome">${g.nome}</div>
+                <div class="card-cat">${g.categoria}</div>
+            </div>
+            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+        </div>
+    `).join('');
+}
+
+carregarGrupos();
 </script>
 
 </body>
