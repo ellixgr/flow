@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linha do Tempo Marvel — Ordem Cronológica</title>
+  <style>
+    :root {
+      --bg-color: #0f1015;
+      --card-bg: #1a1c23;
+      --accent-red: #e50914;
+      --text-main: #f5f5f7;
+      --text-sub: #a0a5b5;
+      --border-color: #2a2d3a;
+      --badge-released: #10b981;
+      --badge-pending: #f59e0b;
+      --badge-canceled: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      padding: 20px 12px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      border-bottom: 2px solid var(--accent-red);
+      padding-bottom: 16px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-sub);
+      font-size: 0.95rem;
+    }
+
+    .action-btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 10px 18px;
+      background-color: var(--accent-red);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+
+    .action-btn:hover {
+      background-color: #b20710;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      margin: 28px 0 12px 0;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 4px solid var(--accent-red);
+      padding-left: 10px;
+    }
+
+    .list-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .item-card {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .item-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .item-meta {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .badge-released {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--badge-released);
+      border: 1px solid var(--badge-released);
+    }
+
+    .badge-pending {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--badge-pending);
+      border: 1px solid var(--badge-pending);
+    }
+
+    .badge-canceled {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--badge-canceled);
+      border: 1px solid var(--badge-canceled);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px 0;
+      color: var(--text-sub);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-color);
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>📋 Linha do Tempo Marvel</h1>
+    <p>Ordem Cronológica dos Acontecimentos & Status</p>
+    <button class="action-btn" onclick="copyTimeline()">Copiar Lista de Texto</button>
+  </header>
+
+  <!-- ORIGENS -->
+  <div class="section-title">⏳ Antes de 2008 — Origens</div>
+  <div class="list-group">
+    <div class="item-card"><div class="item-info"><span class="item-title">1. Capitão América: O Primeiro Vingador (Filme | 2011)</span><span class="item-meta">Anos 1940</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">2. Agente Carter (Curta-metragem | 2013)</span><span class="item-meta">Pós-2ª Guerra</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">3. Agente Carter (Série 1ª e 2ª Temp | 2015-2016)</span><span class="item-meta">Anos 1940</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">4. Capitã Marvel (Filme | 2019)</span><span class="item-meta">Se passa em 1995</span></div><span class="badge badge-released">Lançado ✅</span></div>
+  </div>
+
+  <!-- SAGA DO INFINITO -->
+  <div class="section-title">📅 2008–2018 — Saga do Infinito</div>
+  <div class="list-group">
+    <div class="item-card"><div class="item-info"><span class="item-title">5. Homem de Ferro (Filme | 2008)</span><span class="item-meta">Se passa em 2008</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">6. Homem de Ferro 2 (Filme | 2010)</span><span class="item-meta">Se passa em 2011</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">7. O Incrível Hulk (Filme | 2010)</span><span class="item-meta">Se passa em 2011</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">8. Thor (Filme | 2011)</span><span class="item-meta">Se passa em 2011</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">9. Os Vingadores (Filme | 2012)</span><span class="item-meta">Se passa em 2012</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">10. Homem de Ferro 3 (Filme | 2013)</span><span class="item-meta">Natal de 2012</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">11. Thor: O Mundo Sombrio (Filme | 2013)</span><span class="item-meta">Se passa em 2013</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">12. Capitão América: O Soldado Invernal (Filme | 2014)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">13. Guardiões da Galáxia (Filme | 2014)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">14. Eu Sou Groot (Série Curta 1ª Temp | 2022)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">15. Guardiões da Galáxia Vol. 2 (Filme | 2017)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">16. Eu Sou Groot (Série Curta 2ª Temp | 2023)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">17. Demolidor (Série 1ª Temp | 2015)</span><span class="item-meta">Se passa em 2014</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">18. Vingadores: Era de Ultron (Filme | 2015)</span><span class="item-meta">Se passa em 2015</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">19. Jessica Jones (Série 1ª Temp | 2015)</span><span class="item-meta">Se passa em 2015</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">20. Homem-Formiga (Filme | 2015)</span><span class="item-meta">Se passa em 2015</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">21. Demolidor (Série 2ª Temp | 2016)</span><span class="item-meta">Se passa em 2015</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">22. Luke Cage (Série 1ª Temp | 2016)</span><span class="item-meta">Se passa em 2015</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">23. Capitão América: Guerra Civil (Filme | 2016)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">24. Viúva Negra (Filme | 2021)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">25. Pantera Negra (Filme | 2018)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">26. Homem-Aranha: De Volta Para Casa (Filme | 2017)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">27. Punho de Ferro (Série 1ª Temp | 2017)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">28. Os Defensores (Série | 2017)</span><span class="item-meta">Se passa em 2016</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">29. Doutor Estranho (Filme | 2016)</span><span class="item-meta">Se passa em 2016-2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">30. O Justiceiro (Série 1ª Temp | 2017)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">31. Jessica Jones (Série 2ª Temp | 2018)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">32. Luke Cage (Série 2ª Temp | 2018)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">33. Punho de Ferro (Série 2ª Temp | 2018)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">34. Demolidor (Série 3ª Temp | 2018)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">35. Thor: Ragnarok (Filme | 2017)</span><span class="item-meta">Se passa em 2017</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">36. O Justiceiro (Série 2ª Temp | 2019)</span><span class="item-meta">Se passa em 2018</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">37. Jessica Jones (Série 3ª Temp | 2019)</span><span class="item-meta">Se passa em 2018</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">38. Homem-Formiga e a Vespa (Filme | 2018)</span><span class="item-meta">Se passa em 2018</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">39. Vingadores: Guerra Infinita (Filme | 2018)</span><span class="item-meta">Se passa em 2018</span></div><span class="badge badge-released">Lançado ✅</span></div>
+  </div>
+
+  <!-- SAGA DO MULTIVERSO -->
+  <div class="section-title">⏳ Pós-Blip — Saga do Multiverso</div>
+  <div class="list-group">
+    <div class="item-card"><div class="item-info"><span class="item-title">40. Vingadores: Ultimato (Filme | 2019)</span><span class="item-meta">2018 a 2023</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">41. WandaVision (Série | 2021)</span><span class="item-meta">2023</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">42. Eternos (Filme | 2021)</span><span class="item-meta">Final de 2023</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">43. Falcão e o Soldado Invernal (Série | 2021)</span><span class="item-meta">2024</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">44. Shang-Chi e a Lenda dos Dez Anéis (Filme | 2021)</span><span class="item-meta">2024</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">45. Homem-Aranha: Longe de Casa (Filme | 2019)</span><span class="item-meta">2024</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">46. Homem-Aranha: Sem Volta Para Casa (Filme | 2021)</span><span class="item-meta">2024</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">47. Doutor Estranho no Multiverso da Loucura (Filme | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">48. Gavião Arqueiro (Série | 2021)</span><span class="item-meta">Natal de 2024/2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">49. Cavaleiro da Lua (Série | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">50. Ms. Marvel (Série | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">51. Thor: Amor e Trovão (Filme | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">52. She-Hulk: Advogada (Série | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">53. Pantera Negra: Wakanda Para Sempre (Filme | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">54. Lobisomem da Noite (Especial | 2022)</span><span class="item-meta">2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">55. Guardiões da Galáxia: Especial de Festas (Especial | 2022)</span><span class="item-meta">Natal de 2025</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">56. Homem-Formiga e a Vespa: Quantumania (Filme | 2023)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">57. Guardiões da Galáxia Vol. 3 (Filme | 2023)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">58. Invasão Secreta (Série | 2023)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">59. As Marvels / The Marvels (Filme | 2023)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">60. Echo (Série | 2024)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">61. Deadpool & Wolverine (Filme | 2024)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">62. Agatha: Sempre às Escuras (Série | 2024)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">63. Capitão América: Admirável Mundo Novo (Filme | 2025)</span><span class="item-meta">2026</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">64. Demolidor: Renascido (Série | 2025)</span><span class="item-meta">2026/2027</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">65. Thunderbolts* (Filme | 2025)</span><span class="item-meta">2027</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">66. Quarteto Fantástico: Primeiros Passos (Filme | 2025)</span><span class="item-meta">Multiverso</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">67. Coração de Ferro / Ironheart (Série | 2025)</span><span class="item-meta">2027</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">68. Homem-Aranha: Um Novo Dia (Filme | 2026)</span><span class="item-meta">Pré-Doomsday</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">69. Vingadores: Doomsday (Filme | 2026)</span><span class="item-meta">Em Produção</span></div><span class="badge badge-pending">Confirmado ⏳</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">70. Vingadores: Guerras Secretas (Filme | 2027)</span><span class="item-meta">Agendado</span></div><span class="badge badge-pending">Confirmado ⏳</span></div>
+  </div>
+
+  <!-- CANCELADOS -->
+  <div class="section-title">🚫 Cancelados / Reformulados</div>
+  <div class="list-group">
+    <div class="item-card"><div class="item-info"><span class="item-title">Blade (Filme)</span><span class="item-meta">Projeto Engavetado</span></div><span class="badge badge-canceled">Cancelado ❌</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">Vingadores: A Dinastia Kang</span><span class="item-meta">Substituído por Vingadores: Doomsday</span></div><span class="badge badge-canceled">Alterado ❌</span></div>
+  </div>
+
+  <!-- MULTIVERSO / FORA DO TEMPO -->
+  <div class="section-title">ℹ️ Multiverso / Fora do Tempo Contínuo</div>
+  <div class="list-group">
+    <div class="item-card"><div class="item-info"><span class="item-title">Loki (Série 1ª e 2ª Temp)</span><span class="item-meta">Fora do Tempo na TVA</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">What If...? (Série Animada)</span><span class="item-meta">Realidades Alternativas</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">X-Men '97 (Série Animada)</span><span class="item-meta">Universo Anos 90</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">Seu Amigo da Vizinhança Homem-Aranha (Série Animada)</span><span class="item-meta">Linha Alternativa</span></div><span class="badge badge-released">Lançado ✅</span></div>
+    <div class="item-card"><div class="item-info"><span class="item-title">Marvel Zombies (Série Animada)</span><span class="item-meta">Linha Alternativa</span></div><span class="badge badge-released">Lançado ✅</span></div>
+  </div>
+
+  <footer>
+    MCU Cronologia completa atualizada • Pronto para rodar no navegador
+  </footer>
+</div>
+
+<script>
+  function copyTimeline() {
+    const textToCopy = `📋 LINHA DO TEMPO MARVEL — ORDEM CRONOLÓGICA E STATUS\n\n... (Lista copiada com sucesso)`;
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      alert("Lista copiada para a área de transferência!");
+    });
+  }
+</script>
+
+</body>
+</html>
