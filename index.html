@@ -120,6 +120,26 @@
             border-radius: 12px; background: #f0f0f0; font-weight: 600; gap: 6px;
             border: none; width: 100%; font-size: inherit; cursor: pointer;
         }
+        .btn-fechar-menu {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: #ff4d4d;
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s ease;
+        }
+        .btn-fechar-menu:hover {
+            background: #e63939;
+        }
         .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; }
         .dropdown-content {
             max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
@@ -153,9 +173,8 @@
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 
 <div class="side-menu" id="sideMenu">
-    <div style="cursor:pointer; font-size: 20px; margin-bottom: 20px; font-weight:bold;" onclick="toggleMenu(event)">❌ FECHAR</div>
+    <button class="btn-fechar-menu" onclick="toggleMenu(event)">FECHAR ❌</button>
     <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
-    <a href="#lista-grupos" onclick="toggleMenu(event)" style="background:#000; color:white;">💬 VER TODOS OS GRUPOS</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
