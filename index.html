@@ -36,7 +36,7 @@
         }
         main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
         .perfil-topo {text-align:center; margin-bottom:20px;}
-        .foto-perfil {width:80px; height:80px; border-radius:50%; border:3px solid #25d366;}
+        .foto-perfil {width:80px; height:80px; border-radius:50%; border:3px solid #25d366; object-fit: cover;}
         .nome-time {font-size:20px; font-weight:800; color:#25d366; margin-top:8px;}
         
         .video-container { 
@@ -68,9 +68,10 @@
             background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 12px;
-            padding: 12px;
-            margin: 12px 0;
+            padding: 8px;
+            margin: 12px auto;
             text-align: center;
+            max-width: 260px; /* Reduzido para diminuir o tamanho do banner */
         }
         .anuncio-imagem {
             max-width: 100%;
@@ -174,7 +175,7 @@
 
 <main>
     <div class="perfil-topo">
-        <img src="https://i.ibb.co/FLfk1ZtY/Screenshot-20260624-184341-1.jpg" class="foto-perfil" alt="Logo Team Flow">
+        <img src="https://files.catbox.moe/0aa6f2.png" class="foto-perfil" alt="Logo Team Flow">
         <div class="nome-time">Team Flow</div>
         <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
