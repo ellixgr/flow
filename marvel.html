@@ -58,24 +58,6 @@
       font-size: 0.95rem;
     }
 
-    .action-btn {
-      display: inline-block;
-      margin-top: 14px;
-      padding: 10px 18px;
-      background-color: var(--accent-red);
-      color: white;
-      font-weight: bold;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background 0.2s;
-    }
-
-    .action-btn:hover {
-      background-color: #b20710;
-    }
-
     .section-title {
       font-size: 1.2rem;
       margin: 28px 0 12px 0;
@@ -155,6 +137,16 @@
       font-size: 0.85rem;
       border-top: 1px solid var(--border-color);
     }
+
+    footer a {
+      color: #25f4ee;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
+    footer a:hover {
+      color: #fe2c55;
+    }
   </style>
 </head>
 <body>
@@ -163,7 +155,6 @@
   <header>
     <h1>📋 Linha do Tempo Marvel</h1>
     <p>Ordem Cronológica dos Acontecimentos & Status</p>
-    <button class="action-btn" onclick="copyTimeline()">Copiar Lista de Texto</button>
   </header>
 
   <!-- ORIGENS -->
@@ -269,18 +260,9 @@
   </div>
 
   <footer>
-    TODOS OS DIREITOS RESERVADOS A • MIRANHEI https://vt.tiktok.com/ZSbFLx9pJ/
+    TODOS OS DIREITOS RESERVADOS A • MIRANHEI — <a href="https://vt.tiktok.com/ZSbFLx9pJ/" target="_blank" rel="noopener noreferrer">https://vt.tiktok.com/ZSbFLx9pJ/</a>
   </footer>
 </div>
-
-<script>
-  function copyTimeline() {
-    const textToCopy = `APRENDE COMO FAZ CARAI 😂 LINHA DO TEMPO MARVEL — ORDEM CRONOLÓGICA E STATUS\n\n... (Lista copiada com sucesso)`;
-    navigator.clipboard.writeText(textToCopy).then(() => {
-      alert("Lista copiada para a área de transferência!");
-    });
-  }
-</script>
 
 </body>
 </html>
