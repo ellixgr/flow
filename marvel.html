@@ -43,7 +43,7 @@
       width: 100%;
       border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
       background-color: #000000;
       border: 1px solid var(--border-color);
       box-shadow: 0 8px 24px rgba(0,0,0,0.5);
@@ -139,6 +139,15 @@
       background: var(--accent-red);
       cursor: pointer;
       border: none;
+    }
+
+    /* Espaço para centralizar o anúncio abaixo do vídeo */
+    .ad-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 24px;
+      width: 100%;
     }
 
     header {
@@ -284,6 +293,20 @@
     <video id="meuVideo" autoplay loop muted playsinline>
       <source src="https://github.com/ellixgr/flow/raw/main/kxapvc.mp4" type="video/mp4">
     </video>
+  </div>
+
+  <!-- BLOCO DE ANÚNCIO LOGO ABAIXO DO VÍDEO -->
+  <div class="ad-container">
+    <script type="text/javascript">
+      atOptions = {
+        'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    </script>
+    <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
   </div>
 
   <header>
