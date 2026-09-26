@@ -173,8 +173,8 @@
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 
 <div class="side-menu" id="sideMenu">
-    <button class="btn-fechar-menu" onclick="toggleMenu(event)">FECHAR ❌</button>
-    <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR MEU GRUPO</a>
+    <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
+    <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR GRUPO 50R$ = 1 ano</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
@@ -215,7 +215,7 @@
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
-    <!-- 📢 ANÚNCIO LOGO ABAIXO DO VÍDEO -->
+    <!-- 📢 LOGO ABAIXO DO VÍDEO -->
     <div class="ad-script-container">
         <script type="text/javascript">
           atOptions = {
@@ -244,55 +244,48 @@
         <p class="vazio">Carregando grupos...</p>
     </div>
 
-    <!-- 🔔 ANÚNCIO MÉLIUZ -->
+    <!-- 🔔MÉLIUZ -->
     <div class="anuncio-box">
         <a href="https://www.meliuz.com.br/i/ref_2256e026?ref_source=81" target="_blank" rel="noopener">
             <img src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Ganhe R$5 ao se cadastrar no Méliuz" class="anuncio-imagem">
         </a>
     </div>
 </main>
-
-<!-- 📌 RODAPÉ -->
 <footer>
     © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
-
 <!-- TERMOS E PRIVACIDADE -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
         <p>
-            ❌ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
+            ✖️ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
             ⚠️ Os grupos são de responsabilidade dos criadores. Não nos responsabilizamos pelo conteúdo.<br><br>
             📋 Ao enviar um grupo, você concorda com estes termos.
         </p>
         <button class="btn-fechar-modal" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
-
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
         <p>
             🔒 Seus dados estão protegidos!<br><br>
             📋 Armazenamos apenas: link, nome e categoria dos grupos.<br><br>
-            ❌ Não coletamos dados pessoais dos visitantes.<br><br>
+            ✖️ Não coletamos dados pessoais dos visitantes.<br><br>
             🛡️ O site não armazena conversas ou mensagens privadas.
         </p>
         <button class="btn-fechar-modal" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
-
 <script>
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
-
 function toggleMenu(e) { 
     if(e) e.stopPropagation(); 
     document.getElementById('sideMenu').classList.toggle('active'); 
 }
-
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { 
@@ -300,14 +293,12 @@ function toggleMute(e) {
     video.muted = !video.muted; 
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
-
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
     d.classList.toggle('active'); 
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
-
 function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
@@ -336,7 +327,6 @@ const GRUPOS = [
 ];
 
 let categoriaAtual = 'Todos';
-
 function trocarCategoria(cat) {
     categoriaAtual = cat;
     document.querySelectorAll('.aba').forEach(a => {
@@ -345,7 +335,6 @@ function trocarCategoria(cat) {
     });
     carregarGrupos();
 }
-
 function carregarGrupos() {
     const lista = document.getElementById('lista-grupos');
     const filtrados = categoriaAtual === 'Todos' 
@@ -368,7 +357,6 @@ function carregarGrupos() {
         </div>
     `).join('');
 }
-
 carregarGrupos();
 </script>
 
