@@ -235,6 +235,7 @@
         <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
         <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
         <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
+        <div class="aba" data-cat="Figurinhas" onclick="trocarCategoria('Figurinhas')">🖼️ Figurinhas</div>
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
@@ -325,6 +326,12 @@ const GRUPOS = [
         categoria: "Namoro",
         link: "https://ellixgr.github.io/x23wzp/video",
         foto: "https://i.postimg.cc/nzXv9hxq/Screenshot-20260821-013113-(1).jpg"
+    },
+    {
+        nome: "𝘍𝘐𝘎𝘜𝘙𝘐𝘕𝘏𝘈𝘚 𝗧𝗼𝗽🥇",
+        categoria: "Figurinhas",
+        link: "https://whatsapp.com/channel/0029Vb94ZLLDOQIOzZYu4f2M",
+        foto: "https://files.catbox.moe/nio8u1.jpg"
     }
 ];
 
@@ -343,7 +350,7 @@ function carregarGrupos() {
     const lista = document.getElementById('lista-grupos');
     const filtrados = categoriaAtual === 'Todos' 
         ? GRUPOS 
-        : GRUPOS.filter(g => g.categoria === categoriaAtual);
+        : GRUPOS.filter(g => g.categoria.toLowerCase() === categoriaAtual.toLowerCase());
     
     if (filtrados.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Volte em breve!</p>';
