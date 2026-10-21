@@ -3,18 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Lista de Grupos de WhatsApp - FLOW</title>
+    <title>Grupos WhatsApp 💬 FLOW</title>
     <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
     <meta name="keywords" content="grupos whatsapp, recargapay, dinheiro facil, conta que mais rende, ganhar dinheiro online, bonus de cadastro, renda extra">
-    <link rel="canonical" href="https://ellixgr.github.io/flow/" />
+    <link rel="canonical" href="https://flow-af3j.onrender.com/" />
+    
+    <!-- 🖼️ META TAGS REFORÇADAS PARA PREVIEW DO WHATSAPP / TELEGRAM -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://ellixgr.github.io/flow/">
+    <meta property="og:url" content="https://flow-af3j.onrender.com/">
     <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
-    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp.">
-    <meta property="og:image" content="https://files.catbox.moe/0aa6f2.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/png">
+    <meta property="og:description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
+    <meta property="og:image" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
+    <meta property="og:image:secure_url" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="600">
+    <meta property="og:image:height" content="600">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://flow-af3j.onrender.com/">
+    <meta name="twitter:title" content="Grupos WhatsApp 💬 FLOW">
+    <meta name="twitter:description" content="Encontre os melhores grupos de WhatsApp ativos.">
+    <meta name="twitter:image" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
+
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
     
@@ -330,7 +341,7 @@
         <label style="color: #25d366; margin-bottom: 4px;">👁️ Pré-visualização ao vivo:</label>
         <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
             <button class="denunciar-btn" title="Denunciar" onclick="event.preventDefault()">⚠️</button>
-            <img id="prevFoto" src="https://files.catbox.moe/0aa6f2.png" alt="Preview Foto">
+            <img id="prevFoto" src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Preview Foto">
             <div class="card-info-top">
                 <div class="card-nome" id="prevNome">Nome do Grupo</div>
             </div>
@@ -530,7 +541,7 @@ async function carregarGruposDoServidor() {
         lista.innerHTML = filtrados.map(g => `
             <div class="card">
                 <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do Grupo">
+                <img src="${g.foto || 'https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg'}" alt="Foto do Grupo">
                 <div class="card-info-top">
                     <div class="card-nome">${g.nome}</div>
                 </div>
@@ -547,7 +558,6 @@ async function carregarGruposDoServidor() {
     }
 }
 
-// Funções para atualizar o preview em tempo real no formulário
 function atualizarPreview() {
     let nome = document.getElementById('gNome').value.trim();
     let cat = document.getElementById('gCat').value;
@@ -566,7 +576,7 @@ function atualizarPreviewFoto(input) {
         }
         reader.readAsDataURL(input.files[0]);
     } else {
-        document.getElementById('prevFoto').src = 'https://files.catbox.moe/0aa6f2.png';
+        document.getElementById('prevFoto').src = 'https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg';
     }
 }
 
