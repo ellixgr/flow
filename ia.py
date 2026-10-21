@@ -2,10 +2,13 @@ import os
 import json
 import uuid
 import time
+import base64
+import io
 import requests
 from flask import Flask, request, jsonify, render_template_string
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -71,10 +74,25 @@ def criar_pagamento():
     link = data.get("link", "").strip()
     categoria = data.get("categoria", "Outros")
     descricao = data.get("descricao", "")[:30]
-    foto = data.get("foto", "").strip()
-    if not foto:
-        foto = "https://files.catbox.moe/0aa6f2.png"
+    foto_input = data.get("foto", "").strip()
     
+    # Processamento seguro da imagem enviada (se houver) via Pillow
+    foto_final = "https://files.catbox.moe/0aa6f2.png"
+    if foto_input and "base64," in foto_input:
+        try:
+            header, encoded = foto_input.split(",", 1)
+            img_data = base64.b64decode(encoded)
+            img = Image.open(io.BytesIO(img_data))
+            img = img.convert("RGB")
+            img.thumbnail((300, 300)) # Redimensiona para economizar espaço
+            
+            output = io.BytesIO()
+            img.save(output, format="JPEG", quality=85)
+            compressed_base64 = base64.b64encode(output.getvalue()).decode("utf-8")
+            foto_final = f"data:image/jpeg;base64,{compressed_base64}"
+        except Exception as img_err:
+            print(f"Erro ao processar imagem enviada: {img_err}")
+
     plano_id = int(data.get("plano_id", 1))
 
     # Validação Estrita de Link (WhatsApp apenas)
@@ -116,16 +134,18 @@ def criar_pagamento():
                 "link": link,
                 "categoria": categoria,
                 "descricao": descricao,
-                "foto": foto,
+                "foto": foto_final,
                 "ativado": False,
                 "criado_em": time.time()
             })
 
             return jsonify({"payment_id": pid, "pix_code": qr_code})
+        else:
+            print(f"Erro MP resposta: {r.text}")
     except Exception as e:
         print(f"Erro Mercado Pago: {e}")
 
-    return jsonify({"erro": "Falha ao gerar o Pix no Mercado Pago."}), 500
+    return jsonify({"erro": "Falha ao gerar o Pix no Mercado Pago. Verifique o token."}), 500
 
 @app.route('/api/verificar-pagamento', methods=['GET'])
 def verificar_pagamento():
