@@ -155,34 +155,63 @@
             box-shadow:0 0 15px rgba(37,211,102,0.4); cursor:pointer; border:none;
         }
 
-        /* 🌟 CARD FLUTUANTE DE DESTAQUE NO CANTO DA TELA */
+        /* 🌟 NOVO CARD FLUTUANTE MODERNO COM FOTO DE FUNDO TOTAL E CONTORNO */
         #cardFlutuantePromo {
             position: fixed; bottom: 75px; right: 15px; z-index: 9999;
-            background: rgba(16, 22, 34, 0.95); border: 2px solid #25d366;
-            border-radius: 16px; padding: 12px; width: 260px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: none;
+            width: 290px; height: 340px;
+            border-radius: 20px; overflow: hidden;
+            border: 2px solid #25d366;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+            display: none;
             animation: slideUp 0.4s ease;
+            background-color: #000;
         }
         @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .promo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(255,204,0,0.1); padding: 2px 6px; border-radius: 6px; }
-        .promo-fechar { background: #30363d; color: #8b949e; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        /* Imagem de Fundo cobrindo toda a caixinha */
+        .promo-bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: 1;
+        }
+
+        /* Camada escura por cima da foto para dar contraste e legibilidade */
+        .promo-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to top, rgba(9, 10, 15, 0.95) 40%, rgba(9, 10, 15, 0.4) 100%);
+            z-index: 2;
+        }
+
+        .promo-header { 
+            position: absolute; top: 12px; left: 12px; right: 12px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 5; 
+        }
+        .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,204,0,0.3); }
+        .promo-fechar { background: rgba(48,54,61,0.8); color: #8b949e; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .promo-fechar.liberado { background: #da3633; color: #fff; cursor: pointer; }
         
-        .promo-body { display: flex; align-items: center; gap: 10px; position: relative; text-decoration: none; }
-        .promo-body img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; border: 2px solid #25d366; flex-shrink: 0; }
-        .promo-info { flex: 1; min-width: 0; }
-        .promo-titulo { font-size: 13px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .promo-texto { font-size: 11px; color: #ccc; margin-top: 2px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promo-content-box {
+            position: absolute; bottom: 15px; left: 15px; right: 15px;
+            z-index: 5; display: flex; flex-direction: column; gap: 8px; text-align: center;
+        }
+        .promo-titulo { 
+            font-size: 16px; font-weight: 800; color: #fff; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+        .promo-texto { 
+            font-size: 12px; color: #e2e8f0; line-height: 1.3;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
         
         .btn-pulsante-card {
-            display: block; width: 100%; margin-top: 10px; padding: 8px;
-            background: #25d366; color: #000; font-weight: bold; font-size: 12px;
-            text-align: center; border-radius: 8px; text-decoration: none;
+            display: block; width: 100%; margin-top: 4px; padding: 10px;
+            background: #25d366; color: #000; font-weight: bold; font-size: 13px;
+            text-align: center; border-radius: 10px; text-decoration: none;
+            box-shadow: 0 4px 15px rgba(37,211,102,0.5);
             animation: pulsarCard 1.5s infinite;
         }
-        @keyframes pulsarCard { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37,211,102,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
+        @keyframes pulsarCard { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(37,211,102,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
 
         .anuncio-box-gigante {
             background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(0, 0, 0, 0.6));
@@ -373,20 +402,22 @@
     </div>
 </main>
 
-<!-- 🌟 CARD FLUTUANTE CUSTOMIZADO NO CANTO DA TELA -->
+<!-- 🌟 CARD FLUTUANTE MODERNO COM FOTO DE FUNDO TOTAL -->
 <div id="cardFlutuantePromo">
+    <!-- Imagem de fundo cobrindo todo o card -->
+    <img id="promoFoto" class="promo-bg-img" src="" alt="Destaque">
+    <div class="promo-overlay"></div>
+
     <div class="promo-header">
         <span class="promo-contador" id="promoContador">Aguarde 5s</span>
         <button class="promo-fechar" id="btnFecharPromo" onclick="fecharCardPromo()" disabled>✖</button>
     </div>
-    <a id="promoLink" href="#" target="_blank" class="promo-body" rel="noopener">
-        <img id="promoFoto" src="" alt="Destaque">
-        <div class="promo-info">
-            <div class="promo-titulo" id="promoNome">Destaque</div>
-            <div class="promo-texto" id="promoTexto">Confira agora</div>
-        </div>
-    </a>
-    <a id="promoBtnEntrar" href="#" target="_blank" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
+
+    <div class="promo-content-box">
+        <div class="promo-titulo" id="promoNome">Destaque</div>
+        <div class="promo-texto" id="promoTexto">Confira agora</div>
+        <a id="promoBtnEntrar" href="#" target="_blank" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
+    </div>
 </div>
 
 <footer>
@@ -623,7 +654,6 @@ async function carregarDadosDoServidor() {
             document.getElementById('promoFoto').src = p.foto;
             document.getElementById('promoNome').textContent = p.nome;
             document.getElementById('promoTexto').textContent = p.texto;
-            document.getElementById('promoLink').href = p.link;
             document.getElementById('promoBtnEntrar').href = p.link;
             
             document.getElementById('cardFlutuantePromo').style.display = 'block';
