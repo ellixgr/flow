@@ -155,6 +155,35 @@
             box-shadow:0 0 15px rgba(37,211,102,0.4); cursor:pointer; border:none;
         }
 
+        /* 🌟 CARD FLUTUANTE DE DESTAQUE NO CANTO DA TELA */
+        #cardFlutuantePromo {
+            position: fixed; bottom: 75px; right: 15px; z-index: 9999;
+            background: rgba(16, 22, 34, 0.95); border: 2px solid #25d366;
+            border-radius: 16px; padding: 12px; width: 260px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: none;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .promo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(255,204,0,0.1); padding: 2px 6px; border-radius: 6px; }
+        .promo-fechar { background: #30363d; color: #8b949e; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 11px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .promo-fechar.liberado { background: #da3633; color: #fff; cursor: pointer; }
+        
+        .promo-body { display: flex; align-items: center; gap: 10px; position: relative; text-decoration: none; }
+        .promo-body img { width: 48px; height: 48px; border-radius: 12px; object-fit: cover; border: 2px solid #25d366; flex-shrink: 0; }
+        .promo-info { flex: 1; min-width: 0; }
+        .promo-titulo { font-size: 13px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promo-texto { font-size: 11px; color: #ccc; margin-top: 2px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .btn-pulsante-card {
+            display: block; width: 100%; margin-top: 10px; padding: 8px;
+            background: #25d366; color: #000; font-weight: bold; font-size: 12px;
+            text-align: center; border-radius: 8px; text-decoration: none;
+            animation: pulsarCard 1.5s infinite;
+        }
+        @keyframes pulsarCard { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37,211,102,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
+
         .anuncio-box-gigante {
             background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(0, 0, 0, 0.6));
             border: 2px solid #25d366; border-radius: 16px; padding: 12px;
@@ -343,6 +372,22 @@
         </a>
     </div>
 </main>
+
+<!-- 🌟 CARD FLUTUANTE CUSTOMIZADO NO CANTO DA TELA -->
+<div id="cardFlutuantePromo">
+    <div class="promo-header">
+        <span class="promo-contador" id="promoContador">Aguarde 5s</span>
+        <button class="promo-fechar" id="btnFecharPromo" onclick="fecharCardPromo()" disabled>✖</button>
+    </div>
+    <a id="promoLink" href="#" target="_blank" class="promo-body" rel="noopener">
+        <img id="promoFoto" src="" alt="Destaque">
+        <div class="promo-info">
+            <div class="promo-titulo" id="promoNome">Destaque</div>
+            <div class="promo-texto" id="promoTexto">Confira agora</div>
+        </div>
+    </a>
+    <a id="promoBtnEntrar" href="#" target="_blank" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
+</div>
 
 <footer>
     © 2020-<span id="ano-atual"></span> FLOW — 
@@ -540,39 +585,87 @@ function trocarCategoria(cat) {
         a.classList.remove('ativa');
         if(a.dataset.cat === cat) a.classList.add('ativa');
     });
-    carregarGruposDoServidor();
+    carregarDadosDoServidor();
 }
 
-async function carregarGruposDoServidor() {
+async function carregarDadosDoServidor() {
     try {
-        let res = await fetch('/api/grupos');
-        let grupos = await res.json();
-        const lista = document.getElementById('lista-grupos');
+        let res = await fetch('/api/site-dados');
+        let data = await res.json();
         
+        // Carregar Grupos
+        let grupos = data.grupos || [];
+        const lista = document.getElementById('lista-grupos');
         let filtrados = categoriaAtual === 'Todos' ? grupos : grupos.filter(g => g.categoria === categoriaAtual);
         
         if (!filtrados || filtrados.length === 0) {
             lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado nesta categoria.<br>Seja o primeiro a cadastrar!</p>';
-            return;
+        } else {
+            lista.innerHTML = filtrados.map(g => `
+                <div class="card">
+                    <img src="${g.foto || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg'}" alt="Foto do Grupo">
+                    <div class="card-content-area">
+                        <div class="card-nome">${g.nome}</div>
+                        <div class="card-cat">${g.categoria}</div>
+                        <div class="card-desc">${g.descricao || ''}</div>
+                    </div>
+                    <div class="card-right-area">
+                        <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
+                        <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        lista.innerHTML = filtrados.map(g => `
-            <div class="card">
-                <img src="${g.foto || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg'}" alt="Foto do Grupo">
-                <div class="card-content-area">
-                    <div class="card-nome">${g.nome}</div>
-                    <div class="card-cat">${g.categoria}</div>
-                    <div class="card-desc">${g.descricao || ''}</div>
-                </div>
-                <div class="card-right-area">
-                    <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                    <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
-                </div>
-            </div>
-        `).join('');
+        // Carregar Card Flutuante de Destaque
+        let p = data.promo;
+        if(p && p.ativo) {
+            document.getElementById('promoFoto').src = p.foto;
+            document.getElementById('promoNome').textContent = p.nome;
+            document.getElementById('promoTexto').textContent = p.texto;
+            document.getElementById('promoLink').href = p.link;
+            document.getElementById('promoBtnEntrar').href = p.link;
+            
+            document.getElementById('cardFlutuantePromo').style.display = 'block';
+            iniciarContadorPromo(p.duracao || 5);
+        } else {
+            document.getElementById('cardFlutuantePromo').style.display = 'none';
+        }
+
     } catch(e) {
-        console.error("Erro ao buscar grupos:", e);
+        console.error("Erro ao carregar dados:", e);
         document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
+    }
+}
+
+let timerPromo = null;
+function iniciarContadorPromo(tempoSegundos) {
+    let tempoRestante = tempoSegundos;
+    const contadorEl = document.getElementById('promoContador');
+    const btnFechar = document.getElementById('btnFecharPromo');
+    
+    btnFechar.disabled = true;
+    btnFechar.classList.remove('liberado');
+    
+    if(timerPromo) clearInterval(timerPromo);
+    
+    timerPromo = setInterval(() => {
+        tempoRestante--;
+        if(tempoRestante > 0) {
+            contadorEl.textContent = `Aguarde ${tempoRestante}s`;
+        } else {
+            contadorEl.textContent = "Liberado";
+            btnFechar.disabled = false;
+            btnFechar.classList.add('liberado');
+            clearInterval(timerPromo);
+        }
+    }, 1000);
+}
+
+function fecharCardPromo() {
+    const btnFechar = document.getElementById('btnFecharPromo');
+    if(!btnFechar.disabled) {
+        document.getElementById('cardFlutuantePromo').style.display = 'none';
     }
 }
 
@@ -678,7 +771,7 @@ function verificarStatusPagamento(payment_id) {
                 mostrarAlerta("🎉 Pagamento aprovado com sucesso! Seu grupo já está ativo no site.", "sucesso");
                 setTimeout(() => {
                     fecharModal('modalPix');
-                    carregarGruposDoServidor();
+                    carregarDadosDoServidor();
                 }, 2500);
             }
         } catch(err) {
@@ -714,7 +807,7 @@ async function enviarDenuncia() {
     mostrarAlerta("Denúncia registrada com sucesso. O administrador irá analisar.", "sucesso");
 }
 
-carregarGruposDoServidor();
+carregarDadosDoServidor();
 </script>
 
 </body>
