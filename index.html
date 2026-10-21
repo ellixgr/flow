@@ -13,8 +13,8 @@
     <meta property="og:url" content="https://flow-af3j.onrender.com/">
     <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
     <meta property="og:description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
-    <meta property="og:image" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
-    <meta property="og:image:secure_url" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
+    <meta property="og:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
+    <meta property="og:image:secure_url" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="600">
@@ -24,7 +24,7 @@
     <meta name="twitter:url" content="https://flow-af3j.onrender.com/">
     <meta name="twitter:title" content="Grupos WhatsApp 💬 FLOW">
     <meta name="twitter:description" content="Encontre os melhores grupos de WhatsApp ativos.">
-    <meta name="twitter:image" content="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg">
+    <meta name="twitter:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
 
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
@@ -341,7 +341,7 @@
         <label style="color: #25d366; margin-bottom: 4px;">👁️ Pré-visualização ao vivo:</label>
         <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
             <button class="denunciar-btn" title="Denunciar" onclick="event.preventDefault()">⚠️</button>
-            <img id="prevFoto" src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Preview Foto">
+            <img id="prevFoto" src="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg" alt="Preview Foto">
             <div class="card-info-top">
                 <div class="card-nome" id="prevNome">Nome do Grupo</div>
             </div>
@@ -541,7 +541,7 @@ async function carregarGruposDoServidor() {
         lista.innerHTML = filtrados.map(g => `
             <div class="card">
                 <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                <img src="${g.foto || 'https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg'}" alt="Foto do Grupo">
+                <img src="${g.foto || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg'}" alt="Foto do Grupo">
                 <div class="card-info-top">
                     <div class="card-nome">${g.nome}</div>
                 </div>
@@ -576,7 +576,7 @@ function atualizarPreviewFoto(input) {
         }
         reader.readAsDataURL(input.files[0]);
     } else {
-        document.getElementById('prevFoto').src = 'https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg';
+        document.getElementById('prevFoto').src = 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     }
 }
 
