@@ -56,7 +56,6 @@
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
 
-        /* Espaço centralizado para o anúncio de script abaixo do vídeo */
         .ad-script-container {
             display: flex;
             justify-content: center;
@@ -65,21 +64,28 @@
             width: 100%;
         }
         
-        /* Estilos das Abas e da Lista de Grupos */
         .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:transparent; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
         .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
-        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px;}
+        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px; position:relative;}
         .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
         .card-info {flex:1;}
         .card-nome {font-weight:bold; font-size:15px;}
         .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
+        .card-desc {font-size:12px; color:#ccc; margin-top:4px;}
         .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
+        .denunciar-btn {position:absolute; top:8px; right:8px; background:transparent; border:none; color:#ff4d4d; font-size:14px; cursor:pointer;}
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
 
-        /* ANÚNCIO GIGANTE E CHAMATIVO COM SEO */
+        .btn-enviar-grupo-top {
+            display:block; width:100%; background:linear-gradient(135deg, #25d366, #128c7e); 
+            color:#000; font-weight:bold; padding:14px; border-radius:15px; text-align:center; 
+            text-decoration:none; margin:15px 0; font-size:16px; 
+            box-shadow:0 0 15px rgba(37,211,102,0.4); cursor:pointer; border:none;
+        }
+
         .anuncio-box-gigante {
             background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(0, 0, 0, 0.6));
             border: 2px solid #25d366;
@@ -143,33 +149,18 @@
             border: none; width: 100%; font-size: inherit; cursor: pointer;
         }
         .btn-fechar-menu {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            background: #ff4d4d;
-            color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 15px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background 0.2s ease;
+            width: 100%; padding: 12px; margin-bottom: 20px; background: #ff4d4d;
+            color: #ffffff; border: none; border-radius: 12px; font-weight: bold;
+            font-size: 15px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; gap: 8px; transition: background 0.2s ease;
         }
-        .btn-fechar-menu:hover {
-            background: #e63939;
-        }
+        .btn-fechar-menu:hover { background: #e63939; }
         .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; }
         .dropdown-content {
             max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
             background: #f9f9f9; border-radius: 12px; margin-bottom: 18px; padding: 0 14px;
         }
-        .dropdown-content.active {
-            max-height: 420px; padding: 14px; border: 1px solid #eee;
-        }
+        .dropdown-content.active { max-height: 420px; padding: 14px; border: 1px solid #eee; }
         .servico-item {
             display: flex; justify-content: space-between; padding: 8px 0;
             font-size: 14px; border-bottom: 1px solid #eee;
@@ -183,11 +174,14 @@
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         
+        /* Modais */
         .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
         .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
-        .modal-content h2 {text-align:center; margin-bottom:20px; font-size:19px; font-weight:bold; color:#25d366;}
-        .modal-content p {font-size:14px; line-height:1.7; color:#333;}
-        .btn-fechar-modal {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:20px; cursor:pointer; font-size:15px;}
+        .modal-content h2, .modal-content h3 {text-align:center; margin-bottom:15px; font-size:19px; font-weight:bold; color:#128c7e;}
+        .modal-content label {display:block; font-weight:bold; margin-top:10px; font-size:13px; color:#333;}
+        .modal-content input, .modal-content select, .modal-content textarea {width:100%; padding:10px; margin:5px 0 10px; background:#f0f0f0; border:1px solid #ccc; color:#000; border-radius:8px; font-size:14px;}
+        .btn-fechar-modal {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:15px;}
+        .btn-cancelar-modal {width:100%; padding:10px; background:#666; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
     </style>
 </head>
 <body>
@@ -196,7 +190,8 @@
 
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
-    <a href="https://wa.me/5521977231625?text=Olá! Quero enviar um grupo para o site FLOW!" target="_blank" style="background:var(--primary-green); color:white;">📲 ENVIAR GRUPO 50R$ = 1 ano</a>
+    <a href="#" onclick="toggleMenu(event); abrirFormulario();" style="background:var(--primary-green); color:white;">🚀 CADASTRAR MEU GRUPO</a>
+    <a href="https://wa.me/5521977231625" target="_blank" style="background:#128c7e; color:white;">📲 Falar com o Suporte</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
     <button class="dropdown-btn" id="btnTelas" onclick="toggleDropdown()">📺 Telas ↓</button>
@@ -237,7 +232,10 @@
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
 
-    <!-- 📢 LOGO ABAIXO DO VÍDEO -->
+    <!-- BOTÃO PARA CADASTRAR GRUPO -->
+    <button class="btn-enviar-grupo-top" onclick="abrirFormulario()">🚀 CADASTRAR MEU GRUPO NO SITE</button>
+
+    <!-- ANÚNCIO DE SCRIPT -->
     <div class="ad-script-container">
         <script type="text/javascript">
           atOptions = {
@@ -261,12 +259,12 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- 📋 LISTA DE GRUPOS -->
+    <!-- 📋 LISTA DINÂMICA DE GRUPOS -->
     <div class="lista" id="lista-grupos">
-        <p class="vazio">Carregando grupos...</p>
+        <p class="vazio">Carregando grupos do servidor...</p>
     </div>
 
-    <!-- 💳 ANÚNCIO RECARGAPAY GIGANTE E OTIMIZADO PARA BUSCAS (ABAIXO DA LISTA DE GRUPOS) -->
+    <!-- 💳 ANÚNCIO RECARGAPAY GIGANTE -->
     <div class="anuncio-box-gigante">
         <a href="https://recargapay.com.br/r/sanbro751-xW8" target="_blank" rel="noopener" title="RecargaPay - A Conta Digital Que Mais Rende e Dá Bônus">
             <img src="https://i.postimg.cc/d3jb8WLG/Screenshot-20261019-143054-(1).jpg" 
@@ -292,6 +290,76 @@
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
+
+<!-- MODAL CADASTRAR GRUPO -->
+<div id="modalForm" class="modal">
+    <div class="modal-content">
+        <h3>📝 Cadastrar Grupo</h3>
+        <form id="formGrupo" onsubmit="enviarFormulario(event)">
+            <label>Nome do Grupo:</label>
+            <input type="text" id="gNome" required placeholder="Ex: Grupo de Amigos">
+            
+            <label>Link do WhatsApp (Grupo ou Canal):</label>
+            <input type="url" id="gLink" required placeholder="https://chat.whatsapp.com/...">
+            
+            <label>Categoria:</label>
+            <select id="gCat">
+                <option value="Amizade">Amizade</option>
+                <option value="Namoro">Namoro</option>
+                <option value="Zoeira">Zoeira</option>
+                <option value="Figurinhas">Figurinhas</option>
+                <option value="Outros">Outros</option>
+            </select>
+            
+            <label>Descrição curta (Máx 30 caracteres):</label>
+            <input type="text" id="gDesc" maxlength="30" placeholder="Ex: Resenha e amizades">
+            
+            <label>Link da Foto (Opcional):</label>
+            <input type="url" id="gFoto" placeholder="https://...">
+
+            <label>Escolha o Plano:</label>
+            <select id="gPlano" required>
+                <option value="1">1 Semana - R$ 7,00</option>
+                <option value="2">2 Semanas - R$ 12,00</option>
+                <option value="3">3 Semanas - R$ 17,00</option>
+                <option value="4">1 Mês - R$ 22,00</option>
+                <option value="5">2 Meses - R$ 40,00</option>
+                <option value="6">3 Meses - R$ 55,00</option>
+                <option value="7">4 Meses - R$ 70,00</option>
+                <option value="8">5 Meses - R$ 85,00</option>
+                <option value="9">6 Meses - R$ 100,00</option>
+                <option value="10">1 Ano (VIP) - R$ 150,00</option>
+            </select>
+
+            <button type="submit" class="btn-fechar-modal">💳 GERAR PIX PARA APROVAÇÃO</button>
+            <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalForm')">Cancelar</button>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL PIX -->
+<div id="modalPix" class="modal">
+    <div class="modal-content" style="text-align:center;">
+        <h3>⏳ Pagamento Pix</h3>
+        <p style="margin:10px 0; font-size:13px; color:#555;">Copie o código Pix abaixo. O seu grupo será publicado <b>AUTOMATICAMENTE</b> assim que o pagamento for confirmado!</p>
+        <textarea id="pixCode" readonly style="width:100%; height:80px; font-size:12px; background:#111; color:#0f0; text-align:center; font-family:monospace; border-radius:8px;"></textarea>
+        <button class="btn-fechar-modal" onclick="copiarPix()">📋 Copiar Código Pix</button>
+        <p id="statusPix" style="color:#d97706; margin-top:15px; font-weight:bold; font-size:14px;">Aguardando pagamento...</p>
+        <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalPix')">Fechar</button>
+    </div>
+</div>
+
+<!-- MODAL DENÚNCIA -->
+<div id="modalDenuncia" class="modal">
+    <div class="modal-content">
+        <h3>🚨 Denunciar Grupo</h3>
+        <input type="hidden" id="denunciaGrupoId">
+        <label><input type="radio" name="motivo" value="Conteúdo adulto / Pornografia" checked> Conteúdo adulto / Pornografia</label><br><br>
+        <label><input type="radio" name="motivo" value="Redirecionamento malicioso"> Redirecionamento malicioso / Golpe</label><br><br>
+        <button class="btn-fechar-modal" style="background:#ff4d4d;" onclick="enviarDenuncia()">Enviar Denúncia</button>
+        <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalDenuncia')">Cancelar</button>
+    </div>
+</div>
 
 <!-- TERMOS E PRIVACIDADE -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
@@ -321,10 +389,12 @@
 
 <script>
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
+
 function toggleMenu(e) { 
     if(e) e.stopPropagation(); 
     document.getElementById('sideMenu').classList.toggle('active'); 
 }
+
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { 
@@ -332,71 +402,144 @@ function toggleMute(e) {
     video.muted = !video.muted; 
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
+
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
     d.classList.toggle('active'); 
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
+
 function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
 function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
 
-// LÓGICA DOS GRUPOS
-const GRUPOS = [
-    {
-        nome: "💗𝑾𝑬𝑩|🌬️𝑪𝑯𝑨𝑻💬࿐",
-        categoria: "Amizade",
-        link: "https://chat.whatsapp.com/GV73U3CjuAk8Yrk8iy2xmZ?s=cl&p=a&mlu=4&ilr=4",
-        foto: "https://files.catbox.moe/0aa6f2.png"
-    },
-    {
-        nome: "💗😈 𝑮 𝑹 𝑼 𝑷 𝑶 🔞🔥",
-        categoria: "Namoro",
-        link: "https://ellixgr.github.io/x23wzp/video",
-        foto: "https://i.postimg.cc/nzXv9hxq/Screenshot-20260821-013113-(1).jpg"
-    },
-    {
-        nome: "𝘍𝘐𝘎𝘜𝘙𝘐𝘕𝘏𝘈𝘚 𝗧𝗼𝗽🥇",
-        categoria: "Figurinhas",
-        link: "https://whatsapp.com/channel/0029Vb94ZLLDOQIOzZYu4f2M",
-        foto: "https://files.catbox.moe/nio8u1.jpg"
-    }
-];
+function abrirFormulario() { document.getElementById('modalForm').style.display = 'flex'; }
+function fecharModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+    if(id === 'modalPix' && checkInterval) clearInterval(checkInterval);
+}
 
+// LÓGICA DE CARREGAMENTO DO MONGODB VIA IA.PY
 let categoriaAtual = 'Todos';
+let checkInterval = null;
+
 function trocarCategoria(cat) {
     categoriaAtual = cat;
     document.querySelectorAll('.aba').forEach(a => {
         a.classList.remove('ativa');
         if(a.dataset.cat === cat) a.classList.add('ativa');
     });
-    carregarGrupos();
+    carregarGruposDoServidor();
 }
-function carregarGrupos() {
-    const lista = document.getElementById('lista-grupos');
-    const filtrados = categoriaAtual === 'Todos' 
-        ? GRUPOS 
-        : GRUPOS.filter(g => g.categoria.toLowerCase() === categoriaAtual.toLowerCase());
+
+async function carregarGruposDoServidor() {
+    try {
+        let res = await fetch('/api/grupos');
+        let grupos = await res.json();
+        const lista = document.getElementById('lista-grupos');
+        
+        let filtrados = categoriaAtual === 'Todos' ? grupos : grupos.filter(g => g.categoria === categoriaAtual);
+        
+        if (!filtrados || filtrados.length === 0) {
+            lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado nesta categoria.<br>Seja o primeiro a cadastrar!</p>';
+            return;
+        }
+
+        lista.innerHTML = filtrados.map(g => `
+            <div class="card">
+                <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
+                <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do Grupo">
+                <div class="card-info">
+                    <div class="card-nome">${g.nome}</div>
+                    <div class="card-cat">${g.categoria}</div>
+                    <div class="card-desc">${g.descricao || ''}</div>
+                </div>
+                <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+            </div>
+        `).join('');
+    } catch(e) {
+        console.error("Erro ao buscar grupos:", e);
+        document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
+    }
+}
+
+async function enviarFormulario(e) {
+    e.preventDefault();
+    let nome = document.getElementById('gNome').value;
+    let link = document.getElementById('gLink').value;
+    let categoria = document.getElementById('gCat').value;
+    let descricao = document.getElementById('gDesc').value;
+    let foto = document.getElementById('gFoto').value;
+    let plano_id = document.getElementById('gPlano').value;
+
+    let res = await fetch('/api/criar-pagamento', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({nome, link, categoria, descricao, foto, plano_id})
+    });
+    let r = await res.json();
     
-    if (filtrados.length === 0) {
-        lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado ainda.<br>Volte em breve!</p>';
+    if(r.erro) {
+        alert('❌ ' + r.erro);
         return;
     }
 
-    lista.innerHTML = filtrados.map(g => `
-        <div class="card">
-            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do grupo">
-            <div class="card-info">
-                <div class="card-nome">${g.nome}</div>
-                <div class="card-cat">${g.categoria}</div>
-            </div>
-            <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
-        </div>
-    `).join('');
+    fecharModal('modalForm');
+    document.getElementById('pixCode').value = r.pix_code;
+    document.getElementById('modalPix').style.display = 'flex';
+    
+    verificarStatusPagamento(r.payment_id);
 }
-carregarGrupos();
+
+function copiarPix() {
+    let copyText = document.getElementById("pixCode");
+    copyText.select();
+    navigator.clipboard.writeText(copyText.value);
+    alert("✅ Código Pix copiado para a área de transferência!");
+}
+
+function verificarStatusPagamento(payment_id) {
+    let statusEl = document.getElementById('statusPix');
+    checkInterval = setInterval(async () => {
+        try {
+            let res = await fetch('/api/verificar-pagamento?id=' + payment_id);
+            let r = await res.json();
+            if(r.status === 'approved') {
+                clearInterval(checkInterval);
+                statusEl.innerHTML = "✅ Pagamento Aprovado! Publicando grupo...";
+                setTimeout(() => {
+                    fecharModal('modalPix');
+                    carregarGruposDoServidor();
+                }, 2000);
+            }
+        } catch(err) {
+            console.error("Erro na verificação do Pix:", err);
+        }
+    }, 4000);
+}
+
+function abrirDenuncia(id) {
+    document.getElementById('denunciaGrupoId').value = id;
+    document.getElementById('modalDenuncia').style.display = 'flex';
+}
+
+async function enviarDenuncia() {
+    let grupo_id = document.getElementById('denunciaGrupoId').value;
+    let motivo = document.querySelector('input[name="motivo"]:checked').value;
+    
+    await fetch('/api/denunciar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({grupo_id, motivo})
+    });
+    alert('✅ Denúncia registrada. O administrador irá analisar.');
+    fecharModal('modalDenuncia');
+}
+
+// Inicia buscando os grupos no MongoDB
+carregarGruposDoServidor();
 </script>
 
 </body>
