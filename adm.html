@@ -248,6 +248,35 @@
             <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Dados</button>
         </div>
 
+        <!-- ⚙️ GESTÃO DO CARD FLUTUANTE DE DESTAQUE -->
+        <div class="secao-titulo">⚙️ Configurar Card Flutuante (Destaque)</div>
+        <div class="form-adm-box">
+            <form onsubmit="salvarPromo(event)">
+                <label>Status do Card:</label>
+                <select id="promoAtivo">
+                    <option value="true">✅ Ativado no Site</option>
+                    <option value="false">❌ Desativado</option>
+                </select>
+
+                <label>URL da Imagem:</label>
+                <input type="text" id="promoFoto" required placeholder="https://i.postimg.cc/...">
+
+                <label>Título do Destaque:</label>
+                <input type="text" id="promoNome" required placeholder="Ex: Entrar no Grupo 🔥">
+
+                <label>Texto Descritivo:</label>
+                <input type="text" id="promoTexto" required placeholder="Ex: Clique abaixo para garantir sua vaga!">
+
+                <label>Link de Destino (Botão Transparente/Pulsante):</label>
+                <input type="url" id="promoLink" required placeholder="https://chat.whatsapp.com/...">
+
+                <label>Duração do Contador (Segundos para liberar o botão X):</label>
+                <input type="number" id="promoDuracao" required min="1" max="60" value="5">
+
+                <button type="submit" class="btn-cadastrar-adm" style="margin-top:15px;">💾 Salvar Configurações do Card</button>
+            </form>
+        </div>
+
         <!-- FORMULÁRIO DE CADASTRO GRATUITO PELO ADM -->
         <div class="secao-titulo">🚀 Cadastrar Grupo Gratuitamente (ADM)</div>
         <div class="form-adm-box">
@@ -325,6 +354,16 @@ async function carregarDados() {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('painelConteudo').style.display = 'block';
 
+        // Preencher formulário do Card Flutuante se existir
+        if(data.promo) {
+            document.getElementById('promoAtivo').value = data.promo.ativo ? "true" : "false";
+            document.getElementById('promoFoto').value = data.promo.foto || "";
+            document.getElementById('promoNome').value = data.promo.nome || "";
+            document.getElementById('promoTexto').value = data.promo.texto || "";
+            document.getElementById('promoLink').value = data.promo.link || "";
+            document.getElementById('promoDuracao').value = data.promo.duracao || 5;
+        }
+
         renderizarDenuncias(data.denuncias || []);
         renderizarGrupos(data.grupos || []);
 
@@ -340,6 +379,35 @@ function escaparHTML(str) {
     return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
+}
+
+async function salvarPromo(e) {
+    e.preventDefault();
+    let promo = {
+        ativo: document.getElementById('promoAtivo').value === "true",
+        foto: document.getElementById('promoFoto').value,
+        nome: document.getElementById('promoNome').value,
+        texto: document.getElementById('promoTexto').value,
+        link: document.getElementById('promoLink').value,
+        duracao: parseInt(document.getElementById('promoDuracao').value) || 5
+    };
+
+    try {
+        let res = await fetch('/api/adm/salvar-promo', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva, promo })
+        });
+        let data = await res.json();
+        if(data.sucesso) {
+            alert("✅ Configurações do card flutuante salvas com sucesso!");
+        } else {
+            alert("❌ Erro ao salvar: " + (data.erro || 'Desconhecido'));
+        }
+    } catch(err) {
+        console.error(err);
+        alert("Erro na requisição ao servidor.");
+    }
 }
 
 function renderizarDenuncias(denuncias) {
