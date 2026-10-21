@@ -135,6 +135,10 @@
         /* Card de Denúncias */
         .card-denuncia {
             border-left: 4px solid var(--danger);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
         }
         .card-denuncia .motivo {
             font-size: 14px;
@@ -142,9 +146,16 @@
             color: var(--danger);
         }
         .card-denuncia .meta {
-            font-size: 12px;
+            font-size: 11px;
             color: #8b949e;
             margin-top: 4px;
+            word-break: break-all;
+        }
+        .denuncia-botoes {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
         }
 
         /* Card de Grupos */
@@ -174,6 +185,18 @@
             font-size: 12px;
             font-weight: bold;
             cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-secundario {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
         }
         
         .vazio {
@@ -218,14 +241,14 @@
         <button onclick="autenticar()">Entrar no Painel</button>
     </div>
 
-    <!-- CONTEÚDO DO PAINEL (EXIBIDO APÓS O LOGIN) -->
+    <!-- CONTEÚDO DO PAINEL -->
     <div id="painelConteudo">
         <div class="top-bar">
-            <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado</b></span>
+            <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado com Segurança</b></span>
             <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Dados</button>
         </div>
 
-        <!-- FORMULÁRIO DE CADASTRO GRATUITO PELO DONO (ADM) -->
+        <!-- FORMULÁRIO DE CADASTRO GRATUITO PELO ADM -->
         <div class="secao-titulo">🚀 Cadastrar Grupo Gratuitamente (ADM)</div>
         <div class="form-adm-box">
             <form id="formCadAdm" onsubmit="cadastrarDiretoAdm(event)">
@@ -282,9 +305,14 @@ async function autenticar() {
     await carregarDados();
 }
 
+// 🛡️ REQUISIÇÃO SEGURA VIA POST (A senha nunca vai na URL)
 async function carregarDados() {
     try {
-        let res = await fetch(`/api/adm/dados?senha=${encodeURIComponent(senhaSalva)}`);
+        let res = await fetch('/api/adm/dados', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva })
+        });
         let data = await res.json();
 
         if(res.status === 401 || data.erro) {
@@ -294,7 +322,6 @@ async function carregarDados() {
             return;
         }
 
-        // Sucesso na autenticação
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('painelConteudo').style.display = 'block';
 
@@ -307,6 +334,14 @@ async function carregarDados() {
     }
 }
 
+// 🛡️ FUNÇÃO SEGURA CONTRA INJEÇÃO DE HTML (XSS)
+function escaparHTML(str) {
+    if (!str) return '';
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
+
 function renderizarDenuncias(denuncias) {
     const cont = document.getElementById('listaDenuncias');
     if(denuncias.length === 0) {
@@ -316,8 +351,14 @@ function renderizarDenuncias(denuncias) {
 
     cont.innerHTML = denuncias.map(d => `
         <div class="card card-denuncia">
-            <div class="motivo">⚠️ Motivo: ${d.motivo}</div>
-            <div class="meta">ID do Grupo: <code>${d.grupo_id || 'N/A'}</code></div>
+            <div>
+                <div class="motivo">⚠️ Motivo: ${escaparHTML(d.motivo)}</div>
+                <div class="meta">ID do Grupo: <code>${escaparHTML(d.grupo_id || 'N/A')}</code></div>
+            </div>
+            <div class="denuncia-botoes">
+                ${d.grupo_id ? `<button class="btn-remover" onclick="removerGrupo('${escaparHTML(d.grupo_id)}')">🗑️ Apagar Grupo</button>` : ''}
+                <button class="btn-secundario" onclick="removerDenuncia('${escaparHTML(d._id || d.id)}')">❌ Limpar Denúncia</button>
+            </div>
         </div>
     `).join('');
 }
@@ -331,18 +372,17 @@ function renderizarGrupos(grupos) {
 
     cont.innerHTML = grupos.map(g => `
         <div class="card card-grupo">
-            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto">
+            <img src="${escaparHTML(g.foto || 'https://files.catbox.moe/0aa6f2.png')}" alt="Foto">
             <div class="grupo-info">
-                <div class="grupo-nome">${g.nome}</div>
-                <div class="grupo-cat">${g.categoria}</div>
-                <a href="${g.link}" target="_blank" class="grupo-link">Abrir Link</a>
+                <div class="grupo-nome">${escaparHTML(g.nome)}</div>
+                <div class="grupo-cat">${escaparHTML(g.categoria)}</div>
+                <a href="${escaparHTML(g.link)}" target="_blank" class="grupo-link">Abrir Link</a>
             </div>
-            <button class="btn-remover" onclick="removerGrupo('${g._id}')">🗑️ APAGAR</button>
+            <button class="btn-remover" onclick="removerGrupo('${escaparHTML(g._id)}')">🗑️ APAGAR</button>
         </div>
     `).join('');
 }
 
-// Função auxiliar para ler foto em Base64
 function converterArquivoParaBase64(file) {
     return new Promise((resolve, reject) => {
         if (!file) {
@@ -356,7 +396,6 @@ function converterArquivoParaBase64(file) {
     });
 }
 
-// Cadastrar direto sem Pix (Rota exclusiva do ADM)
 async function cadastrarDiretoAdm(e) {
     e.preventDefault();
     let nome = document.getElementById('admNome').value;
@@ -404,13 +443,36 @@ async function removerGrupo(id) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ senha: senhaSalva, id: id })
         });
-        let data = await res.json();
+        let data = json = await res.json();
 
         if(data.sucesso) {
             alert("✅ Grupo removido com sucesso!");
             carregarDados();
         } else {
             alert("❌ Erro ao remover grupo: " + (data.erro || 'Erro desconhecido'));
+        }
+    } catch(e) {
+        console.error(e);
+        alert("Erro na requisição ao servidor.");
+    }
+}
+
+async function removerDenuncia(id) {
+    if(!confirm("Deseja apagar este aviso de denúncia?")) return;
+
+    try {
+        let res = await fetch('/api/adm/remover-denuncia', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva, id: id })
+        });
+        let data = await res.json();
+
+        if(data.sucesso) {
+            alert("✅ Denúncia removida com sucesso!");
+            carregarDados();
+        } else {
+            alert("❌ Erro ao remover denúncia: " + (data.erro || 'Erro desconhecido'));
         }
     } catch(e) {
         console.error(e);
