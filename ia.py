@@ -199,6 +199,51 @@ def adm_dados():
 
     return jsonify({"denuncias": denuncias, "grupos": grupos})
 
+@app.route('/api/adm/cadastrar', methods=['POST'])
+def adm_cadastrar_direto():
+    data = request.json or {}
+    if data.get("senha") != ADMIN_SENHA:
+        return jsonify({"erro": "Senha incorreta!"}), 401
+    
+    nome = data.get("nome")
+    link = data.get("link", "").strip()
+    categoria = data.get("categoria", "Outros")
+    descricao = data.get("descricao", "")[:30]
+    foto_input = data.get("foto", "").strip()
+    
+    # Validação de link do WhatsApp
+    if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
+        return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
+
+    if colecao_grupos.find_one({"link": link}):
+        return jsonify({"erro": "Este link de grupo já está publicado no site!"}), 400
+
+    foto_final = "https://files.catbox.moe/0aa6f2.png"
+    if foto_input and "base64," in foto_input:
+        try:
+            header, encoded = foto_input.split(",", 1)
+            img_data = base64.b64decode(encoded)
+            img = Image.open(io.BytesIO(img_data))
+            img = img.convert("RGB")
+            img.thumbnail((300, 300))
+            output = io.BytesIO()
+            img.save(output, format="JPEG", quality=85)
+            compressed_base64 = base64.b64encode(output.getvalue()).decode("utf-8")
+            foto_final = f"data:image/jpeg;base64,{compressed_base64}"
+        except Exception as img_err:
+            print(f"Erro ao processar imagem ADM: {img_err}")
+
+    colecao_grupos.insert_one({
+        "nome": nome,
+        "link": link,
+        "categoria": categoria,
+        "descricao": descricao,
+        "foto": foto_final,
+        "criado_em": time.time()
+    })
+
+    return jsonify({"sucesso": True})
+
 @app.route('/api/adm/remover', methods=['POST'])
 def adm_remover():
     data = request.json or {}
