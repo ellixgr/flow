@@ -21,7 +21,7 @@
     <style>
         :root { 
             --primary-green: #25d366; --dark-green: #128c7e;
-            --text-color: #fff; --card-bg: rgba(255,255,255,0.08);
+            --text-color: #fff; --card-bg: rgba(255,255,255,0.06);
         }
         * {box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif;}
         html {scroll-behavior: smooth;}
@@ -36,9 +36,9 @@
             opacity:0.4; z-index:-1; pointer-events:none;
         }
         main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
-        .perfil-topo {text-align:center; margin-bottom:20px;}
-        .foto-perfil {width:80px; height:80px; border-radius:50%; border:3px solid #25d366; object-fit: cover;}
-        .nome-time {font-size:20px; font-weight:800; color:#25d366; margin-top:8px;}
+        
+        .topo-titulo-area {text-align:center; margin-bottom:15px;}
+        .nome-time {font-size:22px; font-weight:800; color:#25d366; margin-top:5px;}
         
         .video-container { 
             width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
@@ -57,26 +57,66 @@
         }
 
         .ad-script-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 15px 0;
-            width: 100%;
+            display: flex; justify-content: center; align-items: center; margin: 15px 0; width: 100%;
         }
         
         .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:transparent; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
+        /* 🛡️ CARDS BLINDADOS CONTRA SOBREPOSIÇÃO */
         .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
-        .card {background:rgba(255,255,255,0.05); border:2px solid #25d366; border-radius:15px; padding: 12px; display:flex; align-items:center; gap:10px; position:relative;}
-        .card img {width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #25d366;}
-        .card-info {flex:1;}
-        .card-nome {font-weight:bold; font-size:15px;}
-        .card-cat {font-size:11px; color:#ffd700; margin-top:2px;}
-        .card-desc {font-size:12px; color:#ccc; margin-top:4px;}
-        .btn-entrar {background:#25d366; color:#000; padding:10px 16px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:14px; border:none; cursor:pointer; text-align:center;}
-        .denunciar-btn {position:absolute; top:8px; right:8px; background:transparent; border:none; color:#ff4d4d; font-size:14px; cursor:pointer;}
+        .card {
+            background: var(--card-bg); 
+            border: 2px solid #25d366; 
+            border-radius: 16px; 
+            padding: 14px; 
+            display: grid;
+            grid-template-columns: 55px 1fr auto;
+            grid-template-rows: auto auto auto;
+            column-gap: 12px;
+            row-gap: 4px;
+            align-items: center;
+            position: relative;
+        }
+        .card img {
+            grid-row: 1 / span 3;
+            width: 55px; height: 55px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid #25d366;
+        }
+        .card-info-top {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-right: 25px;
+        }
+        .card-nome {font-weight: bold; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;}
+        .card-cat {grid-column: 2; grid-row: 2; font-size: 11px; color: #ffd700; font-weight: 600;}
+        .card-desc {grid-column: 2; grid-row: 3; font-size: 12px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;}
+        
+        .btn-entrar-wrapper {
+            grid-column: 3;
+            grid-row: 1 / span 3;
+            display: flex;
+            align-items: center;
+        }
+        .btn-entrar {
+            background: #25d366; color: #000; padding: 10px 14px; 
+            border-radius: 10px; text-decoration: none; font-weight: bold; 
+            font-size: 13px; border: none; cursor: pointer; text-align: center;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(37,211,102,0.3);
+        }
+        .denunciar-btn {
+            position: absolute; top: 10px; right: 10px; 
+            background: transparent; border: none; color: #ffcc00; 
+            font-size: 14px; cursor: pointer; z-index: 5;
+            padding: 4px;
+        }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
 
         .btn-enviar-grupo-top {
@@ -88,12 +128,8 @@
 
         .anuncio-box-gigante {
             background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(0, 0, 0, 0.6));
-            border: 2px solid #25d366;
-            border-radius: 16px;
-            padding: 12px;
-            margin: 20px auto;
-            text-align: center;
-            width: 100%;
+            border: 2px solid #25d366; border-radius: 16px; padding: 12px;
+            margin: 20px auto; text-align: center; width: 100%;
             box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);
         }
         .anuncio-imagem-gigante {
@@ -174,7 +210,6 @@
         .btn-modal-cancelar {width:100%; padding:12px; background:#21262d; color:#f0f6fc; border:1px solid #30363d; border-radius:12px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
         .btn-modal-cancelar:hover { background: #30363d; }
 
-        /* Pop-up de Alerta Personalizado (Toast / Modal Customizado) */
         #customAlertModal .modal-content { text-align: center; max-width: 320px; }
         #customAlertIcon { font-size: 40px; margin-bottom: 10px; }
         #customAlertMsg { font-size: 15px; line-height: 1.5; color: #f0f6fc; margin-bottom: 20px; }
@@ -214,10 +249,9 @@
 </div>
 
 <main>
-    <div class="perfil-topo">
-        <img src="https://files.catbox.moe/0aa6f2.png" class="foto-perfil" alt="Logo Team Flow">
+    <div class="topo-titulo-area">
         <div class="nome-time">Team Flow</div>
-        <p style="font-size:13px; color:#ccc; margin:6px 0 18px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
+        <p style="font-size:13px; color:#ccc; margin:6px 0 15px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
     
     <div class="video-container">
@@ -287,19 +321,35 @@
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
 
-<!-- MODAL CADASTRAR GRUPO -->
+<!-- MODAL CADASTRAR GRUPO COM PREVIEW AO VIVO -->
 <div id="modalForm" class="modal">
     <div class="modal-content">
         <h3>📝 Cadastrar Grupo</h3>
+        
+        <!-- ÁREA DE PREVIEW EM TEMPO REAL -->
+        <label style="color: #25d366; margin-bottom: 4px;">👁️ Pré-visualização ao vivo:</label>
+        <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
+            <button class="denunciar-btn" title="Denunciar" onclick="event.preventDefault()">⚠️</button>
+            <img id="prevFoto" src="https://files.catbox.moe/0aa6f2.png" alt="Preview Foto">
+            <div class="card-info-top">
+                <div class="card-nome" id="prevNome">Nome do Grupo</div>
+            </div>
+            <div class="card-cat" id="prevCat">Amizade</div>
+            <div class="card-desc" id="prevDesc">Descrição curta...</div>
+            <div class="btn-entrar-wrapper">
+                <span class="btn-entrar" style="font-size: 12px; padding: 8px 10px;">👉 Entrar</span>
+            </div>
+        </div>
+
         <form id="formGrupo" onsubmit="enviarFormulario(event)">
             <label>Nome do Grupo:</label>
-            <input type="text" id="gNome" required placeholder="Ex: Grupo de Amigos">
+            <input type="text" id="gNome" required placeholder="Ex: Grupo de Amigos" oninput="atualizarPreview()">
             
             <label>Link do WhatsApp (Grupo ou Canal):</label>
             <input type="url" id="gLink" required placeholder="https://chat.whatsapp.com/...">
             
             <label>Categoria:</label>
-            <select id="gCat">
+            <select id="gCat" onchange="atualizarPreview()">
                 <option value="Amizade">Amizade</option>
                 <option value="Namoro">Namoro</option>
                 <option value="Zoeira">Zoeira</option>
@@ -308,10 +358,10 @@
             </select>
             
             <label>Descrição curta (Máx 30 caracteres):</label>
-            <input type="text" id="gDesc" maxlength="30" placeholder="Ex: Resenha e amizades">
+            <input type="text" id="gDesc" maxlength="30" placeholder="Ex: Resenha e amizades" oninput="atualizarPreview()">
             
             <label>Escolher Foto da Galeria:</label>
-            <input type="file" id="gFotoFile" accept="image/*" style="padding: 8px; background: #0d1117;">
+            <input type="file" id="gFotoFile" accept="image/*" style="padding: 8px; background: #0d1117;" onchange="atualizarPreviewFoto(this)">
 
             <label>Escolha o Plano:</label>
             <select id="gPlano" required>
@@ -333,7 +383,7 @@
     </div>
 </div>
 
-<!-- MODAL PIX COM BOTÃO DE CANCELAR E ATUALIZAÇÃO EM TEMPO REAL -->
+<!-- MODAL PIX -->
 <div id="modalPix" class="modal">
     <div class="modal-content" style="text-align:center;">
         <h3>⏳ Pagamento Pix</h3>
@@ -345,7 +395,7 @@
     </div>
 </div>
 
-<!-- POP-UP DE ALERTA PERSONALIZADO (CUSTOM ALERT) -->
+<!-- POP-UP DE ALERTA PERSONALIZADO -->
 <div id="customAlertModal" class="modal">
     <div class="modal-content">
         <div id="customAlertIcon">⚠️</div>
@@ -429,7 +479,6 @@ function fecharModal(id) {
     }
 }
 
-// ALERTA / POP-UP BONITO PERSONALIZADO (Substitui o alert feio)
 function mostrarAlerta(msg, tipo = 'erro') {
     const iconEl = document.getElementById('customAlertIcon');
     const msgEl = document.getElementById('customAlertMsg');
@@ -453,7 +502,6 @@ function fecharCustomAlert() {
     document.getElementById('customAlertModal').style.display = 'none';
 }
 
-// LÓGICA DE CARREGAMENTO DO MONGODB VIA IA.PY
 let categoriaAtual = 'Todos';
 let checkInterval = null;
 
@@ -483,12 +531,14 @@ async function carregarGruposDoServidor() {
             <div class="card">
                 <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
                 <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto do Grupo">
-                <div class="card-info">
+                <div class="card-info-top">
                     <div class="card-nome">${g.nome}</div>
-                    <div class="card-cat">${g.categoria}</div>
-                    <div class="card-desc">${g.descricao || ''}</div>
                 </div>
-                <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+                <div class="card-cat">${g.categoria}</div>
+                <div class="card-desc">${g.descricao || ''}</div>
+                <div class="btn-entrar-wrapper">
+                    <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+                </div>
             </div>
         `).join('');
     } catch(e) {
@@ -497,7 +547,29 @@ async function carregarGruposDoServidor() {
     }
 }
 
-// Função auxiliar para converter arquivo de imagem selecionado em Base64
+// Funções para atualizar o preview em tempo real no formulário
+function atualizarPreview() {
+    let nome = document.getElementById('gNome').value.trim();
+    let cat = document.getElementById('gCat').value;
+    let desc = document.getElementById('gDesc').value.trim();
+
+    document.getElementById('prevNome').textContent = nome || 'Nome do Grupo';
+    document.getElementById('prevCat').textContent = cat || 'Amizade';
+    document.getElementById('prevDesc').textContent = desc || 'Descrição curta...';
+}
+
+function atualizarPreviewFoto(input) {
+    if (input.files && input.files[0]) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('prevFoto').src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        document.getElementById('prevFoto').src = 'https://files.catbox.moe/0aa6f2.png';
+    }
+}
+
 function converterArquivoParaBase64(file) {
     return new Promise((resolve, reject) => {
         if (!file) {
