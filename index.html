@@ -155,26 +155,27 @@
             box-shadow:0 0 15px rgba(37,211,102,0.4); cursor:pointer; border:none;
         }
 
-        /* 🌟 CARD FLUTUANTE COM FOTO ORIGINAL E BOTÃO 100% TRANSPARENTE PULSANTE */
+        /* 🌟 CARD FLUTUANTE MENOR, VINDO DA DIREITA, SEM BORDA VERDE */
         #cardFlutuantePromo {
             position: fixed; bottom: 75px; right: 15px; z-index: 9999;
-            width: 290px; height: 340px;
-            border-radius: 20px; overflow: hidden;
-            border: 2px solid #25d366;
+            width: 250px; height: 300px;
+            border-radius: 18px; overflow: hidden;
+            border: none;
             box-shadow: 0 15px 35px rgba(0,0,0,0.9);
             display: none;
-            animation: slideUp 0.4s ease;
+            animation: slideRight 0.4s ease;
             background-color: #000;
         }
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideRight { 
+            from { transform: translateX(100px); opacity: 0; } 
+            to { transform: translateX(0); opacity: 1; } 
+        }
         
-        /* Imagem de Fundo cobrindo toda a caixinha com claridade real (sem escurecer) */
         .promo-bg-img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 1; filter: brightness(1);
         }
 
-        /* Gradiente apenas na base para o texto destacar perfeitamente sem escurecer a foto toda */
         .promo-overlay {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0) 100%);
@@ -182,33 +183,32 @@
         }
 
         .promo-header { 
-            position: absolute; top: 12px; left: 12px; right: 12px;
+            position: absolute; top: 10px; left: 10px; right: 10px;
             display: flex; justify-content: space-between; align-items: center; z-index: 5; 
         }
         .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,204,0,0.3); }
-        .promo-fechar { background: rgba(48,54,61,0.8); color: #8b949e; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 12px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .promo-fechar { background: rgba(48,54,61,0.8); color: #8b949e; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 11px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .promo-fechar.liberado { background: #da3633; color: #fff; cursor: pointer; }
         
         .promo-content-box {
-            position: absolute; bottom: 15px; left: 15px; right: 15px;
-            z-index: 5; display: flex; flex-direction: column; gap: 6px; text-align: center;
+            position: absolute; bottom: 12px; left: 12px; right: 12px;
+            z-index: 5; display: flex; flex-direction: column; gap: 5px; text-align: center;
         }
         .promo-titulo { 
-            font-size: 16px; font-weight: 800; color: #fff; 
+            font-size: 15px; font-weight: 800; color: #fff; 
             text-shadow: 0 2px 4px rgba(0,0,0,0.9);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
         }
         .promo-texto { 
-            font-size: 12px; color: #f1f5f9; line-height: 1.3;
+            font-size: 11px; color: #f1f5f9; line-height: 1.2;
             text-shadow: 0 1px 3px rgba(0,0,0,0.9);
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
         
-        /* 🔵 BOTÃO TOTALMENTE TRANSPARENTE E PULSANTE COM CONTORNO */
         .btn-pulsante-card {
-            display: block; width: 100%; margin-top: 4px; padding: 10px;
-            background: transparent; color: #fff; font-weight: bold; font-size: 13px;
-            text-align: center; border-radius: 10px; text-decoration: none;
+            display: block; width: 100%; margin-top: 3px; padding: 8px;
+            background: transparent; color: #fff; font-weight: bold; font-size: 12px;
+            text-align: center; border-radius: 8px; text-decoration: none;
             border: 2px solid #25d366;
             text-shadow: 0 1px 3px rgba(0,0,0,0.9);
             box-shadow: 0 4px 15px rgba(37,211,102,0.3);
@@ -405,9 +405,8 @@
     </div>
 </main>
 
-<!-- 🌟 CARD FLUTUANTE COM FOTO ORIGINAL E BOTÃO 100% TRANSPARENTE -->
+<!-- 🌟 CARD FLUTUANTE VINDO DA DIREITA, SEM BORDA VERDE E SEM A PALAVRA LIBERADO -->
 <div id="cardFlutuantePromo">
-    <!-- Imagem de fundo total, sem escurecimento geral -->
     <img id="promoFoto" class="promo-bg-img" src="" alt="Destaque">
     <div class="promo-overlay"></div>
 
@@ -679,6 +678,7 @@ function iniciarContadorPromo(tempoSegundos) {
     
     btnFechar.disabled = true;
     btnFechar.classList.remove('liberado');
+    contadorEl.style.display = 'inline-block';
     
     if(timerPromo) clearInterval(timerPromo);
     
@@ -687,7 +687,7 @@ function iniciarContadorPromo(tempoSegundos) {
         if(tempoRestante > 0) {
             contadorEl.textContent = `Aguarde ${tempoRestante}s`;
         } else {
-            contadorEl.textContent = "Liberado";
+            contadorEl.style.display = 'none';
             btnFechar.disabled = false;
             btnFechar.classList.add('liberado');
             clearInterval(timerPromo);
