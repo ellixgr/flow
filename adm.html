@@ -122,6 +122,18 @@
             cursor: pointer;
             margin-top: 15px;
         }
+        .btn-apagar-anuncio {
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
 
         .card {
             background: var(--card-bg);
@@ -231,7 +243,7 @@
 <div class="container">
     <header>
         <h1>⚡ FLOW — Painel ADM</h1>
-        <p>Gestão de Grupos, Moderação e Cadastro Gratuito</p>
+        <p>Gestão de Grupos, Moderação e Anúncios</p>
     </header>
 
     <!-- BOX DE LOGIN -->
@@ -274,6 +286,7 @@
                 <input type="number" id="promoDuracao" required min="1" max="60" value="5">
 
                 <button type="submit" class="btn-cadastrar-adm" style="margin-top:15px;">💾 Salvar Configurações do Card</button>
+                <button type="button" class="btn-apagar-anuncio" onclick="apagarPromo()">🗑️ Apagar/Resetar Anúncio do Banco</button>
             </form>
         </div>
 
@@ -403,6 +416,34 @@ async function salvarPromo(e) {
             alert("✅ Configurações do card flutuante salvas com sucesso!");
         } else {
             alert("❌ Erro ao salvar: " + (data.erro || 'Desconhecido'));
+        }
+    } catch(err) {
+        console.error(err);
+        alert("Erro na requisição ao servidor.");
+    }
+}
+
+async function apagarPromo() {
+    if(!confirm("Tem certeza de que deseja apagar/desativar completamente o anúncio flutuante do banco de dados?")) return;
+
+    try {
+        let res = await fetch('/api/adm/apagar-promo', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva })
+        });
+        let data = await res.json();
+        if(data.sucesso) {
+            alert("✅ Anúncio removido/limpo do banco com sucesso!");
+            document.getElementById('promoAtivo').value = "false";
+            document.getElementById('promoFoto').value = "";
+            document.getElementById('promoNome').value = "";
+            document.getElementById('promoTexto').value = "";
+            document.getElementById('promoLink').value = "";
+            document.getElementById('promoDuracao').value = 5;
+            carregarDados();
+        } else {
+            alert("❌ Erro ao apagar anúncio: " + (data.erro || 'Desconhecido'));
         }
     } catch(err) {
         console.error(err);
