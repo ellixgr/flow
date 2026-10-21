@@ -305,7 +305,7 @@ async function autenticar() {
     await carregarDados();
 }
 
-// 🛡️ REQUISIÇÃO SEGURA VIA POST (A senha nunca vai na URL)
+// 🛡️ REQUISIÇÃO SEGURA VIA POST (Envia a senha no body)
 async function carregarDados() {
     try {
         let res = await fetch('/api/adm/dados', {
@@ -443,7 +443,7 @@ async function removerGrupo(id) {
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ senha: senhaSalva, id: id })
         });
-        let data = json = await res.json();
+        let data = await res.json();
 
         if(data.sucesso) {
             alert("✅ Grupo removido com sucesso!");
