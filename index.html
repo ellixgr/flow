@@ -75,57 +75,79 @@
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
-        /* 🛡️ CARDS BLINDADOS CONTRA SOBREPOSIÇÃO */
+        /* 🛡️ CARDS BLINDADOS CONTRA SOBREPOSIÇÃO (LAYOUT FLEX CORRIGIDO) */
         .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
         .card {
             background: var(--card-bg); 
             border: 2px solid #25d366; 
             border-radius: 16px; 
-            padding: 14px; 
-            display: grid;
-            grid-template-columns: 55px 1fr auto;
-            grid-template-rows: auto auto auto;
-            column-gap: 12px;
-            row-gap: 4px;
+            padding: 12px 14px; 
+            display: flex;
             align-items: center;
+            gap: 12px;
             position: relative;
         }
         .card img {
-            grid-row: 1 / span 3;
             width: 55px; height: 55px; 
             border-radius: 50%; 
             object-fit: cover; 
             border: 2px solid #25d366;
+            flex-shrink: 0;
         }
-        .card-info-top {
-            grid-column: 2;
-            grid-row: 1;
+        .card-content-area {
+            flex: 1;
+            min-width: 0;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-right: 25px;
+            flex-direction: column;
+            gap: 2px;
+            padding-right: 20px; /* Espaço para o botão de denúncia não colar no texto */
         }
-        .card-nome {font-weight: bold; font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;}
-        .card-cat {grid-column: 2; grid-row: 2; font-size: 11px; color: #ffd700; font-weight: 600;}
-        .card-desc {grid-column: 2; grid-row: 3; font-size: 12px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px;}
+        .card-nome {
+            font-weight: bold; 
+            font-size: 14px; 
+            color: #fff; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        .card-cat {
+            font-size: 11px; 
+            color: #ffd700; 
+            font-weight: 600;
+        }
+        .card-desc {
+            font-size: 12px; 
+            color: #ccc; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
         
-        .btn-entrar-wrapper {
-            grid-column: 3;
-            grid-row: 1 / span 3;
+        .card-right-area {
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
         .btn-entrar {
-            background: #25d366; color: #000; padding: 10px 14px; 
+            background: #25d366; color: #000; padding: 8px 12px; 
             border-radius: 10px; text-decoration: none; font-weight: bold; 
             font-size: 13px; border: none; cursor: pointer; text-align: center;
             white-space: nowrap;
             box-shadow: 0 2px 8px rgba(37,211,102,0.3);
         }
         .denunciar-btn {
-            position: absolute; top: 10px; right: 10px; 
-            background: transparent; border: none; color: #ffcc00; 
-            font-size: 14px; cursor: pointer; z-index: 5;
+            position: absolute; 
+            top: 8px; 
+            right: 10px; 
+            background: transparent; 
+            border: none; 
+            color: #ffcc00; 
+            font-size: 14px; 
+            cursor: pointer; 
+            z-index: 5;
             padding: 4px;
         }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
@@ -342,12 +364,12 @@
         <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
             <button class="denunciar-btn" title="Denunciar" onclick="event.preventDefault()">⚠️</button>
             <img id="prevFoto" src="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg" alt="Preview Foto">
-            <div class="card-info-top">
+            <div class="card-content-area">
                 <div class="card-nome" id="prevNome">Nome do Grupo</div>
+                <div class="card-cat" id="prevCat">Amizade</div>
+                <div class="card-desc" id="prevDesc">Descrição curta...</div>
             </div>
-            <div class="card-cat" id="prevCat">Amizade</div>
-            <div class="card-desc" id="prevDesc">Descrição curta...</div>
-            <div class="btn-entrar-wrapper">
+            <div class="card-right-area">
                 <span class="btn-entrar" style="font-size: 12px; padding: 8px 10px;">👉 Entrar</span>
             </div>
         </div>
@@ -542,12 +564,12 @@ async function carregarGruposDoServidor() {
             <div class="card">
                 <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
                 <img src="${g.foto || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg'}" alt="Foto do Grupo">
-                <div class="card-info-top">
+                <div class="card-content-area">
                     <div class="card-nome">${g.nome}</div>
+                    <div class="card-cat">${g.categoria}</div>
+                    <div class="card-desc">${g.descricao || ''}</div>
                 </div>
-                <div class="card-cat">${g.categoria}</div>
-                <div class="card-desc">${g.descricao || ''}</div>
-                <div class="btn-entrar-wrapper">
+                <div class="card-right-area">
                     <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
                 </div>
             </div>
