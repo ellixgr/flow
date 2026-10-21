@@ -17,10 +17,10 @@ app = Flask(__name__)
 # ==============================================
 MONGO_URI = os.getenv("MONGO_URI")
 MP_TOKEN = os.getenv("MP_TOKEN")
-ADMIN_SENHA = os.getenv("ADMIN_SENHA")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD") # Corrigido para bater certo com o Render
 
-if not MONGO_URI or not MP_TOKEN or not ADMIN_SENHA:
-    print("⚠️ AVISO: As variáveis de ambiente MONGO_URI, MP_TOKEN ou ADMIN_SENHA não foram totalmente configuradas no Render!")
+if not MONGO_URI or not MP_TOKEN or not ADMIN_PASSWORD:
+    print("⚠️ AVISO: As variáveis de ambiente MONGO_URI, MP_TOKEN ou ADMIN_PASSWORD não foram totalmente configuradas no Render!")
 
 try:
     mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
@@ -76,7 +76,6 @@ def criar_pagamento():
     descricao = data.get("descricao", "")[:30]
     foto_input = data.get("foto", "").strip()
     
-    # Processamento seguro da imagem enviada (se houver) via Pillow
     foto_final = "https://files.catbox.moe/0aa6f2.png"
     if foto_input and "base64," in foto_input:
         try:
@@ -84,7 +83,7 @@ def criar_pagamento():
             img_data = base64.b64decode(encoded)
             img = Image.open(io.BytesIO(img_data))
             img = img.convert("RGB")
-            img.thumbnail((300, 300)) # Redimensiona para economizar espaço
+            img.thumbnail((300, 300))
             
             output = io.BytesIO()
             img.save(output, format="JPEG", quality=85)
@@ -95,18 +94,15 @@ def criar_pagamento():
 
     plano_id = int(data.get("plano_id", 1))
 
-    # Validação Estrita de Link (WhatsApp apenas)
     if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
         return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
 
-    # Bloqueio de Links Repetidos
     if colecao_grupos.find_one({"link": link}):
         return jsonify({"erro": "Este link de grupo já está publicado no site!"}), 400
 
     plano = PLANOS_SITE.get(plano_id, PLANOS_SITE[1])
     valor = plano["valor"]
 
-    # Requisição Mercado Pago
     url = "https://api.mercadopago.com/v1/payments"
     headers = {
         "Authorization": f"Bearer {MP_TOKEN}",
@@ -127,7 +123,6 @@ def criar_pagamento():
             pid = str(res["id"])
             qr_code = res.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
 
-            # Salva pendente no MongoDB
             colecao_pagamentos.insert_one({
                 "payment_id": pid,
                 "nome": nome,
@@ -161,7 +156,6 @@ def verificar_pagamento():
             if status == "approved":
                 pendente = colecao_pagamentos.find_one({"payment_id": str(pid)})
                 if pendente and not pendente.get("ativado"):
-                    # Cadastra no MongoDB e libera no site
                     colecao_grupos.insert_one({
                         "nome": pendente["nome"],
                         "link": pendente["link"],
@@ -186,13 +180,20 @@ def denunciar():
     })
     return jsonify({"sucesso": True})
 
-@app.route('/api/adm/dados', methods=['GET'])
+# ==============================================
+# 🛡️ ROTAS DO PAINEL ADM (CORRIGIDAS PARA POST E ADMIN_PASSWORD)
+# ==============================================
+
+@app.route('/api/adm/dados', methods=['POST'])
 def adm_dados():
-    senha = request.args.get("senha")
-    if senha != ADMIN_SENHA:
+    data = request.json or {}
+    if data.get("senha") != ADMIN_PASSWORD:
         return jsonify({"erro": "Senha incorreta!"}), 401
     
-    denuncias = list(colecao_denuncias.find({}, {"_id": 0}))
+    denuncias = list(colecao_denuncias.find({}))
+    for d in denuncias:
+        d["_id"] = str(d["_id"])
+
     grupos = list(colecao_grupos.find({}))
     for g in grupos:
         g["_id"] = str(g["_id"])
@@ -202,7 +203,7 @@ def adm_dados():
 @app.route('/api/adm/cadastrar', methods=['POST'])
 def adm_cadastrar_direto():
     data = request.json or {}
-    if data.get("senha") != ADMIN_SENHA:
+    if data.get("senha") != ADMIN_PASSWORD:
         return jsonify({"erro": "Senha incorreta!"}), 401
     
     nome = data.get("nome")
@@ -211,7 +212,6 @@ def adm_cadastrar_direto():
     descricao = data.get("descricao", "")[:30]
     foto_input = data.get("foto", "").strip()
     
-    # Validação de link do WhatsApp
     if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
         return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
 
@@ -247,7 +247,7 @@ def adm_cadastrar_direto():
 @app.route('/api/adm/remover', methods=['POST'])
 def adm_remover():
     data = request.json or {}
-    if data.get("senha") != ADMIN_SENHA:
+    if data.get("senha") != ADMIN_PASSWORD:
         return jsonify({"erro": "Senha incorreta!"}), 401
     
     gid = data.get("id")
@@ -255,6 +255,20 @@ def adm_remover():
         colecao_grupos.delete_one({"_id": ObjectId(gid)})
     except:
         colecao_grupos.delete_one({"_id": gid})
+        
+    return jsonify({"sucesso": True})
+
+@app.route('/api/adm/remover-denuncia', methods=['POST'])
+def adm_remover_denuncia():
+    data = request.json or {}
+    if data.get("senha") != ADMIN_PASSWORD:
+        return jsonify({"erro": "Senha incorreta!"}), 401
+    
+    did = data.get("id")
+    try:
+        colecao_denuncias.delete_one({"_id": ObjectId(did)})
+    except:
+        colecao_denuncias.delete_one({"_id": did})
         
     return jsonify({"sucesso": True})
 
