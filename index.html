@@ -97,31 +97,16 @@
             box-shadow: 0 0 20px rgba(37, 211, 102, 0.3);
         }
         .anuncio-imagem-gigante {
-            width: 100%;
-            height: auto;
-            border-radius: 12px;
-            cursor: pointer;
-            display: block;
-            transition: transform 0.3s ease;
-            animation: pulsar 2s ease-in-out infinite;
+            width: 100%; height: auto; border-radius: 12px; cursor: pointer; display: block;
+            transition: transform 0.3s ease; animation: pulsar 2s ease-in-out infinite;
         }
-
         .anuncio-box {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 8px;
-            margin: 12px auto;
-            text-align: center;
-            max-width: 260px;
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; padding: 8px; margin: 12px auto; text-align: center; max-width: 260px;
         }
         .anuncio-imagem {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            animation: pulsar 2s ease-in-out infinite;
+            max-width: 100%; height: auto; border-radius: 8px; cursor: pointer;
+            transition: transform 0.3s ease; animation: pulsar 2s ease-in-out infinite;
         }
         @keyframes pulsar {
             0% { transform: scale(1); }
@@ -174,14 +159,25 @@
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         
-        /* Modais */
-        .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
-        .modal-content {background:#fff; color:#000; padding:25px; border-radius:16px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 0 30px rgba(0,0,0,0.5);}
-        .modal-content h2, .modal-content h3 {text-align:center; margin-bottom:15px; font-size:19px; font-weight:bold; color:#128c7e;}
-        .modal-content label {display:block; font-weight:bold; margin-top:10px; font-size:13px; color:#333;}
-        .modal-content input, .modal-content select, .modal-content textarea {width:100%; padding:10px; margin:5px 0 10px; background:#f0f0f0; border:1px solid #ccc; color:#000; border-radius:8px; font-size:14px;}
-        .btn-fechar-modal {width:100%; padding:12px; background:#25d366; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:15px;}
-        .btn-cancelar-modal {width:100%; padding:10px; background:#666; color:white; border:none; border-radius:10px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
+        /* Modais Modernizados */
+        .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
+        .modal-content {background:#161b22; color:#f0f6fc; border: 1px solid #30363d; padding:25px; border-radius:20px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 10px 30px rgba(0,0,0,0.8); animation: modalScale 0.3s ease;}
+        @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-content h2, .modal-content h3 {text-align:center; margin-bottom:15px; font-size:20px; font-weight:bold; color:#25d366;}
+        .modal-content label {display:block; font-weight:600; margin-top:12px; font-size:13px; color:#8b949e;}
+        .modal-content input, .modal-content select, .modal-content textarea {width:100%; padding:12px; margin:6px 0 12px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; font-size:14px; outline:none;}
+        .modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus {border-color:#25d366;}
+        
+        .btn-modal-acao {width:100%; padding:14px; background:#25d366; color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:15px; transition:0.2s;}
+        .btn-modal-acao:hover { opacity: 0.9; }
+        .btn-modal-cancelar {width:100%; padding:12px; background:#21262d; color:#f0f6fc; border:1px solid #30363d; border-radius:12px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
+        .btn-modal-cancelar:hover { background: #30363d; }
+
+        /* Pop-up de Alerta Personalizado (Toast / Modal Customizado) */
+        #customAlertModal .modal-content { text-align: center; max-width: 320px; }
+        #customAlertIcon { font-size: 40px; margin-bottom: 10px; }
+        #customAlertMsg { font-size: 15px; line-height: 1.5; color: #f0f6fc; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -314,8 +310,8 @@
             <label>Descrição curta (Máx 30 caracteres):</label>
             <input type="text" id="gDesc" maxlength="30" placeholder="Ex: Resenha e amizades">
             
-            <label>Link da Foto (Opcional):</label>
-            <input type="url" id="gFoto" placeholder="https://...">
+            <label>Escolher Foto da Galeria:</label>
+            <input type="file" id="gFotoFile" accept="image/*" style="padding: 8px; background: #0d1117;">
 
             <label>Escolha o Plano:</label>
             <select id="gPlano" required>
@@ -331,21 +327,30 @@
                 <option value="10">1 Ano (VIP) - R$ 150,00</option>
             </select>
 
-            <button type="submit" class="btn-fechar-modal">💳 GERAR PIX PARA APROVAÇÃO</button>
-            <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalForm')">Cancelar</button>
+            <button type="submit" class="btn-modal-acao">💳 GERAR PIX PARA APROVAÇÃO</button>
+            <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalForm')">Cancelar</button>
         </form>
     </div>
 </div>
 
-<!-- MODAL PIX -->
+<!-- MODAL PIX COM BOTÃO DE CANCELAR E ATUALIZAÇÃO EM TEMPO REAL -->
 <div id="modalPix" class="modal">
     <div class="modal-content" style="text-align:center;">
         <h3>⏳ Pagamento Pix</h3>
-        <p style="margin:10px 0; font-size:13px; color:#555;">Copie o código Pix abaixo. O seu grupo será publicado <b>AUTOMATICAMENTE</b> assim que o pagamento for confirmado!</p>
-        <textarea id="pixCode" readonly style="width:100%; height:80px; font-size:12px; background:#111; color:#0f0; text-align:center; font-family:monospace; border-radius:8px;"></textarea>
-        <button class="btn-fechar-modal" onclick="copiarPix()">📋 Copiar Código Pix</button>
-        <p id="statusPix" style="color:#d97706; margin-top:15px; font-weight:bold; font-size:14px;">Aguardando pagamento...</p>
-        <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalPix')">Fechar</button>
+        <p style="margin:10px 0; font-size:13px; color:#8b949e;">Copie o código Pix abaixo. Assim que pagar no seu banco, o grupo será publicado <b>AUTOMATICAMENTE</b> na hora!</p>
+        <textarea id="pixCode" readonly style="width:100%; height:80px; font-size:12px; background:#0d1117; color:#25d366; text-align:center; font-family:monospace; border-radius:8px; border: 1px solid #30363d;"></textarea>
+        <button class="btn-modal-acao" onclick="copiarPix()">📋 Copiar Código Pix</button>
+        <p id="statusPix" style="color:#f0883e; margin-top:15px; font-weight:bold; font-size:14px;">Aguardando pagamento no banco...</p>
+        <button type="button" class="btn-modal-cancelar" style="background:#da3633; border:none; color:#fff;" onclick="cancelarPix()">❌ Cancelar / Fechar</button>
+    </div>
+</div>
+
+<!-- POP-UP DE ALERTA PERSONALIZADO (CUSTOM ALERT) -->
+<div id="customAlertModal" class="modal">
+    <div class="modal-content">
+        <div id="customAlertIcon">⚠️</div>
+        <div id="customAlertMsg">Mensagem aqui</div>
+        <button class="btn-modal-acao" onclick="fecharCustomAlert()">OK, Entendi</button>
     </div>
 </div>
 
@@ -356,8 +361,8 @@
         <input type="hidden" id="denunciaGrupoId">
         <label><input type="radio" name="motivo" value="Conteúdo adulto / Pornografia" checked> Conteúdo adulto / Pornografia</label><br><br>
         <label><input type="radio" name="motivo" value="Redirecionamento malicioso"> Redirecionamento malicioso / Golpe</label><br><br>
-        <button class="btn-fechar-modal" style="background:#ff4d4d;" onclick="enviarDenuncia()">Enviar Denúncia</button>
-        <button type="button" class="btn-cancelar-modal" onclick="fecharModal('modalDenuncia')">Cancelar</button>
+        <button class="btn-modal-acao" style="background:#da3633; color:#fff;" onclick="enviarDenuncia()">Enviar Denúncia</button>
+        <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalDenuncia')">Cancelar</button>
     </div>
 </div>
 
@@ -365,25 +370,25 @@
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
-        <p>
+        <p style="color: #8b949e; font-size: 14px; line-height: 1.6;">
             ✖️ Imagens com conteúdo adulto, nudez ou +18 são estritamente proibidas.<br><br>
             ⚠️ Os grupos são de responsabilidade dos criadores. Não nos responsabilizamos pelo conteúdo.<br><br>
             📋 Ao enviar um grupo, você concorda com estes termos.
         </p>
-        <button class="btn-fechar-modal" onclick="fecharTermos()">✅ ENTENDI</button>
+        <button class="btn-modal-acao" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
 
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
-        <p>
+        <p style="color: #8b949e; font-size: 14px; line-height: 1.6;">
             🔒 Seus dados estão protegidos!<br><br>
             📋 Armazenamos apenas: link, nome e categoria dos grupos.<br><br>
             ✖️ Não coletamos dados pessoais dos visitantes.<br><br>
             🛡️ O site não armazena conversas ou mensagens privadas.
         </p>
-        <button class="btn-fechar-modal" onclick="fecharPrivacidade()">✅ ENTENDI</button>
+        <button class="btn-modal-acao" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
 
@@ -418,7 +423,34 @@ function fecharPrivacidade() { document.getElementById('privacidadeModal').style
 function abrirFormulario() { document.getElementById('modalForm').style.display = 'flex'; }
 function fecharModal(id) { 
     document.getElementById(id).style.display = 'none'; 
-    if(id === 'modalPix' && checkInterval) clearInterval(checkInterval);
+    if(id === 'modalPix' && checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+    }
+}
+
+// ALERTA / POP-UP BONITO PERSONALIZADO (Substitui o alert feio)
+function mostrarAlerta(msg, tipo = 'erro') {
+    const iconEl = document.getElementById('customAlertIcon');
+    const msgEl = document.getElementById('customAlertMsg');
+    
+    if(tipo === 'sucesso') {
+        iconEl.innerHTML = '✅';
+        iconEl.style.color = '#25d366';
+    } else if(tipo === 'aviso') {
+        iconEl.innerHTML = '⏳';
+        iconEl.style.color = '#f0883e';
+    } else {
+        iconEl.innerHTML = '❌';
+        iconEl.style.color = '#da3633';
+    }
+    
+    msgEl.innerHTML = msg;
+    document.getElementById('customAlertModal').style.display = 'flex';
+}
+
+function fecharCustomAlert() {
+    document.getElementById('customAlertModal').style.display = 'none';
 }
 
 // LÓGICA DE CARREGAMENTO DO MONGODB VIA IA.PY
@@ -465,39 +497,72 @@ async function carregarGruposDoServidor() {
     }
 }
 
+// Função auxiliar para converter arquivo de imagem selecionado em Base64
+function converterArquivoParaBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve("");
+            return;
+        }
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
 async function enviarFormulario(e) {
     e.preventDefault();
     let nome = document.getElementById('gNome').value;
     let link = document.getElementById('gLink').value;
     let categoria = document.getElementById('gCat').value;
     let descricao = document.getElementById('gDesc').value;
-    let foto = document.getElementById('gFoto').value;
     let plano_id = document.getElementById('gPlano').value;
+    let fotoFile = document.getElementById('gFotoFile').files[0];
 
-    let res = await fetch('/api/criar-pagamento', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({nome, link, categoria, descricao, foto, plano_id})
-    });
-    let r = await res.json();
-    
-    if(r.erro) {
-        alert('❌ ' + r.erro);
-        return;
+    let fotoBase64 = "";
+    if (fotoFile) {
+        try {
+            fotoBase64 = await converterArquivoParaBase64(fotoFile);
+        } catch(err) {
+            console.error("Erro ao processar imagem:", err);
+        }
     }
 
-    fecharModal('modalForm');
-    document.getElementById('pixCode').value = r.pix_code;
-    document.getElementById('modalPix').style.display = 'flex';
-    
-    verificarStatusPagamento(r.payment_id);
+    mostrarAlerta("Gerando fatura Pix com o Mercado Pago...", "aviso");
+
+    try {
+        let res = await fetch('/api/criar-pagamento', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({nome, link, categoria, descricao, foto: fotoBase64, plano_id})
+        });
+        let r = await res.json();
+        
+        fecharCustomAlert();
+
+        if(r.erro) {
+            mostrarAlerta(r.erro, 'erro');
+            return;
+        }
+
+        fecharModal('modalForm');
+        document.getElementById('pixCode').value = r.pix_code;
+        document.getElementById('modalPix').style.display = 'flex';
+        
+        verificarStatusPagamento(r.payment_id);
+    } catch(err) {
+        fecharCustomAlert();
+        mostrarAlerta("Erro de conexão ao processar o pagamento.", 'erro');
+    }
 }
 
 function copiarPix() {
     let copyText = document.getElementById("pixCode");
     copyText.select();
+    copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
-    alert("✅ Código Pix copiado para a área de transferência!");
+    mostrarAlerta("✅ Código Pix copiado com sucesso!<br>Abra o app do seu banco e cole na opção Pix Copia e Cola.", "sucesso");
 }
 
 function verificarStatusPagamento(payment_id) {
@@ -508,16 +573,27 @@ function verificarStatusPagamento(payment_id) {
             let r = await res.json();
             if(r.status === 'approved') {
                 clearInterval(checkInterval);
+                checkInterval = null;
                 statusEl.innerHTML = "✅ Pagamento Aprovado! Publicando grupo...";
+                mostrarAlerta("🎉 Pagamento aprovado com sucesso! Seu grupo já está ativo no site.", "sucesso");
                 setTimeout(() => {
                     fecharModal('modalPix');
                     carregarGruposDoServidor();
-                }, 2000);
+                }, 2500);
             }
         } catch(err) {
             console.error("Erro na verificação do Pix:", err);
         }
     }, 4000);
+}
+
+function cancelarPix() {
+    if(checkInterval) {
+        clearInterval(checkInterval);
+        checkInterval = null;
+    }
+    fecharModal('modalPix');
+    mostrarAlerta("Pagamento cancelado pelo usuário.", "aviso");
 }
 
 function abrirDenuncia(id) {
@@ -534,11 +610,10 @@ async function enviarDenuncia() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({grupo_id, motivo})
     });
-    alert('✅ Denúncia registrada. O administrador irá analisar.');
     fecharModal('modalDenuncia');
+    mostrarAlerta("Denúncia registrada com sucesso. O administrador irá analisar.", "sucesso");
 }
 
-// Inicia buscando os grupos no MongoDB
 carregarGruposDoServidor();
 </script>
 
