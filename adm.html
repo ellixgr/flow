@@ -43,7 +43,7 @@
             box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         }
         .login-box h2 { font-size: 18px; margin-bottom: 15px; color: var(--text); }
-        .login-box input {
+        .login-box input, .login-box select, .login-box textarea {
             width: 100%;
             padding: 12px;
             background: #0d1117;
@@ -51,7 +51,6 @@
             border-radius: 10px;
             color: #fff;
             font-size: 15px;
-            text-align: center;
             margin-bottom: 15px;
             outline: none;
         }
@@ -80,6 +79,48 @@
             align-items: center;
             gap: 8px;
             color: var(--primary);
+        }
+
+        /* Caixa de Cadastro Direto pelo ADM */
+        .form-adm-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .form-adm-box label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #8b949e;
+            margin-top: 10px;
+            margin-bottom: 4px;
+        }
+        .form-adm-box input, .form-adm-box select {
+            width: 100%;
+            padding: 10px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+        .form-adm-box input:focus, .form-adm-box select:focus {
+            border-color: var(--primary);
+        }
+        .btn-cadastrar-adm {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 15px;
         }
 
         .card {
@@ -167,7 +208,7 @@
 <div class="container">
     <header>
         <h1>⚡ FLOW — Painel ADM</h1>
-        <p>Gestão de Grupos e Moderação</p>
+        <p>Gestão de Grupos, Moderação e Cadastro Gratuito</p>
     </header>
 
     <!-- BOX DE LOGIN -->
@@ -182,6 +223,35 @@
         <div class="top-bar">
             <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado</b></span>
             <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Dados</button>
+        </div>
+
+        <!-- FORMULÁRIO DE CADASTRO GRATUITO PELO DONO (ADM) -->
+        <div class="secao-titulo">🚀 Cadastrar Grupo Gratuitamente (ADM)</div>
+        <div class="form-adm-box">
+            <form id="formCadAdm" onsubmit="cadastrarDiretoAdm(event)">
+                <label>Nome do Grupo:</label>
+                <input type="text" id="admNome" required placeholder="Ex: Grupo VIP do Dono">
+                
+                <label>Link do WhatsApp (Grupo ou Canal):</label>
+                <input type="url" id="admLink" required placeholder="https://chat.whatsapp.com/...">
+                
+                <label>Categoria:</label>
+                <select id="admCat">
+                    <option value="Amizade">Amizade</option>
+                    <option value="Namoro">Namoro</option>
+                    <option value="Zoeira">Zoeira</option>
+                    <option value="Figurinhas">Figurinhas</option>
+                    <option value="Outros">Outros</option>
+                </select>
+                
+                <label>Descrição curta (Máx 30 caracteres):</label>
+                <input type="text" id="admDesc" maxlength="30" placeholder="Ex: Grupo oficial">
+                
+                <label>Escolher Foto da Galeria:</label>
+                <input type="file" id="admFotoFile" accept="image/*" style="padding: 6px;">
+
+                <button type="submit" class="btn-cadastrar-adm">✨ Publicar Grupo Grátis</button>
+            </form>
         </div>
 
         <!-- SEÇÃO DE DENÚNCIAS -->
@@ -270,6 +340,59 @@ function renderizarGrupos(grupos) {
             <button class="btn-remover" onclick="removerGrupo('${g._id}')">🗑️ APAGAR</button>
         </div>
     `).join('');
+}
+
+// Função auxiliar para ler foto em Base64
+function converterArquivoParaBase64(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve("");
+            return;
+        }
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// Cadastrar direto sem Pix (Rota exclusiva do ADM)
+async function cadastrarDiretoAdm(e) {
+    e.preventDefault();
+    let nome = document.getElementById('admNome').value;
+    let link = document.getElementById('admLink').value;
+    let categoria = document.getElementById('admCat').value;
+    let descricao = document.getElementById('admDesc').value;
+    let fotoFile = document.getElementById('admFotoFile').files[0];
+
+    let fotoBase64 = "";
+    if (fotoFile) {
+        try {
+            fotoBase64 = await converterArquivoParaBase64(fotoFile);
+        } catch(err) {
+            console.error("Erro ao processar imagem:", err);
+        }
+    }
+
+    try {
+        let res = await fetch('/api/adm/cadastrar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva, nome, link, categoria, descricao, foto: fotoBase64 })
+        });
+        let data = await res.json();
+
+        if(data.sucesso) {
+            alert("✅ Grupo publicado com sucesso no site!");
+            document.getElementById('formCadAdm').reset();
+            carregarDados();
+        } else {
+            alert("❌ Erro: " + (data.erro || 'Erro desconhecido'));
+        }
+    } catch(err) {
+        console.error(err);
+        alert("Erro na requisição ao servidor.");
+    }
 }
 
 async function removerGrupo(id) {
