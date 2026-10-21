@@ -17,7 +17,7 @@ app = Flask(__name__)
 # ==============================================
 MONGO_URI = os.getenv("MONGO_URI")
 MP_TOKEN = os.getenv("MP_TOKEN")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD") # Corrigido para bater certo com o Render
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 if not MONGO_URI or not MP_TOKEN or not ADMIN_PASSWORD:
     print("⚠️ AVISO: As variáveis de ambiente MONGO_URI, MP_TOKEN ou ADMIN_PASSWORD não foram totalmente configuradas no Render!")
@@ -28,6 +28,7 @@ try:
     colecao_grupos = db["grupos_site"]
     colecao_denuncias = db["denuncias"]
     colecao_pagamentos = db["pagamentos_pendentes"]
+    colecao_config = db["configuracoes_site"]
     print("✅ Conectado ao MongoDB com sucesso!")
 except Exception as e:
     print(f"❌ Erro ao conectar no MongoDB: {e}")
@@ -66,6 +67,25 @@ def listar_grupos():
     for g in grupos:
         g["_id"] = str(g["_id"])
     return jsonify(grupos)
+
+@app.route('/api/site-dados', methods=['GET'])
+def site_dados():
+    grupos = list(colecao_grupos.find({}, {"_id": 1, "nome": 1, "link": 1, "categoria": 1, "descricao": 1, "foto": 1}))
+    for g in grupos:
+        g["_id"] = str(g["_id"])
+    
+    config_promo = colecao_config.find_one({"_id": "card_promo"}) or {
+        "ativo": True,
+        "foto": "https://i.postimg.cc/tg5hC1fJ/Screenshot-20261021-190017-(1).jpg",
+        "nome": "Entrar no Grupo 🔥",
+        "texto": "Clique no botão abaixo para garantir sua vaga!",
+        "link": "https://chat.whatsapp.com/",
+        "duracao": 5
+    }
+    if "_id" in config_promo:
+        del config_promo["_id"]
+
+    return jsonify({"grupos": grupos, "promo": config_promo})
 
 @app.route('/api/criar-pagamento', methods=['POST'])
 def criar_pagamento():
@@ -111,7 +131,7 @@ def criar_pagamento():
     }
     payload = {
         "transaction_amount": float(valor),
-        "description": f"Anúncio Grupo: {nome}",
+        "description": f"Destaque Grupo: {nome}",
         "payment_method_id": "pix",
         "payer": {"email": f"cliente_{int(time.time())}@flowsite.com"}
     }
@@ -181,7 +201,7 @@ def denunciar():
     return jsonify({"sucesso": True})
 
 # ==============================================
-# 🛡️ ROTAS DO PAINEL ADM (CORRIGIDAS PARA POST E ADMIN_PASSWORD)
+# 🛡️ ROTAS DO PAINEL ADM (POST E ADMIN_PASSWORD)
 # ==============================================
 
 @app.route('/api/adm/dados', methods=['POST'])
@@ -198,7 +218,21 @@ def adm_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
 
-    return jsonify({"denuncias": denuncias, "grupos": grupos})
+    config_promo = colecao_config.find_one({"_id": "card_promo"})
+
+    return jsonify({"denuncias": denuncias, "grupos": grupos, "promo": config_promo})
+
+@app.route('/api/adm/salvar-promo', methods=['POST'])
+def adm_salvar_promo():
+    data = request.json or {}
+    if data.get("senha") != ADMIN_PASSWORD:
+        return jsonify({"erro": "Senha incorreta!"}), 401
+    
+    promo_data = data.get("promo", {})
+    promo_data["_id"] = "card_promo"
+    
+    colecao_config.replace_one({"_id": "card_promo"}, promo_data, upsert=True)
+    return jsonify({"sucesso": True})
 
 @app.route('/api/adm/cadastrar', methods=['POST'])
 def adm_cadastrar_direto():
@@ -232,6 +266,8 @@ def adm_cadastrar_direto():
             foto_final = f"data:image/jpeg;base64,{compressed_base64}"
         except Exception as img_err:
             print(f"Erro ao processar imagem ADM: {img_err}")
+    elif foto_input:
+        foto_final = foto_input
 
     colecao_grupos.insert_one({
         "nome": nome,
