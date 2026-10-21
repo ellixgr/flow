@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Painel Administrativo - FLOW</title>
+    <style>
+        :root {
+            --primary: #25d366;
+            --danger: #ff4d4d;
+            --dark-bg: #0d1117;
+            --card-bg: #161b22;
+            --text: #f0f6fc;
+            --border: #30363d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px 12px 60px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        header h1 { font-size: 22px; color: var(--primary); font-weight: 800; }
+        header p { font-size: 13px; color: #8b949e; margin-top: 4px; }
+
+        /* Login Box */
+        .login-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        }
+        .login-box h2 { font-size: 18px; margin-bottom: 15px; color: var(--text); }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: #fff;
+            font-size: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+            outline: none;
+        }
+        .login-box button, .btn-acao {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .login-box button:hover { opacity: 0.9; }
+
+        /* Conteúdo do Painel */
+        #painelConteudo { display: none; }
+        
+        .secao-titulo {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 25px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            position: relative;
+        }
+
+        /* Card de Denúncias */
+        .card-denuncia {
+            border-left: 4px solid var(--danger);
+        }
+        .card-denuncia .motivo {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--danger);
+        }
+        .card-denuncia .meta {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        /* Card de Grupos */
+        .card-grupo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-grupo img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+        .grupo-info { flex: 1; overflow: hidden; }
+        .grupo-nome { font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .grupo-cat { font-size: 11px; color: #ffd700; margin-top: 2px; }
+        .grupo-link { font-size: 11px; color: #58a6ff; text-decoration: none; word-break: break-all; }
+
+        .btn-remover {
+            background: var(--danger);
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .vazio {
+            text-align: center;
+            color: #8b949e;
+            font-size: 13px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px dashed var(--border);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .btn-atualizar {
+            background: #21262d;
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>⚡ FLOW — Painel ADM</h1>
+        <p>Gestão de Grupos e Moderação</p>
+    </header>
+
+    <!-- BOX DE LOGIN -->
+    <div id="loginBox" class="login-box">
+        <h2>🔒 Acesso Restrito</h2>
+        <input type="password" id="senhaAdm" placeholder="Digite a Senha de Administrador">
+        <button onclick="autenticar()">Entrar no Painel</button>
+    </div>
+
+    <!-- CONTEÚDO DO PAINEL (EXIBIDO APÓS O LOGIN) -->
+    <div id="painelConteudo">
+        <div class="top-bar">
+            <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado</b></span>
+            <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Dados</button>
+        </div>
+
+        <!-- SEÇÃO DE DENÚNCIAS -->
+        <div class="secao-titulo">🚨 Denúncias Recebidas</div>
+        <div id="listaDenuncias">
+            <p class="vazio">Carregando denúncias...</p>
+        </div>
+
+        <!-- SEÇÃO DE GRUPOS ATIVOS -->
+        <div class="secao-titulo">📋 Grupos Ativos no Site</div>
+        <div id="listaGrupos">
+            <p class="vazio">Carregando grupos...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+let senhaSalva = "";
+
+async function autenticar() {
+    const senhaInput = document.getElementById('senhaAdm').value;
+    if(!senhaInput) {
+        alert("Por favor, digite a senha!");
+        return;
+    }
+    
+    senhaSalva = senhaInput;
+    await carregarDados();
+}
+
+async function carregarDados() {
+    try {
+        let res = await fetch(`/api/adm/dados?senha=${encodeURIComponent(senhaSalva)}`);
+        let data = await res.json();
+
+        if(res.status === 401 || data.erro) {
+            alert("❌ Senha incorreta!");
+            document.getElementById('loginBox').style.display = 'block';
+            document.getElementById('painelConteudo').style.display = 'none';
+            return;
+        }
+
+        // Sucesso na autenticação
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('painelConteudo').style.display = 'block';
+
+        renderizarDenuncias(data.denuncias || []);
+        renderizarGrupos(data.grupos || []);
+
+    } catch(e) {
+        console.error(e);
+        alert("Erro ao conectar ao servidor.");
+    }
+}
+
+function renderizarDenuncias(denuncias) {
+    const cont = document.getElementById('listaDenuncias');
+    if(denuncias.length === 0) {
+        cont.innerHTML = '<p class="vazio">Nenhuma denúncia pendente no momento. 🎉</p>';
+        return;
+    }
+
+    cont.innerHTML = denuncias.map(d => `
+        <div class="card card-denuncia">
+            <div class="motivo">⚠️ Motivo: ${d.motivo}</div>
+            <div class="meta">ID do Grupo: <code>${d.grupo_id || 'N/A'}</code></div>
+        </div>
+    `).join('');
+}
+
+function renderizarGrupos(grupos) {
+    const cont = document.getElementById('listaGrupos');
+    if(grupos.length === 0) {
+        cont.innerHTML = '<p class="vazio">Nenhum grupo cadastrado no banco de dados.</p>';
+        return;
+    }
+
+    cont.innerHTML = grupos.map(g => `
+        <div class="card card-grupo">
+            <img src="${g.foto || 'https://files.catbox.moe/0aa6f2.png'}" alt="Foto">
+            <div class="grupo-info">
+                <div class="grupo-nome">${g.nome}</div>
+                <div class="grupo-cat">${g.categoria}</div>
+                <a href="${g.link}" target="_blank" class="grupo-link">Abrir Link</a>
+            </div>
+            <button class="btn-remover" onclick="removerGrupo('${g._id}')">🗑️ APAGAR</button>
+        </div>
+    `).join('');
+}
+
+async function removerGrupo(id) {
+    if(!confirm("Tem certeza de que deseja apagar este grupo permanentemente do site?")) return;
+
+    try {
+        let res = await fetch('/api/adm/remover', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva, id: id })
+        });
+        let data = await res.json();
+
+        if(data.sucesso) {
+            alert("✅ Grupo removido com sucesso!");
+            carregarDados();
+        } else {
+            alert("❌ Erro ao remover grupo: " + (data.erro || 'Erro desconhecido'));
+        }
+    } catch(e) {
+        console.error(e);
+        alert("Erro na requisição ao servidor.");
+    }
+}
+</script>
+
+</body>
+</html>
