@@ -13,6 +13,16 @@ from PIL import Image
 app = Flask(__name__)
 
 # ==============================================
+# 🌐 CORREÇÃO DE CORS (PERMITE GITHUB E RENDER JUNTOS)
+# ==============================================
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
+    return response
+
+# ==============================================
 # 🔗 VARIÁVEIS DE AMBIENTE (PROTEGIDAS)
 # ==============================================
 MONGO_URI = os.getenv("MONGO_URI")
