@@ -56,8 +56,8 @@ PLANOS_SITE = {
 # ==============================================
 
 @app.route('/')
-def index():
-    with open("index.html", "r", encoding="utf-8") as f:
+def main():
+    with open("main.html", "r", encoding="utf-8") as f:
         return f.read()
 
 @app.route('/adm')
