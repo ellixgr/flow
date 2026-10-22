@@ -149,9 +149,9 @@
         }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
 
-        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO (CABEÇALHO AO LADO DO MENU) */
+        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO (Z-INDEX AJUSTADO PARA FICAR ABAIXO DO MENU) */
         .btn-enviar-topo-header {
-            position: fixed; top: 15px; right: 65px; z-index: 9999;
+            position: fixed; top: 15px; right: 65px; z-index: 1000;
             background: linear-gradient(135deg, #25d366, #128c7e);
             color: #000; font-weight: 800; font-size: 12px;
             padding: 10px 14px; border-radius: 12px; border: 2px solid var(--primary-green);
@@ -247,14 +247,16 @@
         .menu-btn { 
             position: fixed; top: 15px; right: 15px; font-size: 24px; 
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
-            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 9999; 
+            padding: 10px; border-radius: 12px; cursor: pointer; z-index: 1000; 
             border: 2px solid var(--primary-green); color: #000; 
         }
+        
+        /* 📱 MENU LATERAL COM Z-INDEX SUPERIOR PARA COBRIR TUDO CORRETAMENTE */
         .side-menu { 
             position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
             background: #ffffff; padding: 60px 20px; 
-            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 9998; 
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
+            transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); z-index: 99999; 
+            box-shadow: -5px 0 15px rgba(0,0,0,0.3); color: #000; overflow-y: auto; 
         }
         .side-menu.active { right: 0; }
         .side-menu a, .side-menu .btn-menu-item, .side-menu .dropdown-btn { 
@@ -286,24 +288,24 @@
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
-        /* 📚 ESTILOS DA SEÇÃO SEO / FAQ (PERGUNTAS E TUTORIAIS) */
+        /* 📚 SEÇÃO DE SEO / FAQ (PERGUNTAS E TUTORIAIS) - SEM BORDAS VERDES EXAGERADAS */
         .seo-section {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(37, 211, 102, 0.3);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 16px;
             padding: 16px;
             margin: 25px 0 15px 0;
         }
         .seo-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: #25d366;
-            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
         }
         .seo-item {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
             margin-bottom: 8px;
             overflow: hidden;
         }
@@ -326,7 +328,7 @@
             flex: 1;
         }
         .seta-icone {
-            font-size: 12px;
+            font-size: 11px;
             color: #25d366;
             transition: transform 0.3s ease;
             background: rgba(37, 211, 102, 0.1);
@@ -346,15 +348,15 @@
             overflow: hidden;
             transition: max-height 0.3s ease, padding 0.3s ease;
             padding: 0 14px;
-            color: #ccc;
+            color: #bbb;
             font-size: 12px;
             line-height: 1.5;
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(0, 0, 0, 0.2);
         }
         .seo-item.ativo .seo-answer {
             max-height: 350px;
             padding: 12px 14px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
         }
         .seo-answer ol {
             padding-left: 16px;
@@ -488,9 +490,9 @@
 
     <!-- 📚 SEÇÃO DE SEO / TUTORIAIS E DICAS DO WHATSAPP -->
     <div class="seo-section">
-        <div class="seo-title">💬 O que é o Grupos WhatsApp FLOW?</div>
+        <div class="seo-title">💬 Sobre o Grupos WhatsApp FLOW</div>
         <p style="font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
-            Nós somos o melhor site de links de grupos de WhatsApp ativos na internet. Aqui você encontra os melhores grupos para participar. Além disso, você também pode cadastrar seu grupo de WhatsApp enviando o link e destacando-o facilmente.
+            Bem-vindo ao seu portal prático de links de grupos de WhatsApp! Aqui você encontra comunidades ativas e organizadas por categorias, com facilidade para entrar diretamente nos links e ferramentas exclusivas para cadastrar ou destacar seu próprio grupo com aprovação automática via Pix.
         </p>
 
         <div class="seo-item" id="faq1">
