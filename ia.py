@@ -6,21 +6,15 @@ import base64
 import io
 import requests
 from flask import Flask, request, jsonify, render_template_string
+from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from PIL import Image
 
 app = Flask(__name__)
 
-# ==============================================
-# 🌐 CORREÇÃO DE CORS (PERMITE GITHUB E RENDER JUNTOS)
-# ==============================================
-@app.after_request
-def add_cors_headers(response):
-    response.headers['Access-Control-Allow-Origin'] = '*'
-    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
-    response.headers['Access-Control-Allow-Methods'] = 'GET,POST,OPTIONS'
-    return response
+# 🌐 CORREÇÃO DEFINITIVA DE CORS PARA O GITHUB E RENDER FUNCIONAREM JUNTOS
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ==============================================
 # 🔗 VARIÁVEIS DE AMBIENTE (PROTEGIDAS)
