@@ -4,17 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Grupos WhatsApp 💬 FLOW</title>
-    <script>
-        if (window.location.hostname.includes('github.io')) {
-            window.location.replace('https://flow-af3j.onrender.com/');
-        }
-    </script>
-
     <meta name="description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
     <meta name="keywords" content="grupos whatsapp, recargapay, dinheiro facil, conta que mais rende, ganhar dinheiro online, bonus de cadastro, renda extra">
-    <link rel="canonical" href="https://flow-af3j.onrender.com/" />
+    <link rel="canonical" href="https://ellixgr.github.io/flow/" />
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://flow-af3j.onrender.com/">
+    <meta property="og:url" content="https://ellixgr.github.io/flow/">
     <meta property="og:title" content="Grupos WhatsApp 💬 FLOW">
     <meta property="og:description" content="Encontre os melhores grupos de WhatsApp ativos. Links diretos e atualizados diariamente.">
     <meta property="og:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
@@ -23,7 +17,7 @@
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="600">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://flow-af3j.onrender.com/">
+    <meta name="twitter:url" content="https://ellixgr.github.io/flow/">
     <meta name="twitter:title" content="Grupos WhatsApp 💬 FLOW">
     <meta name="twitter:description" content="Encontre os melhores grupos de WhatsApp ativos.">
     <meta name="twitter:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
@@ -46,7 +40,8 @@
         
         .topo-titulo-area {text-align:center; margin-bottom:15px;}
         .nome-time {font-size:22px; font-weight:800; color:#25d366; margin-top:5px;}
-
+        
+        /* 🎬 CONTAINER DO VÍDEO COM SOMBREADO IMERSIVO */
         .video-container { 
             width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
             background: #000; margin: 20px 0;
@@ -81,6 +76,7 @@
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
+        /* 🛡️ CARDS BLINDADOS COM ESPAÇOS INDEPENDENTES */
         .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
         .card {
             background: var(--card-bg); 
@@ -753,6 +749,11 @@
 </div>
 
 <script>
+// 🌐 CONFIGURAÇÃO DA API COMPATÍVEL COM OS DOIS LINKS (GITHUB E RENDER)
+const API_BASE = window.location.hostname.includes('github.io') 
+    ? 'https://flow-af3j.onrender.com' 
+    : '';
+
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
 function toggleMenu(e) { 
@@ -854,7 +855,7 @@ function trocarCategoria(cat) {
 
 async function carregarDadosDoServidor() {
     try {
-        let res = await fetch('/api/site-dados');
+        let res = await fetch(API_BASE + '/api/site-dados');
         let data = await res.json();
         
         let grupos = data.grupos || [];
@@ -987,7 +988,7 @@ async function enviarFormulario(e) {
     mostrarAlerta("Gerando fatura Pix com o Mercado Pago...", "aviso");
 
     try {
-        let res = await fetch('/api/criar-pagamento', {
+        let res = await fetch(API_BASE + '/api/criar-pagamento', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({nome, link, categoria, descricao, foto: fotoBase64, plano_id})
@@ -1024,7 +1025,7 @@ function verificarStatusPagamento(payment_id) {
     let statusEl = document.getElementById('statusPix');
     checkInterval = setInterval(async () => {
         try {
-            let res = await fetch('/api/verificar-pagamento?id=' + payment_id);
+            let res = await fetch(API_BASE + '/api/verificar-pagamento?id=' + payment_id);
             let r = await res.json();
             if(r.status === 'approved') {
                 clearInterval(checkInterval);
@@ -1060,7 +1061,7 @@ async function enviarDenuncia() {
     let grupo_id = document.getElementById('denunciaGrupoId').value;
     let motivo = document.querySelector('input[name="motivo"]:checked').value;
     
-    await fetch('/api/denunciar', {
+    await fetch(API_BASE + '/api/denunciar', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({grupo_id, motivo})
