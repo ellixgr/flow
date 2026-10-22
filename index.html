@@ -286,6 +286,84 @@
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
+        /* 📚 ESTILOS DA SEÇÃO SEO / FAQ (PERGUNTAS E TUTORIAIS) */
+        .seo-section {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin: 25px 0 15px 0;
+        }
+        .seo-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #25d366;
+            margin-bottom: 12px;
+        }
+        .seo-item {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+        .seo-question {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .seo-question span {
+            flex: 1;
+        }
+        .seta-icone {
+            font-size: 12px;
+            color: #25d366;
+            transition: transform 0.3s ease;
+            background: rgba(37, 211, 102, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .seo-item.ativo .seta-icone {
+            transform: rotate(180deg);
+        }
+        .seo-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+            padding: 0 14px;
+            color: #ccc;
+            font-size: 12px;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .seo-item.ativo .seo-answer {
+            max-height: 350px;
+            padding: 12px 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .seo-answer ol {
+            padding-left: 16px;
+            margin-top: 6px;
+        }
+        .seo-answer li {
+            margin-bottom: 4px;
+        }
+
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
         
@@ -318,10 +396,7 @@
 
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
-    
-    <!-- FIX: Convertido para button para impedir abertura de anúncios popunder -->
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:white;">🚀 CADASTRAR MEU GRUPO</button>
-    
     <a href="https://wa.me/5521977231625" target="_blank" style="background:#128c7e; color:white;">📲 Falar com o Suporte</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
@@ -410,6 +485,70 @@
             <img src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Ganhe R$5 ao se cadastrar no Méliuz" class="anuncio-imagem">
         </a>
     </div>
+
+    <!-- 📚 SEÇÃO DE SEO / TUTORIAIS E DICAS DO WHATSAPP -->
+    <div class="seo-section">
+        <div class="seo-title">💬 O que é o Grupos WhatsApp FLOW?</div>
+        <p style="font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
+            Nós somos o melhor site de links de grupos de WhatsApp ativos na internet[span_3](start_span)[span_3](end_span). Aqui você encontra os melhores grupos para participar[span_4](start_span)[span_4](end_span). Além disso, você também pode cadastrar seu grupo de WhatsApp enviando o link e destacando-o facilmente[span_5](start_span)[span_5](end_span).
+        </p>
+
+        <div class="seo-item" id="faq1">
+            <button class="seo-question" onclick="toggleFaq('faq1')">
+                <span>Como criar um grupo de WhatsApp?</span>
+                <div class="seta-icone">▼</div>
+            </button>
+            <div class="seo-answer">
+                Criar um grupo é muito fácil e rápido, veja só[span_6](start_span)[span_6](end_span):
+                <ol>
+                    <li>Abra seu WhatsApp e clique na aba <b>Conversas</b>[span_7](start_span)[span_7](end_span).</li>
+                    <li>No canto superior direito, clique em <b>Novo grupo</b>[span_8](start_span)[span_8](end_span).</li>
+                    <li>Selecione os participantes iniciais e clique em avançar[span_9](start_span)[span_9](end_span).</li>
+                    <li>Digite o nome do grupo, adicione uma foto e clique em <b>Criar</b>[span_10](start_span)[span_10](end_span).</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="seo-item" id="faq2">
+            <button class="seo-question" onclick="toggleFaq('faq2')">
+                <span>Como encontrar um grupo de WhatsApp?</span>
+                <div class="seta-icone">▼</div>
+            </button>
+            <div class="seo-answer">
+                Para encontrar grupos do WhatsApp, navegue pelas nossas categorias no topo do site (Amizade, Namoro, Zoeira, etc.)[span_11](start_span)[span_11](end_span), escolha o grupo de seu interesse e clique em "Entrar".
+            </div>
+        </div>
+
+        <div class="seo-item" id="faq3">
+            <button class="seo-question" onclick="toggleFaq('faq3')">
+                <span>Como entrar em um grupo de WhatsApp?</span>
+                <div class="seta-icone">▼</div>
+            </button>
+            <div class="seo-answer">
+                Basta escolher qualquer grupo ativo em nossa lista, clicar no botão verde <b>👉 Entrar</b>[span_12](start_span)[span_12](end_span). O link abrirá diretamente o convite oficial do WhatsApp no seu celular ou computador[span_13](start_span)[span_13](end_span).
+            </div>
+        </div>
+
+        <div class="seo-item" id="faq4">
+            <button class="seo-question" onclick="toggleFaq('faq4')">
+                <span>Como excluir um grupo de WhatsApp?</span>
+                <div class="seta-icone">▼</div>
+            </button>
+            <div class="seo-answer">
+                Para excluir um grupo, você precisa ser o administrador[span_14](start_span)[span_14](end_span). Remova todos os participantes um a um, depois saia do grupo e clique em <b>Excluir grupo</b>[span_15](start_span)[span_15](end_span).
+            </div>
+        </div>
+
+        <div class="seo-item" id="faq5">
+            <button class="seo-question" onclick="toggleFaq('faq5')">
+                <span>Quantas pessoas cabem em um grupo de WhatsApp?</span>
+                <div class="seta-icone">▼</div>
+            </button>
+            <div class="seo-answer">
+                Atualmente, um grupo de WhatsApp padrão tem capacidade para até **1.024 pessoas**[span_16](start_span)[span_16](end_span).
+            </div>
+        </div>
+    </div>
 </main>
 
 <!-- 🌟 CARD FLUTUANTE VINDO DA DIREITA -->
@@ -440,7 +579,6 @@
     <div class="modal-content">
         <h3>📝 Cadastrar Grupo</h3>
         
-        <!-- ÁREA DE PREVIEW EM TEMPO REAL -->
         <label style="color: #25d366; margin-bottom: 4px;">👁️ Pré-visualização ao vivo:</label>
         <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
             <img id="prevFoto" src="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg" alt="Preview Foto">
@@ -576,6 +714,21 @@ function executarCadastroMenu(e) {
     abrirFormulario();
 }
 
+/* 📚 FUNÇÃO PARA ABRIR/FECHAR AS PERGUNTAS FREQUENTES (FAQ / SEO) */
+function toggleFaq(id) {
+    const item = document.getElementById(id);
+    const estaAtivo = item.classList.contains('ativo');
+    
+    // Fecha todos os outros itens antes de abrir o atual (efeito sanfona limpo)
+    document.querySelectorAll('.seo-item').forEach(el => {
+        el.classList.remove('ativo');
+    });
+
+    if(!estaAtivo) {
+        item.classList.add('ativo');
+    }
+}
+
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 
@@ -646,7 +799,6 @@ async function carregarDadosDoServidor() {
         let res = await fetch('/api/site-dados');
         let data = await res.json();
         
-        // Carregar Grupos
         let grupos = data.grupos || [];
         const lista = document.getElementById('lista-grupos');
         let filtrados = categoriaAtual === 'Todos' ? grupos : grupos.filter(g => g.categoria === categoriaAtual);
@@ -670,7 +822,6 @@ async function carregarDadosDoServidor() {
             `).join('');
         }
 
-        // Carregar Card Flutuante de Destaque
         let p = data.promo;
         if(p && p.ativo) {
             document.getElementById('promoFoto').src = p.foto;
