@@ -36,11 +36,6 @@
             color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column;
             padding-bottom: 100px; padding-top: 70px;
         }
-        body::before {
-            content:""; position:fixed; top:0; left:0; width:100%; height:100%;
-            background:url('https://www.transparenttextures.com/patterns/stardust.png');
-            opacity:0.4; z-index:-1; pointer-events:none;
-        }
         main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
         
         .topo-titulo-area {text-align:center; margin-bottom:15px;}
@@ -66,7 +61,7 @@
             display: flex; justify-content: center; align-items: center; margin: 15px 0; width: 100%;
         }
         
-        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:transparent; z-index:10; padding-top:8px;}
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
@@ -143,11 +138,14 @@
         }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
 
-        .btn-enviar-grupo-top {
-            display:block; width:100%; background:linear-gradient(135deg, #25d366, #128c7e); 
-            color:#000; font-weight:bold; padding:14px; border-radius:15px; text-align:center; 
-            text-decoration:none; margin:15px 0; font-size:16px; 
-            box-shadow:0 0 15px rgba(37,211,102,0.4); cursor:pointer; border:none;
+        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO (CABEÇALHO AO LADO DO MENU) */
+        .btn-enviar-topo-header {
+            position: fixed; top: 15px; right: 65px; z-index: 9999;
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: #000; font-weight: 800; font-size: 12px;
+            padding: 10px 14px; border-radius: 12px; border: 2px solid var(--primary-green);
+            cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px;
+            box-shadow: 0 4px 15px rgba(37,211,102,0.4); white-space: nowrap;
         }
 
         /* 🌟 CARD FLUTUANTE MENOR, VINDO DA DIREITA, SEM BORDA VERDE */
@@ -302,6 +300,9 @@
 </head>
 <body>
 
+<!-- BOTÃO DE ENVIAR GRUPO NO CABEÇALHO (AO LADO DO MENU) -->
+<button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
+
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 
 <div class="side-menu" id="sideMenu">
@@ -346,9 +347,6 @@
         </video>
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
-
-    <!-- BOTÃO PARA CADASTRAR GRUPO -->
-    <button class="btn-enviar-grupo-top" onclick="abrirFormulario()">🚀ENVIAR MEU GRUPO</button>
 
     <!-- ANÚNCIO DE SCRIPT -->
     <div class="ad-script-container">
