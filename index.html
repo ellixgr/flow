@@ -149,7 +149,7 @@
         }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
 
-        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO (Z-INDEX AJUSTADO PARA FICAR ABAIXO DO MENU) */
+        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO */
         .btn-enviar-topo-header {
             position: fixed; top: 15px; right: 65px; z-index: 1000;
             background: linear-gradient(135deg, #25d366, #128c7e);
@@ -256,7 +256,15 @@
             border: 2px solid var(--primary-green); color: #000; 
         }
         
-        /* 📱 MENU LATERAL COM Z-INDEX SUPERIOR PARA COBRIR TUDO CORRETAMENTE */
+        /* 📱 OVERLAY PARA BLOQUEAR O FUNDO QUANDO O MENU ESTIVER ABERTO */
+        .menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+            z-index: 99998; opacity: 0; visibility: hidden; transition: 0.3s ease;
+        }
+        .menu-overlay.active { opacity: 1; visibility: visible; }
+
+        /* 📱 MENU LATERAL COM Z-INDEX SUPERIOR */
         .side-menu { 
             position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
             background: #ffffff; padding: 60px 20px; 
@@ -277,7 +285,7 @@
             justify-content: center; gap: 8px; transition: background 0.2s ease;
         }
         .btn-fechar-menu:hover { background: #e63939; }
-        .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; }
+        .mini-img { width: 100%; max-width: 200px; height: auto; border-radius: 8px; margin-top: 6px; }
         .dropdown-content {
             max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
             background: #f9f9f9; border-radius: 12px; margin-bottom: 18px; padding: 0 14px;
@@ -293,7 +301,7 @@
             color: white !important; padding: 10px !important; font-size: 14px !important; font-weight: bold;
         }
         
-        /* 📚 SEÇÃO DE SEO / FAQ (PERGUNTAS E TUTORIAIS) */
+        /* 📚 SEÇÃO DE SEO / FAQ */
         .seo-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -384,6 +392,28 @@
         .modal-content input, .modal-content select, .modal-content textarea {width:100%; padding:12px; margin:6px 0 12px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; font-size:14px; outline:none;}
         .modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus {border-color:#25d366;}
         
+        /* Estilização moderna e corrigida para os rádios de denúncia */
+        .denuncia-opcao {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 8px;
+            cursor: pointer;
+            color: #fff;
+            font-size: 14px;
+        }
+        .denuncia-opcao input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #25d366;
+            cursor: pointer;
+            margin: 0;
+        }
+
         .btn-modal-acao {width:100%; padding:14px; background:#25d366; color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:15px; transition:0.2s;}
         .btn-modal-acao:hover { opacity: 0.9; }
         .btn-modal-cancelar {width:100%; padding:12px; background:#21262d; color:#f0f6fc; border:1px solid #30363d; border-radius:12px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
@@ -400,6 +430,9 @@
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
 
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
+
+<!-- OVERLAY PARA BLOQUEAR O FUNDO DO SITE COM MENU ABERTO -->
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu(event)"></div>
 
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
@@ -451,7 +484,7 @@
         <p class="vazio">Carregando grupos do servidor...</p>
     </div>
 
-    <!-- 🎬 CONTAINER DO VÍDEO (MOVIDO PARA BAIXO DA LISTA DE GRUPOS) -->
+    <!-- 🎬 CONTAINER DO VÍDEO -->
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
         <video id="meuVideo" autoplay loop muted playsinline preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
@@ -664,14 +697,23 @@
     </div>
 </div>
 
-<!-- MODAL DENÚNCIA -->
+<!-- MODAL DENÚNCIA CORRIGIDO E MODERNIZADO -->
 <div id="modalDenuncia" class="modal">
     <div class="modal-content">
         <h3>🚨 Denunciar Grupo</h3>
         <input type="hidden" id="denunciaGrupoId">
-        <label><input type="radio" name="motivo" value="Conteúdo adulto / Pornografia" checked> Conteúdo adulto / Pornografia</label><br><br>
-        <label><input type="radio" name="motivo" value="Redirecionamento malicioso"> Redirecionamento malicioso / Golpe</label><br><br>
-        <button class="btn-modal-acao" style="background:#da3633; color:#fff;" onclick="enviarDenuncia()">Enviar Denúncia</button>
+        
+        <label class="denuncia-opcao">
+            <input type="radio" name="motivo" value="Conteúdo adulto / Pornografia" checked>
+            Conteúdo adulto / Pornografia
+        </label>
+        
+        <label class="denuncia-opcao">
+            <input type="radio" name="motivo" value="Redirecionamento malicioso">
+            Redirecionamento malicioso / Golpe
+        </label>
+        
+        <button class="btn-modal-acao" style="background:#da3633; color:#fff; margin-top: 20px;" onclick="enviarDenuncia()">Enviar Denúncia</button>
         <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalDenuncia')">Cancelar</button>
     </div>
 </div>
@@ -711,6 +753,7 @@ function toggleMenu(e) {
         e.stopPropagation();
     } 
     document.getElementById('sideMenu').classList.toggle('active'); 
+    document.getElementById('menuOverlay').classList.toggle('active');
 }
 
 function executarCadastroMenu(e) {
