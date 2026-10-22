@@ -52,13 +52,27 @@ PLANOS_SITE = {
 }
 
 # ==============================================
+# 🔍 ROTA DE VERIFICAÇÃO DO GOOGLE SEARCH CONSOLE
+# ==============================================
+@app.route('/google_verification.html')
+def google_verification():
+    return '<meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />'
+
+# ==============================================
 # 🌐 ROTAS DO SITE E API
 # ==============================================
 
 @app.route('/')
 def main():
     with open("main.html", "r", encoding="utf-8") as f:
-        return f.read()
+        html_content = f.read()
+    
+    # Injeta automaticamente a tag de verificação do Google no <head> da página principal
+    meta_google = '<meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />'
+    if "<head>" in html_content:
+        html_content = html_content.replace("<head>", f"<head>\n    {meta_google}")
+        
+    return html_content
 
 @app.route('/adm')
 def adm_panel():
