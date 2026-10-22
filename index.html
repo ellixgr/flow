@@ -257,11 +257,11 @@
             box-shadow: -5px 0 15px rgba(0,0,0,0.1); color: #000; overflow-y: auto; 
         }
         .side-menu.active { right: 0; }
-        .side-menu a, .side-menu .dropdown-btn { 
+        .side-menu a, .side-menu .btn-menu-item, .side-menu .dropdown-btn { 
             display: flex; flex-direction: column; align-items: center; text-align: center;
             text-decoration: none; color: #000; padding: 14px; margin-bottom: 18px; 
             border-radius: 12px; background: #f0f0f0; font-weight: 600; gap: 6px;
-            border: none; width: 100%; font-size: inherit; cursor: pointer;
+            border: none; width: 100%; font-size: 14px; cursor: pointer;
         }
         .btn-fechar-menu {
             width: 100%; padding: 12px; margin-bottom: 20px; background: #ff4d4d;
@@ -311,14 +311,17 @@
 </head>
 <body>
 
-<!-- BOTÃO DE ENVIAR GRUPO NO CABEÇALHO (AO LADO DO MENU) -->
+<!-- BOTÃO DE ENVIAR GRUPO NO CABEÇALHO -->
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
 
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
-    <a href="#" onclick="toggleMenu(event); abrirFormulario();" style="background:var(--primary-green); color:white;">🚀 CADASTRAR MEU GRUPO</a>
+    
+    <!-- FIX: Convertido para button para impedir abertura de anúncios popunder -->
+    <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:white;">🚀 CADASTRAR MEU GRUPO</button>
+    
     <a href="https://wa.me/5521977231625" target="_blank" style="background:#128c7e; color:white;">📲 Falar com o Suporte</a>
     <a href="https://t.me/UmCliqueBot?start=8864014312">🇺🇸 Números Virtuais 🇧🇷</a>
     <a href="https://br.shp.ee/5q1d37e?smtt=0.0.9" target="_blank" rel="noopener">🛍️ Loja Acessórios</a>
@@ -409,7 +412,7 @@
     </div>
 </main>
 
-<!-- 🌟 CARD FLUTUANTE VINDO DA DIREITA, SEM BORDA VERDE E SEM A PALAVRA LIBERADO -->
+<!-- 🌟 CARD FLUTUANTE VINDO DA DIREITA -->
 <div id="cardFlutuantePromo">
     <img id="promoFoto" class="promo-bg-img" src="" alt="Destaque">
     <div class="promo-overlay"></div>
@@ -557,8 +560,20 @@
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
 
 function toggleMenu(e) { 
-    if(e) e.stopPropagation(); 
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    } 
     document.getElementById('sideMenu').classList.toggle('active'); 
+}
+
+function executarCadastroMenu(e) {
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    toggleMenu();
+    abrirFormulario();
 }
 
 const video = document.getElementById('meuVideo');
