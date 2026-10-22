@@ -44,7 +44,7 @@
         /* 🎬 CONTAINER DO VÍDEO COM SOMBREADO IMERSIVO */
         .video-container { 
             width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
-            background: #000; margin-bottom: 20px;
+            background: #000; margin: 20px 0;
             box-shadow: 0 0 40px 15px rgba(0, 0, 0, 0.95), 0 0 25px rgba(37, 211, 102, 0.25);
         }
         .video-container::after {
@@ -436,6 +436,22 @@
         <p style="font-size:13px; color:#ccc; margin:6px 0 15px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
     
+    <!-- 📂 ABAS DE CATEGORIAS -->
+    <div class="abas" id="abas">
+        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
+        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
+        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
+        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
+        <div class="aba" data-cat="Figurinhas" onclick="trocarCategoria('Figurinhas')">🖼️ Figurinhas</div>
+        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
+    </div>
+
+    <!-- 📋 LISTA DINÂMICA DE GRUPOS -->
+    <div class="lista" id="lista-grupos">
+        <p class="vazio">Carregando grupos do servidor...</p>
+    </div>
+
+    <!-- 🎬 CONTAINER DO VÍDEO (MOVIDO PARA BAIXO DA LISTA DE GRUPOS) -->
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
         <video id="meuVideo" autoplay loop muted playsinline preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
@@ -456,21 +472,6 @@
           };
         </script>
         <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
-    </div>
-
-    <!-- 📂 ABAS DE CATEGORIAS -->
-    <div class="abas" id="abas">
-        <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
-        <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
-        <div class="aba" data-cat="Namoro" onclick="trocarCategoria('Namoro')">❤️ Namoro</div>
-        <div class="aba" data-cat="Zoeira" onclick="trocarCategoria('Zoeira')">😂 Zoeira</div>
-        <div class="aba" data-cat="Figurinhas" onclick="trocarCategoria('Figurinhas')">🖼️ Figurinhas</div>
-        <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
-    </div>
-
-    <!-- 📋 LISTA DINÂMICA DE GRUPOS -->
-    <div class="lista" id="lista-grupos">
-        <p class="vazio">Carregando grupos do servidor...</p>
     </div>
 
     <!-- 💳 ANÚNCIO RECARGAPAY GIGANTE (SEM BORDA) -->
