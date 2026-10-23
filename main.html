@@ -610,7 +610,7 @@
     <div class="promo-content-box">
         <div class="promo-titulo" id="promoNome">Destaque</div>
         <div class="promo-texto" id="promoTexto">Confira agora</div>
-        <a id="promoBtnEntrar" href="#" target="_blank" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
+        <a id="promoBtnEntrar" href="#" onclick="abrirAnuncioEGrupo(event, this.href)" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
     </div>
 </div>
 
@@ -775,6 +775,21 @@ function executarCadastroMenu(e) {
     abrirFormulario();
 }
 
+/* 🚀 FUNÇÃO DE CLIQUE DUPLO: ABRE O GRUPO NA ABA DA FRENTE E O ADSTERRA NA ABA DE TRÁS */
+function abrirAnuncioEGrupo(event, linkGrupo) {
+    event.preventDefault();
+    const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+
+    // 1. Abre a nova aba indo direto para o Grupo do WhatsApp e dá o foco nela
+    const novaAba = window.open(linkGrupo, '_blank');
+    if (novaAba) {
+        novaAba.focus();
+    }
+
+    // 2. Transforma a aba atual (onde o usuário estava) no anúncio do Adsterra (trás)
+    window.location.href = linkAnuncio;
+}
+
 /* 📚 FUNÇÃO PARA ABRIR/FECHAR AS PERGUNTAS FREQUENTES (FAQ / SEO) */
 function toggleFaq(id) {
     const item = document.getElementById(id);
@@ -876,7 +891,7 @@ async function carregarDadosDoServidor() {
                     </div>
                     <div class="card-right-area">
                         <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                        <a href="${g.link}" target="_blank" class="btn-entrar">👉 Entrar</a>
+                        <a href="${g.link}" onclick="abrirAnuncioEGrupo(event, '${g.link}')" class="btn-entrar">👉 Entrar</a>
                     </div>
                 </div>
             `).join('');
