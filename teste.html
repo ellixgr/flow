@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de Clique Duplo com Anúncio</title>
+    <title>Teste de Clique Duplo - Foco no Site</title>
     <style>
         body {
             background-color: #000;
@@ -65,26 +65,26 @@
 
     <div class="container">
         <h2>Página de Teste 🚀</h2>
-        <p>Clique no botão abaixo para testar a abertura do anúncio e o redirecionamento simultâneo.</p>
+        <p>Clique no botão para abrir o site principal no foco e o anúncio em segundo plano.</p>
 
-        <button class="btn-acao" onclick="executarRedirecionamentoDuplo()">
+        <button class="btn-acao" onclick="executarPopunderInverso()">
             👉 ENTRAR NO SITE
         </button>
     </div>
 
     <script>
-        function executarRedirecionamentoDuplo() {
-            // 1. Link do Anúncio do Adsterra (Abre em uma nova aba)
+        function executarPopunderInverso() {
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-
-            // 2. Link do seu site no Render (Redireciona a aba principal)
             const linkDestino = "https://flow-af3j.onrender.com/";
 
-            // Dispara a abertura da aba do anúncio
-            window.open(linkAnuncio, '_blank');
+            // 1. Abre o seu site do Render em uma nova aba e dá o FOCO nela
+            const novaAba = window.open(linkDestino, '_blank');
+            if (novaAba) {
+                novaAba.focus();
+            }
 
-            // Redireciona a página atual para o seu site
-            window.location.href = linkDestino;
+            // 2. Transforma a aba antiga (onde o usuário clicou) no anúncio do Adsterra
+            window.location.href = linkAnuncio;
         }
     </script>
 
