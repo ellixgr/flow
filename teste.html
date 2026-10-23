@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Clique Duplo com Anúncio</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            box-shadow: 0 0 25px rgba(37, 211, 102, 0.2);
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: #25d366;
+        }
+
+        p {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 25px;
+        }
+
+        .btn-acao {
+            background: linear-gradient(135deg, #25d366, #128c7e);
+            color: #000;
+            font-weight: 800;
+            font-size: 16px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-acao:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Página de Teste 🚀</h2>
+        <p>Clique no botão abaixo para testar a abertura do anúncio e o redirecionamento simultâneo.</p>
+
+        <button class="btn-acao" onclick="executarRedirecionamentoDuplo()">
+            👉 ENTRAR NO SITE
+        </button>
+    </div>
+
+    <script>
+        function executarRedirecionamentoDuplo() {
+            // 1. Link do Anúncio do Adsterra (Abre em uma nova aba)
+            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+
+            // 2. Link do seu site no Render (Redireciona a aba principal)
+            const linkDestino = "https://flow-af3j.onrender.com/";
+
+            // Dispara a abertura da aba do anúncio
+            window.open(linkAnuncio, '_blank');
+
+            // Redireciona a página atual para o seu site
+            window.location.href = linkDestino;
+        }
+    </script>
+
+</body>
+</html>
