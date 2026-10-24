@@ -39,8 +39,25 @@
         }
         main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
         
-        .topo-titulo-area {text-align:center; margin-bottom:15px;}
-        .nome-time {font-size:22px; font-weight:800; color:#25d366; margin-top:5px;}
+        /* 🎨 CABEÇOTE ORGANIZADO E ARRUMADO */
+        .topo-titulo-area {
+            text-align: center; 
+            margin-bottom: 12px;
+            padding: 0 5px;
+        }
+        .nome-time {
+            font-size: 24px; 
+            font-weight: 800; 
+            color: #25d366; 
+            margin-top: 2px;
+            letter-spacing: 0.5px;
+        }
+        .topo-descricao {
+            font-size: 13px; 
+            color: #bbb; 
+            margin-top: 6px; 
+            line-height: 1.4;
+        }
         
         /* 🎬 CONTAINER DO VÍDEO COM SOMBREADO IMERSIVO */
         .video-container { 
@@ -69,11 +86,16 @@
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
 
+        /* 🎯 ANÚNCIO NO TOPO (ACIMA DAS ABAS) */
         .ad-script-container {
-            display: flex; justify-content: center; align-items: center; margin: 15px 0; width: 100%;
+            display: flex; justify-content: center; align-items: center; 
+            margin: 10px 0 15px 0; width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            padding: 8px 0;
         }
         
-        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 10px 0 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
@@ -471,9 +493,23 @@
 <main>
     <div class="topo-titulo-area">
         <div class="nome-time">Team Flow</div>
-        <p style="font-size:13px; color:#ccc; margin:6px 0 15px; line-height:1.5;">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
+        <p class="topo-descricao">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
     
+    <!-- 🎯 ANÚNCIO DE SCRIPT REPOSICIONADO NO TOPO (ACIMA DAS ABAS) -->
+    <div class="ad-script-container">
+        <script type="text/javascript">
+          atOptions = {
+            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
+    </div>
+
     <!-- 📂 ABAS DE CATEGORIAS -->
     <div class="abas" id="abas">
         <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
@@ -496,20 +532,6 @@
             <source src="https://github.com/ellixgr/flow/raw/main/1629e9d243f25775400ef63d3c93648b.mp4" type="video/mp4">
         </video>
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
-    </div>
-
-    <!-- ANÚNCIO DE SCRIPT -->
-    <div class="ad-script-container">
-        <script type="text/javascript">
-          atOptions = {
-            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
 
     <!-- 💳 ANÚNCIO RECARGAPAY GIGANTE (SEM BORDA) -->
@@ -702,7 +724,7 @@
     </div>
 </div>
 
-<!-- MODAL DENÚNCIA CORRIGIDO E MODERNIZADO -->
+<!-- MODAL DENÚNCIA COM 3 OPÇÕES (INCLUINDO LINK EXPIRADO) -->
 <div id="modalDenuncia" class="modal">
     <div class="modal-content">
         <h3>🚨 Denunciar Grupo</h3>
@@ -716,6 +738,11 @@
         <label class="denuncia-opcao">
             <input type="radio" name="motivo" value="Redirecionamento malicioso">
             Redirecionamento malicioso / Golpe
+        </label>
+
+        <label class="denuncia-opcao">
+            <input type="radio" name="motivo" value="Link expirado / Não funciona">
+            Link expirado / Não funciona
         </label>
         
         <button class="btn-modal-acao" style="background:#da3633; color:#fff; margin-top: 20px;" onclick="enviarDenuncia()">Enviar Denúncia</button>
