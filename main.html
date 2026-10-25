@@ -616,7 +616,7 @@
                 <option value="9">6 Meses - R$ 100,00</option>
                 <option value="10">1 Ano (VIP) - R$ 150,00</option>
             </select>
-            <button type="submit" class="btn-modal-acao">💳 GERAR PIX PARA APROVAÇÃO</button>
+            <button type="submit" class="btn-modal-acao">ENVIAR GRUPO</button>
             <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalForm')">Cancelar</button>
         </form>
     </div>
@@ -629,6 +629,13 @@
         <button class="btn-modal-acao" onclick="copiarPix()">📋 Copiar Código Pix</button>
         <p id="statusPix" style="color:#f0883e; margin-top:15px; font-weight:bold; font-size:14px;">Aguardando pagamento no banco...</p>
         <button type="button" class="btn-modal-cancelar" style="background:#da3633; border:none; color:#fff;" onclick="cancelarPix()">❌ Cancelar / Fechar</button>
+    </div>
+</div>
+
+<div id="modalLoading" class="modal">
+    <div class="modal-content" style="text-align:center; max-width:300px; padding:30px;">
+        <div style="font-size:40px; margin-bottom:15px;">⏳</div>
+        <div id="loadingMsg" style="font-size:15px; font-weight:bold; color:#f0f6fc;">Gerando código Pix...</div>
     </div>
 </div>
 <div id="customAlertModal" class="modal">
@@ -887,7 +894,11 @@ async function enviarFormulario(e) {
             console.error("Erro ao processar imagem:", err);
         }
     }
-    mostrarAlerta("Gerando fatura Pix com o Mercado Pago...", "aviso");
+ 
+    fecharModal('modalForm');
+    document.getElementById('loadingMsg').textContent = "Gerando código Pix...";
+    document.getElementById('modalLoading').style.display = 'flex';
+
     try {
         let res = await fetch(API_BASE + '/api/criar-pagamento', {
             method: 'POST',
@@ -895,20 +906,23 @@ async function enviarFormulario(e) {
             body: JSON.stringify({nome, link, categoria, descricao, foto: fotoBase64, plano_id})
         });
         let r = await res.json();
-        fecharCustomAlert();
+       
+        document.getElementById('modalLoading').style.display = 'none';
+
         if(r.erro) {
             mostrarAlerta(r.erro, 'erro');
             return;
         }
-        fecharModal('modalForm');
+
         document.getElementById('pixCode').value = r.pix_code;
         document.getElementById('modalPix').style.display = 'flex';
         verificarStatusPagamento(r.payment_id);
     } catch(err) {
-        fecharCustomAlert();
+        document.getElementById('modalLoading').style.display = 'none';
         mostrarAlerta("Erro de conexão ao processar o pagamento.", 'erro');
     }
 }
+
 function copiarPix() {
     let copyText = document.getElementById("pixCode");
     copyText.select();
