@@ -24,7 +24,6 @@
     <meta name="twitter:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
     <meta name="robots" content="index, follow">
     <script>if (top !== self) {top.location = self.location;}</script>
-    
     <style>
         :root { 
             --primary-green: #25d366; --dark-green: #128c7e;
@@ -38,8 +37,6 @@
             padding-bottom: 100px; padding-top: 70px;
         }
         main {max-width:420px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
-        
-        /* 🎨 CABEÇOTE ORGANIZADO E ARRUMADO */
         .topo-titulo-area {
             text-align: center; 
             margin-bottom: 12px;
@@ -58,8 +55,6 @@
             margin-top: 6px; 
             line-height: 1.4;
         }
-        
-        /* 🎬 CONTAINER DO VÍDEO COM SOMBREADO IMERSIVO */
         .video-container { 
             width: 100%; border-radius: 20px; overflow: hidden; position: relative; 
             background: #000; margin: 20px 0;
@@ -85,8 +80,6 @@
             position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
-
-        /* 🎯 ANÚNCIO NO TOPO (ACIMA DAS ABAS) */
         .ad-script-container {
             display: flex; justify-content: center; align-items: center; 
             margin: 10px 0 15px 0; width: 100%;
@@ -94,12 +87,9 @@
             border-radius: 12px;
             padding: 8px 0;
         }
-        
         .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 10px 0 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
-        
-        /* 🛡️ CARDS BLINDADOS COM ESPAÇOS INDEPENDENTES */
         .lista {display:flex; flex-direction:column; gap:12px; margin-bottom: 20px;}
         .card {
             background: var(--card-bg); 
@@ -145,7 +135,6 @@
             overflow: hidden; 
             text-overflow: ellipsis; 
         }
-        
         .card-right-area {
             display: flex;
             flex-direction: column;
@@ -171,8 +160,6 @@
             line-height: 1;
         }
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px;}
-
-        /* 🚀 BOTÃO DE ENVIAR GRUPO NO TOPO */
         .btn-enviar-topo-header {
             position: fixed; top: 15px; right: 65px; z-index: 1000;
             background: linear-gradient(135deg, #25d366, #128c7e);
@@ -181,8 +168,6 @@
             cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px;
             box-shadow: 0 4px 15px rgba(37,211,102,0.4); white-space: nowrap;
         }
-
-        /* 🌟 CARD FLUTUANTE MENOR, VINDO DA DIREITA, SEM BORDA VERDE */
         #cardFlutuantePromo {
             position: fixed; bottom: 75px; right: 15px; z-index: 9999;
             width: 250px; height: 300px;
@@ -197,18 +182,15 @@
             from { transform: translateX(100px); opacity: 0; } 
             to { transform: translateX(0); opacity: 1; } 
         }
-        
         .promo-bg-img {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: 1; filter: brightness(1);
         }
-
         .promo-overlay {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
             background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0) 100%);
             z-index: 2;
         }
-
         .promo-header { 
             position: absolute; top: 10px; left: 10px; right: 10px;
             display: flex; justify-content: space-between; align-items: center; z-index: 5; 
@@ -216,7 +198,6 @@
         .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,204,0,0.3); }
         .promo-fechar { background: rgba(48,54,61,0.8); color: #8b949e; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 11px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .promo-fechar.liberado { background: #da3633; color: #fff; cursor: pointer; }
-        
         .promo-content-box {
             position: absolute; bottom: 12px; left: 12px; right: 12px;
             z-index: 5; display: flex; flex-direction: column; gap: 5px; text-align: center;
@@ -231,7 +212,6 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.9);
             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
         }
-        
         .btn-pulsante-card {
             display: block; width: 100%; margin-top: 3px; padding: 8px;
             background: transparent; color: #fff; font-weight: bold; font-size: 12px;
@@ -242,8 +222,6 @@
             animation: pulsarCard 1.5s infinite;
         }
         @keyframes pulsarCard { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37,211,102,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
-
-        /* 💳 ANÚNCIO RECARGAPAY SEM BORDA VERDE */
         .anuncio-box-gigante {
             background: rgba(255, 255, 255, 0.03);
             border: none;
@@ -271,23 +249,18 @@
             50% { transform: scale(1.02); }
             100% { transform: scale(1); }
         }
-        
         .menu-btn { 
             position: fixed; top: 15px; right: 15px; font-size: 24px; 
             background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); 
             padding: 10px; border-radius: 12px; cursor: pointer; z-index: 1000; 
             border: 2px solid var(--primary-green); color: #000; 
         }
-        
-        /* 📱 OVERLAY PARA BLOQUEAR O FUNDO QUANDO O MENU ESTIVER ABERTO */
         .menu-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
             z-index: 99998; opacity: 0; visibility: hidden; transition: 0.3s ease;
         }
         .menu-overlay.active { opacity: 1; visibility: visible; }
-
-        /* 📱 MENU LATERAL COM FUNDO PRETO E TEXTOS BRANCOS/CLAROS */
         .side-menu { 
             position: fixed; top: 0; right: -300px; width: 280px; height: 100%; 
             background: #000000; border-left: 1px solid rgba(37, 211, 102, 0.3); padding: 60px 20px; 
@@ -327,8 +300,6 @@
             margin-top: 15px; background: var(--primary-green) !important;
             color: #000 !important; font-weight: bold !important; border: none !important;
         }
-        
-        /* 📚 SEÇÃO DE SEO / FAQ */
         .seo-section {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -405,21 +376,15 @@
         .seo-answer li {
             margin-bottom: 4px;
         }
-
         footer {position:fixed; bottom:0; left:0; width:100%; background:rgba(0,0,0,0.9); padding:10px; text-align:center; font-size:11px; color:#aaa; border-top:1px solid #333; z-index:50;}
         footer a {color:#25d366; text-decoration:none; margin:0 4px;}
-        
-        /* Modais Modernizados */
         .modal {display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index:99999; align-items:center; justify-content:center; padding:15px; overflow-y:auto;}
         .modal-content {background:#161b22; color:#f0f6fc; border: 1px solid #30363d; padding:25px; border-radius:20px; max-width:400px; width:100%; max-height:90vh; overflow-y:auto; position:relative; z-index:100000; box-shadow:0 10px 30px rgba(0,0,0,0.8); animation: modalScale 0.3s ease;}
         @keyframes modalScale { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        
         .modal-content h2, .modal-content h3 {text-align:center; margin-bottom:15px; font-size:20px; font-weight:bold; color:#25d366;}
         .modal-content label {display:block; font-weight:600; margin-top:12px; font-size:13px; color:#8b949e;}
         .modal-content input, .modal-content select, .modal-content textarea {width:100%; padding:12px; margin:6px 0 12px; background:#0d1117; border:1px solid #30363d; color:#fff; border-radius:10px; font-size:14px; outline:none;}
         .modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus {border-color:#25d366;}
-        
-        /* Estilização moderna e corrigida para os rádios de denúncia */
         .denuncia-opcao {
             display: flex;
             align-items: center;
@@ -440,27 +405,19 @@
             cursor: pointer;
             margin: 0;
         }
-
         .btn-modal-acao {width:100%; padding:14px; background:#25d366; color:#000; border:none; border-radius:12px; font-weight:bold; margin-top:15px; cursor:pointer; font-size:15px; transition:0.2s;}
         .btn-modal-acao:hover { opacity: 0.9; }
         .btn-modal-cancelar {width:100%; padding:12px; background:#21262d; color:#f0f6fc; border:1px solid #30363d; border-radius:12px; font-weight:bold; margin-top:8px; cursor:pointer; font-size:14px;}
         .btn-modal-cancelar:hover { background: #30363d; }
-
         #customAlertModal .modal-content { text-align: center; max-width: 320px; }
         #customAlertIcon { font-size: 40px; margin-bottom: 10px; }
         #customAlertMsg { font-size: 15px; line-height: 1.5; color: #f0f6fc; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-
-<!-- BOTÃO DE ENVIAR GRUPO NO CABEÇALHO -->
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
-
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
-
-<!-- OVERLAY PARA BLOQUEAR O FUNDO DO SITE COM MENU ABERTO -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu(event)"></div>
-
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:#000;">🚀 CADASTRAR MEU GRUPO</button>
@@ -489,14 +446,11 @@
         🎁 Ganhe 20,00 🎉 Baixe tiktok
     </a>
 </div>
-
 <main>
     <div class="topo-titulo-area">
         <div class="nome-time">Team Flow</div>
         <p class="topo-descricao">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
-    
-    <!-- 🎯 ANÚNCIO DE SCRIPT REPOSICIONADO NO TOPO (ACIMA DAS ABAS) -->
     <div class="ad-script-container">
         <script type="text/javascript">
           atOptions = {
@@ -509,8 +463,6 @@
         </script>
         <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
-
-    <!-- 📂 ABAS DE CATEGORIAS -->
     <div class="abas" id="abas">
         <div class="aba ativa" data-cat="Todos" onclick="trocarCategoria('Todos')">✅ Todos</div>
         <div class="aba" data-cat="Amizade" onclick="trocarCategoria('Amizade')">🤝 Amizade</div>
@@ -519,13 +471,9 @@
         <div class="aba" data-cat="Figurinhas" onclick="trocarCategoria('Figurinhas')">🖼️ Figurinhas</div>
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
-
-    <!-- 📋 LISTA DINÂMICA DE GRUPOS -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
     </div>
-
-    <!-- 🎬 CONTAINER DO VÍDEO -->
     <div class="video-container">
         <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
         <video id="meuVideo" autoplay loop muted playsinline preload="metadata" aria-label="Vídeo promocional" onclick="window.open('https://vt.tiktok.com/ZSQf7opoe/', '_blank')">
@@ -533,34 +481,24 @@
         </video>
         <div class="tiktok-icon"><svg viewBox="0 0 448 512" fill="white"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg></div>
     </div>
-
-    <!-- 💳 ANÚNCIO RECARGAPAY GIGANTE (SEM BORDA) -->
     <div class="anuncio-box-gigante">
         <a href="https://recargapay.com.br/r/sanbro751-xW8" target="_blank" rel="noopener" title="RecargaPay - A Conta Digital Que Mais Rende e Dá Bônus">
-            <img src="https://i.postimg.cc/d3jb8WLG/Screenshot-20261019-143054-(1).jpg" 
-                 alt="RecargaPay dinheiro facil conta que mais rende bonus no cadastro recarga de celular renda extra" 
-                 class="anuncio-imagem-gigante"
-                 loading="lazy">
+            <img src="https://i.postimg.cc/d3jb8WLG/Screenshot-20261019-143054-(1).jpg" alt="RecargaPay dinheiro facil conta que mais rende bonus no cadastro recarga de celular renda extra" class="anuncio-imagem-gigante" loading="lazy">
         </a>
         <p style="font-size: 13px; color: #25d366; margin-top: 8px; font-weight: bold;">
             💰 RecargaPay: A conta digital que mais rende! Ganhe bônus no cadastro.
         </p>
     </div>
-
-    <!-- 🔔 MÉLIUZ -->
     <div class="anuncio-box">
         <a href="https://www.meliuz.com.br/i/ref_2256e026?ref_source=81" target="_blank" rel="noopener">
             <img src="https://i.postimg.cc/zGxNGTzY/Screenshot-20260919-153359-(1).jpg" alt="Ganhe R$5 ao se cadastrar no Méliuz" class="anuncio-imagem">
         </a>
     </div>
-
-    <!-- 📚 SEÇÃO DE SEO / TUTORIAIS E DICAS DO WHATSAPP -->
     <div class="seo-section">
         <div class="seo-title">💬 Sobre o Grupos WhatsApp FLOW</div>
         <p style="font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
             Bem-vindo ao seu portal prático de links de grupos de WhatsApp! Aqui você encontra comunidades ativas e organizadas por categorias, com facilidade para entrar diretamente nos links e ferramentas exclusivas para cadastrar ou destacar seu próprio grupo com aprovação automática via Pix.
         </p>
-
         <div class="seo-item" id="faq1">
             <button class="seo-question" onclick="toggleFaq('faq1')">
                 <span>Como criar um grupo de WhatsApp?</span>
@@ -576,7 +514,6 @@
                 </ol>
             </div>
         </div>
-
         <div class="seo-item" id="faq2">
             <button class="seo-question" onclick="toggleFaq('faq2')">
                 <span>Como encontrar um grupo de WhatsApp?</span>
@@ -586,7 +523,6 @@
                 Para encontrar grupos do WhatsApp, navegue pelas nossas categorias no topo do site (Amizade, Namoro, Zoeira, etc.), escolha o grupo de seu interesse e clique em "Entrar".
             </div>
         </div>
-
         <div class="seo-item" id="faq3">
             <button class="seo-question" onclick="toggleFaq('faq3')">
                 <span>Como entrar em um grupo de WhatsApp?</span>
@@ -596,7 +532,6 @@
                 Basta escolher qualquer grupo ativo em nossa lista, clicar no botão verde <b>👉 Entrar</b>. O link abrirá diretamente o convite oficial do WhatsApp no seu celular ou computador.
             </div>
         </div>
-
         <div class="seo-item" id="faq4">
             <button class="seo-question" onclick="toggleFaq('faq4')">
                 <span>Como excluir um grupo de WhatsApp?</span>
@@ -606,7 +541,6 @@
                 Para excluir um grupo, você precisa ser o administrador. Remova todos os participantes um a um, depois saia do grupo e clique em <b>Excluir grupo</b>.
             </div>
         </div>
-
         <div class="seo-item" id="faq5">
             <button class="seo-question" onclick="toggleFaq('faq5')">
                 <span>Quantas pessoas cabem em um grupo de WhatsApp?</span>
@@ -618,35 +552,27 @@
         </div>
     </div>
 </main>
-
-<!-- 🌟 CARD FLUTUANTE VINDO DA DIREITA -->
 <div id="cardFlutuantePromo">
     <img id="promoFoto" class="promo-bg-img" src="" alt="Destaque">
     <div class="promo-overlay"></div>
-
     <div class="promo-header">
         <span class="promo-contador" id="promoContador">Aguarde 5s</span>
         <button class="promo-fechar" id="btnFecharPromo" onclick="fecharCardPromo()" disabled>✖</button>
     </div>
-
     <div class="promo-content-box">
         <div class="promo-titulo" id="promoNome">Destaque</div>
         <div class="promo-texto" id="promoTexto">Confira agora</div>
         <a id="promoBtnEntrar" href="#" onclick="abrirAnuncioEGrupo(event, this.href)" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
     </div>
 </div>
-
 <footer>
     © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
-
-<!-- MODAL CADASTRAR GRUPO COM PREVIEW AO VIVO -->
 <div id="modalForm" class="modal">
     <div class="modal-content">
         <h3>📝 Cadastrar Grupo</h3>
-        
         <label style="color: #25d366; margin-bottom: 4px;">👁️ Pré-visualização ao vivo:</label>
         <div class="card" id="previewCard" style="margin-bottom: 15px; border-color: #25d366; background: rgba(37,211,102,0.05);">
             <img id="prevFoto" src="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg" alt="Preview Foto">
@@ -660,14 +586,11 @@
                 <span class="btn-entrar" style="font-size: 11px; padding: 6px 10px;">👉 Entrar</span>
             </div>
         </div>
-
         <form id="formGrupo" onsubmit="enviarFormulario(event)">
             <label>Nome do Grupo:</label>
             <input type="text" id="gNome" required placeholder="Ex: Grupo de Amigos" oninput="atualizarPreview()">
-            
             <label>Link do WhatsApp (Grupo ou Canal):</label>
             <input type="url" id="gLink" required placeholder="https://chat.whatsapp.com/...">
-            
             <label>Categoria:</label>
             <select id="gCat" onchange="atualizarPreview()">
                 <option value="Amizade">Amizade</option>
@@ -676,13 +599,10 @@
                 <option value="Figurinhas">Figurinhas</option>
                 <option value="Outros">Outros</option>
             </select>
-            
             <label>Descrição curta (Máx 30 caracteres):</label>
             <input type="text" id="gDesc" maxlength="30" placeholder="Ex: Resenha e amizades" oninput="atualizarPreview()">
-            
             <label>Escolher Foto da Galeria:</label>
             <input type="file" id="gFotoFile" accept="image/*" style="padding: 8px; background: #0d1117;" onchange="atualizarPreviewFoto(this)">
-
             <label>Escolha o Plano:</label>
             <select id="gPlano" required>
                 <option value="1">1 Semana - R$ 7,00</option>
@@ -696,14 +616,11 @@
                 <option value="9">6 Meses - R$ 100,00</option>
                 <option value="10">1 Ano (VIP) - R$ 150,00</option>
             </select>
-
             <button type="submit" class="btn-modal-acao">💳 GERAR PIX PARA APROVAÇÃO</button>
             <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalForm')">Cancelar</button>
         </form>
     </div>
 </div>
-
-<!-- MODAL PIX -->
 <div id="modalPix" class="modal">
     <div class="modal-content" style="text-align:center;">
         <h3>⏳ Pagamento Pix</h3>
@@ -714,8 +631,6 @@
         <button type="button" class="btn-modal-cancelar" style="background:#da3633; border:none; color:#fff;" onclick="cancelarPix()">❌ Cancelar / Fechar</button>
     </div>
 </div>
-
-<!-- POP-UP DE ALERTA PERSONALIZADO -->
 <div id="customAlertModal" class="modal">
     <div class="modal-content">
         <div id="customAlertIcon">⚠️</div>
@@ -723,34 +638,26 @@
         <button class="btn-modal-acao" onclick="fecharCustomAlert()">OK, Entendi</button>
     </div>
 </div>
-
-<!-- MODAL DENÚNCIA COM 3 OPÇÕES (INCLUINDO LINK EXPIRADO) -->
 <div id="modalDenuncia" class="modal">
     <div class="modal-content">
         <h3>🚨 Denunciar Grupo</h3>
         <input type="hidden" id="denunciaGrupoId">
-        
         <label class="denuncia-opcao">
             <input type="radio" name="motivo" value="Conteúdo adulto / Pornografia" checked>
             Conteúdo adulto / Pornografia
         </label>
-        
         <label class="denuncia-opcao">
             <input type="radio" name="motivo" value="Redirecionamento malicioso">
             Redirecionamento malicioso / Golpe
         </label>
-
         <label class="denuncia-opcao">
             <input type="radio" name="motivo" value="Link expirado / Não funciona">
             Link expirado / Não funciona
         </label>
-        
         <button class="btn-modal-acao" style="background:#da3633; color:#fff; margin-top: 20px;" onclick="enviarDenuncia()">Enviar Denúncia</button>
         <button type="button" class="btn-modal-cancelar" onclick="fecharModal('modalDenuncia')">Cancelar</button>
     </div>
 </div>
-
-<!-- TERMOS E PRIVACIDADE -->
 <div id="termosModal" class="modal" onclick="fecharTermos()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>📜 Termos de Uso</h2>
@@ -762,7 +669,6 @@
         <button class="btn-modal-acao" onclick="fecharTermos()">✅ ENTENDI</button>
     </div>
 </div>
-
 <div id="privacidadeModal" class="modal" onclick="fecharPrivacidade()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2>🔒 Política de Privacidade</h2>
@@ -775,83 +681,65 @@
         <button class="btn-modal-acao" onclick="fecharPrivacidade()">✅ ENTENDI</button>
     </div>
 </div>
-
 <script>
-// 🌐 CONFIGURAÇÃO DA API COMPATÍVEL COM OS DOIS LINKS (GITHUB E RENDER)
-const API_BASE = window.location.hostname.includes('github.io') 
-    ? 'https://flow-af3j.onrender.com' 
-    : '';
-
+const API_BASE = window.location.hostname.includes('github.io') ? 'https://flow-af3j.onrender.com' : '';
 document.getElementById('ano-atual').textContent = new Date().getFullYear();
-
 function toggleMenu(e) { 
-    if(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    } 
+    if(e) { e.preventDefault(); e.stopPropagation(); } 
     document.getElementById('sideMenu').classList.toggle('active'); 
     document.getElementById('menuOverlay').classList.toggle('active');
 }
-
 function executarCadastroMenu(e) {
-    if(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+    if(e) { e.preventDefault(); e.stopPropagation(); }
     toggleMenu();
     abrirFormulario();
 }
-
-/* 🚀 FUNÇÃO DE CLIQUE DUPLO: ABRE O GRUPO NA ABA DA FRENTE E O ADSTERRA NA ABA DE TRÁS */
-function abrirAnuncioEGrupo(event, linkGrupo) {
+async function abrirAnuncioEGrupo(event, linkGrupo, grupoId) {
     event.preventDefault();
     const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-
-    // 1. Abre a nova aba indo direto para o Grupo do WhatsApp e dá o foco nela
-    const novaAba = window.open(linkGrupo, '_blank');
-    if (novaAba) {
-        novaAba.focus();
+    let usuarioId = localStorage.getItem('flow_user_id');
+    if (!usuarioId) {
+        usuarioId = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+        localStorage.setItem('flow_user_id', usuarioId);
     }
-
-    // 2. Transforma a aba atual (onde o usuário estava) no anúncio do Adsterra (trás)
+    if (grupoId) {
+        try {
+            fetch(API_BASE + '/api/registrar-clique', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ grupo_id: grupoId, usuario_id: usuarioId })
+            });
+        } catch (err) {
+            console.error("Erro ao registrar clique:", err);
+        }
+    }
+    const novaAba = window.open(linkGrupo, '_blank');
+    if (novaAba) { novaAba.focus(); }
     window.location.href = linkAnuncio;
 }
-
-/* 📚 FUNÇÃO PARA ABRIR/FECHAR AS PERGUNTAS FREQUENTES (FAQ / SEO) */
 function toggleFaq(id) {
     const item = document.getElementById(id);
     const estaAtivo = item.classList.contains('ativo');
-    
-    document.querySelectorAll('.seo-item').forEach(el => {
-        el.classList.remove('ativo');
-    });
-
-    if(!estaAtivo) {
-        item.classList.add('ativo');
-    }
+    document.querySelectorAll('.seo-item').forEach(el => { el.classList.remove('ativo'); });
+    if(!estaAtivo) { item.classList.add('ativo'); }
 }
-
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
-
 function toggleMute(e) { 
     if(e) { e.preventDefault(); e.stopPropagation(); } 
     video.muted = !video.muted; 
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
-
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
     d.classList.toggle('active'); 
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
-
 function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
 function fecharPrivacidade() { document.getElementById('privacidadeModal').style.display = 'none'; }
-
 function abrirFormulario() { document.getElementById('modalForm').style.display = 'flex'; }
 function fecharModal(id) { 
     document.getElementById(id).style.display = 'none'; 
@@ -860,11 +748,9 @@ function fecharModal(id) {
         checkInterval = null;
     }
 }
-
 function mostrarAlerta(msg, tipo = 'erro') {
     const iconEl = document.getElementById('customAlertIcon');
     const msgEl = document.getElementById('customAlertMsg');
-    
     if(tipo === 'sucesso') {
         iconEl.innerHTML = '✅';
         iconEl.style.color = '#25d366';
@@ -875,18 +761,12 @@ function mostrarAlerta(msg, tipo = 'erro') {
         iconEl.innerHTML = '❌';
         iconEl.style.color = '#da3633';
     }
-    
     msgEl.innerHTML = msg;
     document.getElementById('customAlertModal').style.display = 'flex';
 }
-
-function fecharCustomAlert() {
-    document.getElementById('customAlertModal').style.display = 'none';
-}
-
+function fecharCustomAlert() { document.getElementById('customAlertModal').style.display = 'none'; }
 let categoriaAtual = 'Todos';
 let checkInterval = null;
-
 function trocarCategoria(cat) {
     categoriaAtual = cat;
     document.querySelectorAll('.aba').forEach(a => {
@@ -895,16 +775,13 @@ function trocarCategoria(cat) {
     });
     carregarDadosDoServidor();
 }
-
 async function carregarDadosDoServidor() {
     try {
         let res = await fetch(API_BASE + '/api/site-dados');
         let data = await res.json();
-        
         let grupos = data.grupos || [];
         const lista = document.getElementById('lista-grupos');
         let filtrados = categoriaAtual === 'Todos' ? grupos : grupos.filter(g => g.categoria === categoriaAtual);
-        
         if (!filtrados || filtrados.length === 0) {
             lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado nesta categoria.<br>Seja o primeiro a cadastrar!</p>';
         } else {
@@ -918,43 +795,36 @@ async function carregarDadosDoServidor() {
                     </div>
                     <div class="card-right-area">
                         <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                        <a href="${g.link}" onclick="abrirAnuncioEGrupo(event, '${g.link}')" class="btn-entrar">👉 Entrar</a>
+                        <a href="${g.link}" onclick="abrirAnuncioEGrupo(event, '${g.link}', '${g._id}')" class="btn-entrar">👉 Entrar</a>
                     </div>
                 </div>
             `).join('');
         }
-
         let p = data.promo;
         if(p && p.ativo) {
             document.getElementById('promoFoto').src = p.foto;
             document.getElementById('promoNome').textContent = p.nome;
             document.getElementById('promoTexto').textContent = p.texto;
             document.getElementById('promoBtnEntrar').href = p.link;
-            
             document.getElementById('cardFlutuantePromo').style.display = 'block';
             iniciarContadorPromo(p.duracao || 5);
         } else {
             document.getElementById('cardFlutuantePromo').style.display = 'none';
         }
-
     } catch(e) {
         console.error("Erro ao carregar dados:", e);
         document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
     }
 }
-
 let timerPromo = null;
 function iniciarContadorPromo(tempoSegundos) {
     let tempoRestante = tempoSegundos;
     const contadorEl = document.getElementById('promoContador');
     const btnFechar = document.getElementById('btnFecharPromo');
-    
     btnFechar.disabled = true;
     btnFechar.classList.remove('liberado');
     contadorEl.style.display = 'inline-block';
-    
     if(timerPromo) clearInterval(timerPromo);
-    
     timerPromo = setInterval(() => {
         tempoRestante--;
         if(tempoRestante > 0) {
@@ -967,24 +837,20 @@ function iniciarContadorPromo(tempoSegundos) {
         }
     }, 1000);
 }
-
 function fecharCardPromo() {
     const btnFechar = document.getElementById('btnFecharPromo');
     if(!btnFechar.disabled) {
         document.getElementById('cardFlutuantePromo').style.display = 'none';
     }
 }
-
 function atualizarPreview() {
     let nome = document.getElementById('gNome').value.trim();
     let cat = document.getElementById('gCat').value;
     let desc = document.getElementById('gDesc').value.trim();
-
     document.getElementById('prevNome').textContent = nome || 'Nome do Grupo';
     document.getElementById('prevCat').textContent = cat || 'Amizade';
     document.getElementById('prevDesc').textContent = desc || 'Descrição curta...';
 }
-
 function atualizarPreviewFoto(input) {
     if (input.files && input.files[0]) {
         let reader = new FileReader();
@@ -996,20 +862,15 @@ function atualizarPreviewFoto(input) {
         document.getElementById('prevFoto').src = 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     }
 }
-
 function converterArquivoParaBase64(file) {
     return new Promise((resolve, reject) => {
-        if (!file) {
-            resolve("");
-            return;
-        }
+        if (!file) { resolve(""); return; }
         let reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result);
         reader.onerror = error => reject(error);
     });
 }
-
 async function enviarFormulario(e) {
     e.preventDefault();
     let nome = document.getElementById('gNome').value;
@@ -1018,7 +879,6 @@ async function enviarFormulario(e) {
     let descricao = document.getElementById('gDesc').value;
     let plano_id = document.getElementById('gPlano').value;
     let fotoFile = document.getElementById('gFotoFile').files[0];
-
     let fotoBase64 = "";
     if (fotoFile) {
         try {
@@ -1027,9 +887,7 @@ async function enviarFormulario(e) {
             console.error("Erro ao processar imagem:", err);
         }
     }
-
     mostrarAlerta("Gerando fatura Pix com o Mercado Pago...", "aviso");
-
     try {
         let res = await fetch(API_BASE + '/api/criar-pagamento', {
             method: 'POST',
@@ -1037,25 +895,20 @@ async function enviarFormulario(e) {
             body: JSON.stringify({nome, link, categoria, descricao, foto: fotoBase64, plano_id})
         });
         let r = await res.json();
-        
         fecharCustomAlert();
-
         if(r.erro) {
             mostrarAlerta(r.erro, 'erro');
             return;
         }
-
         fecharModal('modalForm');
         document.getElementById('pixCode').value = r.pix_code;
         document.getElementById('modalPix').style.display = 'flex';
-        
         verificarStatusPagamento(r.payment_id);
     } catch(err) {
         fecharCustomAlert();
         mostrarAlerta("Erro de conexão ao processar o pagamento.", 'erro');
     }
 }
-
 function copiarPix() {
     let copyText = document.getElementById("pixCode");
     copyText.select();
@@ -1063,7 +916,6 @@ function copiarPix() {
     navigator.clipboard.writeText(copyText.value);
     mostrarAlerta("✅ Código Pix copiado com sucesso!<br>Abra o app do seu banco e cole na opção Pix Copia e Cola.", "sucesso");
 }
-
 function verificarStatusPagamento(payment_id) {
     let statusEl = document.getElementById('statusPix');
     checkInterval = setInterval(async () => {
@@ -1085,7 +937,6 @@ function verificarStatusPagamento(payment_id) {
         }
     }, 4000);
 }
-
 function cancelarPix() {
     if(checkInterval) {
         clearInterval(checkInterval);
@@ -1094,16 +945,13 @@ function cancelarPix() {
     fecharModal('modalPix');
     mostrarAlerta("Pagamento cancelado pelo usuário.", "aviso");
 }
-
 function abrirDenuncia(id) {
     document.getElementById('denunciaGrupoId').value = id;
     document.getElementById('modalDenuncia').style.display = 'flex';
 }
-
 async function enviarDenuncia() {
     let grupo_id = document.getElementById('denunciaGrupoId').value;
     let motivo = document.querySelector('input[name="motivo"]:checked').value;
-    
     await fetch(API_BASE + '/api/denunciar', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -1112,9 +960,7 @@ async function enviarDenuncia() {
     fecharModal('modalDenuncia');
     mostrarAlerta("Denúncia registrada com sucesso. O administrador irá analisar.", "sucesso");
 }
-
 carregarDadosDoServidor();
 </script>
-
 </body>
 </html>
