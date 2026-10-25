@@ -105,6 +105,40 @@ def site_dados():
 
     return jsonify({"grupos": grupos, "promo": config_promo})
 
+# ==============================================
+# 📊 ROTA DE REGISTRO DE CLIQUES ÚNICOS POR USUÁRIO
+# ==============================================
+@app.route('/api/registrar-clique', methods=['POST'])
+def registrar_clique():
+    data = request.json or {}
+    grupo_id = data.get("grupo_id")
+    usuario_id = data.get("usuario_id") # Identificador único salvo no navegador do usuário
+
+    if not grupo_id or not usuario_id:
+        return jsonify({"sucesso": False, "erro": "Dados incompletos"}), 400
+
+    try:
+        # Tenta converter o ID para ObjectId se for válido do MongoDB
+        obj_id = ObjectId(grupo_id)
+    except:
+        obj_id = grupo_id
+
+    # Verifica se o usuário já clicou neste grupo antes
+    grupo = colecao_grupos.find_one({"_id": obj_id})
+    if not grupo:
+        return jsonify({"sucesso": False, "erro": "Grupo não encontrado"}), 404
+
+    cliques_unicos = grupo.get("cliques_unicos", [])
+
+    if usuario_id not in cliques_unicos:
+        # Adiciona o ID do usuário na lista de cliques únicos do grupo
+        colecao_grupos.update_one(
+            {"_id": obj_id},
+            {"$push": {"cliques_unicos": usuario_id}}
+        )
+
+    return jsonify({"sucesso": True})
+
 @app.route('/api/criar-pagamento', methods=['POST'])
 def criar_pagamento():
     data = request.json or {}
@@ -200,6 +234,7 @@ def verificar_pagamento():
                         "categoria": pendente["categoria"],
                         "descricao": pendente["descricao"],
                         "foto": pendente["foto"],
+                        "cliques_unicos": [],
                         "criado_em": time.time()
                     })
                     colecao_pagamentos.update_one({"payment_id": str(pid)}, {"$set": {"ativado": True}})
@@ -293,6 +328,7 @@ def adm_cadastrar_direto():
         "categoria": categoria,
         "descricao": descricao,
         "foto": foto_final,
+        "cliques_unicos": [],
         "criado_em": time.time()
     })
 
