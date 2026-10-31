@@ -172,60 +172,6 @@
             cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px;
             box-shadow: 0 4px 15px rgba(37,211,102,0.4); white-space: nowrap;
         }
-        #cardFlutuantePromo {
-            position: fixed; bottom: 75px; right: 15px; z-index: 9999;
-            width: 250px; height: 300px;
-            border-radius: 18px; overflow: hidden;
-            border: none;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9);
-            display: none;
-            animation: slideRight 0.4s ease;
-            background-color: #000;
-        }
-        @keyframes slideRight { 
-            from { transform: translateX(100px); opacity: 0; } 
-            to { transform: translateX(0); opacity: 1; } 
-        }
-        .promo-bg-img {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: 1; filter: brightness(1);
-        }
-        .promo-overlay {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0) 100%);
-            z-index: 2;
-        }
-        .promo-header { 
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            display: flex; justify-content: space-between; align-items: center; z-index: 5; 
-        }
-        .promo-contador { font-size: 11px; color: #ffcc00; font-weight: bold; background: rgba(0,0,0,0.7); padding: 4px 8px; border-radius: 8px; border: 1px solid rgba(255,204,0,0.3); }
-        .promo-fechar { background: rgba(48,54,61,0.8); color: #8b949e; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 11px; cursor: not-allowed; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .promo-fechar.liberado { background: #da3633; color: #fff; cursor: pointer; }
-        .promo-content-box {
-            position: absolute; bottom: 12px; left: 12px; right: 12px;
-            z-index: 5; display: flex; flex-direction: column; gap: 5px; text-align: center;
-        }
-        .promo-titulo { 
-            font-size: 15px; font-weight: 800; color: #fff; 
-            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
-        }
-        .promo-texto { 
-            font-size: 11px; color: #f1f5f9; line-height: 1.2;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-        }
-        .btn-pulsante-card {
-            display: block; width: 100%; margin-top: 3px; padding: 8px;
-            background: transparent; color: #fff; font-weight: bold; font-size: 12px;
-            text-align: center; border-radius: 8px; text-decoration: none;
-            border: 2px solid #25d366;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-            box-shadow: 0 4px 15px rgba(37,211,102,0.3);
-            animation: pulsarCard 1.5s infinite;
-        }
-        @keyframes pulsarCard { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0.7); } 70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(37,211,102,0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(37,211,102,0); } }
         .anuncio-box-gigante {
             background: rgba(255, 255, 255, 0.03);
             border: none;
@@ -556,19 +502,6 @@
         </div>
     </div>
 </main>
-<div id="cardFlutuantePromo">
-    <img id="promoFoto" class="promo-bg-img" src="" alt="Destaque">
-    <div class="promo-overlay"></div>
-    <div class="promo-header">
-        <span class="promo-contador" id="promoContador">Aguarde 5s</span>
-        <button class="promo-fechar" id="btnFecharPromo" onclick="fecharCardPromo()" disabled>✖</button>
-    </div>
-    <div class="promo-content-box">
-        <div class="promo-titulo" id="promoNome">Destaque</div>
-        <div class="promo-texto" id="promoTexto">Confira agora</div>
-        <a id="promoBtnEntrar" href="#" onclick="abrirAnuncioEGrupo(event, this.href)" class="btn-pulsante-card" rel="noopener">🔥 entrar no grupo 🔥</a>
-    </div>
-</div>
 <footer>
     © 2020-<span id="ano-atual"></span> FLOW — 
     <a href="#" onclick="mostrarTermos()">Termos de Uso</a> & 
@@ -705,9 +638,7 @@ function executarCadastroMenu(e) {
     toggleMenu();
     abrirFormulario();
 }
-async function abrirAnuncioEGrupo(event, linkGrupo, grupoId) {
-    event.preventDefault();
-    const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+function registrarClique(grupoId) {
     let usuarioId = localStorage.getItem('flow_user_id');
     if (!usuarioId) {
         usuarioId = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -724,9 +655,6 @@ async function abrirAnuncioEGrupo(event, linkGrupo, grupoId) {
             console.error("Erro ao registrar clique:", err);
         }
     }
-    const novaAba = window.open(linkGrupo, '_blank');
-    if (novaAba) { novaAba.focus(); }
-    window.location.href = linkAnuncio;
 }
 function toggleFaq(id) {
     const item = document.getElementById(id);
@@ -806,52 +734,14 @@ async function carregarDadosDoServidor() {
                     </div>
                     <div class="card-right-area">
                         <button class="denunciar-btn" onclick="abrirDenuncia('${g._id}')" title="Denunciar">⚠️</button>
-                        <a href="${g.link}" onclick="abrirAnuncioEGrupo(event, '${g.link}', '${g._id}')" class="btn-entrar">👉 Entrar</a>
+                        <a href="${g.link}" target="_blank" rel="noopener" onclick="registrarClique('${g._id}')" class="btn-entrar">👉 Entrar</a>
                     </div>
                 </div>
             `).join('');
         }
-        let p = data.promo;
-        if(p && p.ativo) {
-            document.getElementById('promoFoto').src = p.foto;
-            document.getElementById('promoNome').textContent = p.nome;
-            document.getElementById('promoTexto').textContent = p.texto;
-            document.getElementById('promoBtnEntrar').href = p.link;
-            document.getElementById('cardFlutuantePromo').style.display = 'block';
-            iniciarContadorPromo(p.duracao || 5);
-        } else {
-            document.getElementById('cardFlutuantePromo').style.display = 'none';
-        }
     } catch(e) {
         console.error("Erro ao carregar dados:", e);
         document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
-    }
-}
-let timerPromo = null;
-function iniciarContadorPromo(tempoSegundos) {
-    let tempoRestante = tempoSegundos;
-    const contadorEl = document.getElementById('promoContador');
-    const btnFechar = document.getElementById('btnFecharPromo');
-    btnFechar.disabled = true;
-    btnFechar.classList.remove('liberado');
-    contadorEl.style.display = 'inline-block';
-    if(timerPromo) clearInterval(timerPromo);
-    timerPromo = setInterval(() => {
-        tempoRestante--;
-        if(tempoRestante > 0) {
-            contadorEl.textContent = `Aguarde ${tempoRestante}s`;
-        } else {
-            contadorEl.style.display = 'none';
-            btnFechar.disabled = false;
-            btnFechar.classList.add('liberado');
-            clearInterval(timerPromo);
-        }
-    }, 1000);
-}
-function fecharCardPromo() {
-    const btnFechar = document.getElementById('btnFecharPromo');
-    if(!btnFechar.disabled) {
-        document.getElementById('cardFlutuantePromo').style.display = 'none';
     }
 }
 function atualizarPreview() {
