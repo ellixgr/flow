@@ -166,6 +166,7 @@ def criar_pagamento():
 
     plano_id = int(data.get("plano_id", 1))
 
+    # 🔒 CLIENTES: Continua bloqueando qualquer link que não seja WhatsApp
     if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
         return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
 
@@ -299,8 +300,9 @@ def adm_cadastrar_direto():
     descricao = data.get("descricao", "")[:30]
     foto_input = data.get("foto", "").strip()
     
-    if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
-        return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
+    # 🔓 ADM: Aceita qualquer link, apenas verifica se ele foi preenchido
+    if not link:
+        return jsonify({"erro": "O link é obrigatório!"}), 400
 
     if colecao_grupos.find_one({"link": link}):
         return jsonify({"erro": "Este link de grupo já está publicado no site!"}), 400
