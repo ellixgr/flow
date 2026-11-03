@@ -46,28 +46,25 @@
 </head>
 <body>
 
-    <button class="btn-ver-grupos" onclick="abrirPopunder(event)">Ver Grupos</button>
+    <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
 
     <script>
-        function abrirPopunder(event) {
+        function abrirCorreto(event) {
             event.preventDefault();
             
-            // Seu anúncio do Adsterra
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-            
-            // Seu site principal que DEVE ficar na frente
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Abre o anúncio em uma nova aba
-            const abaAnuncio = window.open(linkAnuncio, '_blank');
-            
-            // 2. Tira o foco da nova aba e joga o anúncio para trás (segundo plano)
-            if (abaAnuncio) {
-                abaAnuncio.blur();
-                window.focus();
-            }
+            // 1. Abre o anúncio numa aba secundária invisível/em segundo plano se o navegador permitir
+            const iframeInvisivel = document.createElement('iframe');
+            iframeInvisivel.style.display = 'none';
+            iframeInvisivel.src = linkAnuncio;
+            document.body.appendChild(iframeInvisivel);
 
-            // 3. Redireciona a aba principal para o seu site na frente
+            // 2. Abre o anúncio também com o window.open logo em seguida
+            window.open(linkAnuncio, '_blank');
+
+            // 3. Mantém o utilizador estritamente no teu site principal na aba atual
             window.location.href = sitePrincipal;
         }
     </script>
