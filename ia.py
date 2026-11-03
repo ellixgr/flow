@@ -68,7 +68,6 @@ def main():
     with open("main.html", "r", encoding="utf-8") as f:
         html_content = f.read()
     
-    # Injeta automaticamente a tag de verificação do Google no <head> da página principal
     meta_google = '<meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />'
     if "<head>" in html_content:
         html_content = html_content.replace("<head>", f"<head>\n    {meta_google}")
@@ -82,8 +81,172 @@ def adm_panel():
 
 @app.route('/msc')
 def pagina_download():
-    with open("MSC.html", "r", encoding="utf-8") as f:
-        return f.read()
+    # Página embutida para nunca mais dar Internal Server Error por falta de arquivo físico
+    html_msc = """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLOW — Baixar Músicas e Vídeos</title>
+    <style>
+        :root {
+            --primary: #25d366;
+            --dark-bg: #0d1117;
+            --card-bg: #161b22;
+            --text: #f0f6fc;
+            --border: #30363d;
+            --danger: #ff4d4d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        h1 { font-size: 22px; color: var(--primary); margin-bottom: 8px; font-weight: 800; }
+        p { font-size: 13px; color: #8b949e; margin-bottom: 20px; }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+        input[type="text"]:focus { border-color: var(--primary); }
+
+        .botoes-acao {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-audio { background: #1f6feb; color: #fff; }
+        .btn-video { background: var(--primary); color: #000; }
+        .btn-voltar {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid var(--border);
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        #statusMsg {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .loading { color: #ffd700 !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📥 FLOW Downloader</h1>
+    <p>Cole o link do YouTube ou digite o nome da música/vídeo</p>
+
+    <input type="text" id="termoInput" placeholder="Ex: Nome da música ou link...">
+
+    <div class="botoes-acao">
+        <button class="btn-audio" onclick="baixar('audio')">🎵 Baixar MP3</button>
+        <button class="btn-video" onclick="baixar('video')">🎬 Baixar MP4</button>
+    </div>
+
+    <button class="btn-voltar" onclick="window.location.href='/'">⬅️ Voltar para o Site Principal</button>
+
+    <div id="statusMsg"></div>
+</div>
+
+<script>
+async function baixar(tipo) {
+    let termo = document.getElementById('termoInput').value.trim();
+    let statusDiv = document.getElementById('statusMsg');
+
+    if(!termo) {
+        alert("Por favor, digite um nome ou cole um link!");
+        return;
+    }
+
+    let rota = tipo === 'audio' ? '/api/adm/baixar-audio' : '/api/adm/baixar-video';
+    statusDiv.className = "loading";
+    statusDiv.innerText = "⏳ A processar e a preparar o download... Aguarde!";
+
+    try {
+        let res = await fetch(rota, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: "123", termo: termo })
+        });
+
+        if (!res.ok) {
+            let errData = await res.json();
+            throw new Error(errData.erro || "Erro ao baixar arquivo");
+        }
+
+        let disposition = res.headers.get('content-disposition');
+        let filename = "arquivo";
+        if (disposition && disposition.includes('filename=')) {
+            let match = disposition.match(/filename="?([^"]+)"?/);
+            if (match && match[1]) filename = decodeURIComponent(match[1]);
+        }
+
+        let blob = await res.blob();
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        statusDiv.className = "";
+        statusDiv.style.color = "var(--primary)";
+        statusDiv.innerText = "✅ Download concluído com sucesso!";
+    } catch(err) {
+        console.error(err);
+        statusDiv.className = "";
+        statusDiv.style.color = "var(--danger)";
+        statusDiv.innerText = "❌ Erro: " + err.message;
+    }
+}
+</script>
+
+</body>
+</html>"""
+    return render_template_string(html_msc)
 
 @app.route('/api/grupos', methods=['GET'])
 def listar_grupos():
@@ -98,7 +261,6 @@ def site_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
     
-    # Ordena estritamente pelo número de cliques (do maior para o menor) em tempo real
     grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
     
     config_promo = colecao_config.find_one({"_id": "card_promo"}) or {
@@ -121,7 +283,7 @@ def site_dados():
 def registrar_clique():
     data = request.json or {}
     grupo_id = data.get("grupo_id")
-    usuario_id = data.get("usuario_id") # Identificador único salvo no navegador do usuário
+    usuario_id = data.get("usuario_id")
 
     if not grupo_id or not usuario_id:
         return jsonify({"sucesso": False, "erro": "Dados incompletos"}), 400
@@ -365,9 +527,7 @@ def adm_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
 
-    # Ordena os grupos por cliques para o painel ADM exibir na mesma ordem do site
     grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
-
     config_promo = colecao_config.find_one({"_id": "card_promo"})
 
     return jsonify({"denuncias": denuncias, "grupos": grupos, "promo": config_promo})
@@ -393,7 +553,6 @@ def adm_apagar_promo():
     colecao_config.delete_one({"_id": "card_promo"})
     return jsonify({"sucesso": True})
 
-# 🔄 ROTA PARA ATUALIZAR OS CLIQUES DIRETAMENTE PELO PAINEL ADM
 @app.route('/api/adm/atualizar-cliques', methods=['POST'])
 def adm_atualizar_cliques():
     data = request.json or {}
@@ -408,7 +567,6 @@ def adm_atualizar_cliques():
     except:
         obj_id = gid
 
-    # Gera uma lista fictícia de IDs únicos com o tamanho exato da quantidade de cliques desejada
     lista_ficticia = [f"adm_click_{i}" for i in range(novos_cliques)]
 
     resultado = colecao_grupos.update_one(
