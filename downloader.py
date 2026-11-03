@@ -114,7 +114,6 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
         .loading { color: #ffd700 !important; font-weight: bold; }
         .bloqueado { opacity: 0.5; pointer-events: none; }
         
-        /* ESTILO DO PREVIEW */
         #previewBox {
             display: none;
             margin-top: 15px;
@@ -174,7 +173,6 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
         </div>
     </div>
 
-    <!-- CAIXA DE PREVIEW DA MÍDIA -->
     <div id="previewBox">
         <img id="previewImg" src="" alt="Capa da Mídia">
         <p id="previewTitle"></p>
@@ -328,7 +326,6 @@ async function confirmarVideo(confirmado) {
     }
 }
 
-// Atalho para a função do botão de confirmação
 function confirmarDownload(sim) {
     confirmarVideo(sim);
 }
@@ -439,7 +436,6 @@ async function verificarPagamentoVip() {
         else:
             colecao_downloads.update_one({"usuario_id": usuario_id}, {"$inc": {"total_baixados": 1}}, upsert=True)
 
-    # ROTA DE PREVIEW (BUSCA OS DADOS SEM BAIXAR NEM DESCONTAR CRÉDITO)
     @app.route('/api/adm/preview-midia', methods=['POST'])
     def adm_preview_midia():
         data = request.json or {}
@@ -451,7 +447,14 @@ async function verificarPagamentoVip() {
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
         pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
-        ydl_opts = {'quiet': True, 'skip_download': True, 'default_search': 'ytsearch'}
+        
+        # Adicionado o extractor-args para evitar o bloqueio de bot do YouTube
+        ydl_opts = {
+            'quiet': True,
+            'skip_download': True,
+            'default_search': 'ytsearch',
+            'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
+        }
 
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -489,7 +492,8 @@ async function verificarPagamentoVip() {
                 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
                 'quiet': True,
-                'default_search': 'ytsearch'
+                'default_search': 'ytsearch',
+                'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(pesquisa, download=True)
@@ -527,7 +531,8 @@ async function verificarPagamentoVip() {
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
                 'quiet': True,
-                'default_search': 'ytsearch'
+                'default_search': 'ytsearch',
+                'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(pesquisa, download=True)
