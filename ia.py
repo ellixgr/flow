@@ -5,16 +5,18 @@ import time
 import base64
 import io
 import requests
-from flask import Flask, request, jsonify, render_template_string, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from PIL import Image
-import yt_dlp
+
+# Importa as rotas do baixador que separamos
+from downloader import registrar_rotas_downloader
 
 app = Flask(__name__)
 
-# 🌐 CORREÇÃO DEFINITIVA DE CORS PARA O GITHUB E RENDER FUNCIONAREM JUNTOS
+# 🌐 CORREÇÃO DEFINITIVA DE CORS
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # ==============================================
@@ -25,7 +27,7 @@ MP_TOKEN = os.getenv("MP_TOKEN")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 if not MONGO_URI or not MP_TOKEN or not ADMIN_PASSWORD:
-    print("⚠️ AVISO: As variáveis de ambiente MONGO_URI, MP_TOKEN ou ADMIN_PASSWORD não foram totalmente configuradas no Render!")
+    print("⚠️ AVISO: Variáveis de ambiente incompletas no Render!")
 
 try:
     mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
@@ -38,7 +40,9 @@ try:
 except Exception as e:
     print(f"❌ Erro ao conectar no MongoDB: {e}")
 
-# Tabela de 10 Planos
+# Registra todas as rotas do baixador importadas do outro arquivo
+registrar_rotas_downloader(app, db, MP_TOKEN)
+
 PLANOS_SITE = {
     1: {"dias": 7, "nome": "1 Semana", "valor": 7.00},
     2: {"dias": 14, "nome": "2 Semanas", "valor": 12.00},
@@ -52,26 +56,17 @@ PLANOS_SITE = {
     10: {"dias": 365, "nome": "1 Ano (VIP)", "valor": 150.00}
 }
 
-# ==============================================
-# 🔍 ROTA DE VERIFICAÇÃO DO GOOGLE SEARCH CONSOLE
-# ==============================================
 @app.route('/google_verification.html')
 def google_verification():
     return '<meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />'
-
-# ==============================================
-# 🌐 ROTAS DO SITE E API
-# ==============================================
 
 @app.route('/')
 def main():
     with open("main.html", "r", encoding="utf-8") as f:
         html_content = f.read()
-    
     meta_google = '<meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />'
     if "<head>" in html_content:
         html_content = html_content.replace("<head>", f"<head>\n    {meta_google}")
-        
     return html_content
 
 @app.route('/adm')
@@ -79,190 +74,17 @@ def adm_panel():
     with open("adm.html", "r", encoding="utf-8") as f:
         return f.read()
 
-@app.route('/msc')
-def pagina_download():
-    # Página embutida para nunca mais dar Internal Server Error por falta de arquivo físico
-    html_msc = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FLOW — Baixar Músicas e Vídeos</title>
-    <style>
-        :root {
-            --primary: #25d366;
-            --dark-bg: #0d1117;
-            --card-bg: #161b22;
-            --text: #f0f6fc;
-            --border: #30363d;
-            --danger: #ff4d4d;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body {
-            background-color: var(--dark-bg);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-        h1 { font-size: 22px; color: var(--primary); margin-bottom: 8px; font-weight: 800; }
-        p { font-size: 13px; color: #8b949e; margin-bottom: 20px; }
-        
-        input[type="text"] {
-            width: 100%;
-            padding: 14px;
-            background: #0d1117;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: #fff;
-            font-size: 15px;
-            margin-bottom: 15px;
-            outline: none;
-            text-align: center;
-        }
-        input[type="text"]:focus { border-color: var(--primary); }
-
-        .botoes-acao {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            transition: opacity 0.2s, transform 0.1s;
-        }
-        button:hover { opacity: 0.9; transform: scale(1.02); }
-        .btn-audio { background: #1f6feb; color: #fff; }
-        .btn-video { background: var(--primary); color: #000; }
-        .btn-voltar {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid var(--border);
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-        #statusMsg {
-            margin-top: 15px;
-            font-size: 13px;
-            color: #8b949e;
-        }
-        .loading { color: #ffd700 !important; font-weight: bold; }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>📥 FLOW Downloader</h1>
-    <p>Cole o link do YouTube ou digite o nome da música/vídeo</p>
-
-    <input type="text" id="termoInput" placeholder="Ex: Nome da música ou link...">
-
-    <div class="botoes-acao">
-        <button class="btn-audio" onclick="baixar('audio')">🎵 Baixar MP3</button>
-        <button class="btn-video" onclick="baixar('video')">🎬 Baixar MP4</button>
-    </div>
-
-    <button class="btn-voltar" onclick="window.location.href='/'">⬅️ Voltar para o Site Principal</button>
-
-    <div id="statusMsg"></div>
-</div>
-
-<script>
-async function baixar(tipo) {
-    let termo = document.getElementById('termoInput').value.trim();
-    let statusDiv = document.getElementById('statusMsg');
-
-    if(!termo) {
-        alert("Por favor, digite um nome ou cole um link!");
-        return;
-    }
-
-    let rota = tipo === 'audio' ? '/api/adm/baixar-audio' : '/api/adm/baixar-video';
-    statusDiv.className = "loading";
-    statusDiv.innerText = "⏳ A processar e a preparar o download... Aguarde!";
-
-    try {
-        let res = await fetch(rota, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ senha: "123", termo: termo })
-        });
-
-        if (!res.ok) {
-            let errData = await res.json();
-            throw new Error(errData.erro || "Erro ao baixar arquivo");
-        }
-
-        let disposition = res.headers.get('content-disposition');
-        let filename = "arquivo";
-        if (disposition && disposition.includes('filename=')) {
-            let match = disposition.match(/filename="?([^"]+)"?/);
-            if (match && match[1]) filename = decodeURIComponent(match[1]);
-        }
-
-        let blob = await res.blob();
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-
-        statusDiv.className = "";
-        statusDiv.style.color = "var(--primary)";
-        statusDiv.innerText = "✅ Download concluído com sucesso!";
-    } catch(err) {
-        console.error(err);
-        statusDiv.className = "";
-        statusDiv.style.color = "var(--danger)";
-        statusDiv.innerText = "❌ Erro: " + err.message;
-    }
-}
-</script>
-
-</body>
-</html>"""
-    return render_template_string(html_msc)
-
 @app.route('/api/grupos', methods=['GET'])
 def listar_grupos():
     grupos = list(colecao_grupos.find({}, {"_id": 1, "nome": 1, "link": 1, "categoria": 1, "descricao": 1, "foto": 1}))
-    for g in grupos:
-        g["_id"] = str(g["_id"])
+    for g in grupos: g["_id"] = str(g["_id"])
     return jsonify(grupos)
 
 @app.route('/api/site-dados', methods=['GET'])
 def site_dados():
     grupos = list(colecao_grupos.find({}, {"_id": 1, "nome": 1, "link": 1, "categoria": 1, "descricao": 1, "foto": 1, "cliques_unicos": 1}))
-    for g in grupos:
-        g["_id"] = str(g["_id"])
-    
+    for g in grupos: g["_id"] = str(g["_id"])
     grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
-    
     config_promo = colecao_config.find_one({"_id": "card_promo"}) or {
         "ativo": True,
         "foto": "https://i.postimg.cc/tg5hC1fJ/Screenshot-20261021-190017-(1).jpg",
@@ -271,387 +93,157 @@ def site_dados():
         "link": "https://chat.whatsapp.com/",
         "duracao": 5
     }
-    if "_id" in config_promo:
-        del config_promo["_id"]
-
+    if "_id" in config_promo: del config_promo["_id"]
     return jsonify({"grupos": grupos, "promo": config_promo})
 
-# ==============================================
-# 📊 ROTA DE REGISTRO DE CLIQUES ÚNICOS POR USUÁRIO
-# ==============================================
 @app.route('/api/registrar-clique', methods=['POST'])
 def registrar_clique():
     data = request.json or {}
-    grupo_id = data.get("grupo_id")
-    usuario_id = data.get("usuario_id")
-
-    if not grupo_id or not usuario_id:
-        return jsonify({"sucesso": False, "erro": "Dados incompletos"}), 400
-
-    try:
-        obj_id = ObjectId(grupo_id)
-    except:
-        obj_id = grupo_id
-
+    grupo_id, usuario_id = data.get("grupo_id"), data.get("usuario_id")
+    if not grupo_id or not usuario_id: return jsonify({"sucesso": False}), 400
+    try: obj_id = ObjectId(grupo_id)
+    except: obj_id = grupo_id
     grupo = colecao_grupos.find_one({"_id": obj_id})
-    if not grupo:
-        return jsonify({"sucesso": False, "erro": "Grupo não encontrado"}), 404
-
-    cliques_unicos = grupo.get("cliques_unicos", [])
-
-    if usuario_id not in cliques_unicos:
-        colecao_grupos.update_one(
-            {"_id": obj_id},
-            {"$push": {"cliques_unicos": usuario_id}}
-        )
-
+    if not grupo: return jsonify({"sucesso": False}), 404
+    if usuario_id not in grupo.get("cliques_unicos", []):
+        colecao_grupos.update_one({"_id": obj_id}, {"$push": {"cliques_unicos": usuario_id}})
     return jsonify({"sucesso": True})
 
 @app.route('/api/criar-pagamento', methods=['POST'])
 def criar_pagamento():
     data = request.json or {}
-    nome = data.get("nome")
-    link = data.get("link", "").strip()
-    categoria = data.get("categoria", "Outros")
-    descricao = data.get("descricao", "")[:30]
+    nome, link = data.get("nome"), data.get("link", "").strip()
+    categoria, descricao = data.get("categoria", "Outros"), data.get("descricao", "")[:30]
     foto_input = data.get("foto", "").strip()
     
     foto_final = "https://files.catbox.moe/0aa6f2.png"
     if foto_input and "base64," in foto_input:
         try:
-            header, encoded = foto_input.split(",", 1)
-            img_data = base64.b64decode(encoded)
-            img = Image.open(io.BytesIO(img_data))
-            img = img.convert("RGB")
+            _, encoded = foto_input.split(",", 1)
+            img = Image.open(io.BytesIO(base64.b64decode(encoded))).convert("RGB")
             img.thumbnail((300, 300))
-            
             output = io.BytesIO()
             img.save(output, format="JPEG", quality=85)
-            compressed_base64 = base64.b64encode(output.getvalue()).decode("utf-8")
-            foto_final = f"data:image/jpeg;base64,{compressed_base64}"
-        except Exception as img_err:
-            print(f"Erro ao processar imagem enviada: {img_err}")
+            foto_final = f"data:image/jpeg;base64,{base64.b64encode(output.getvalue()).decode('utf-8')}"
+        except Exception as e: print(e)
 
-    plano_id = int(data.get("plano_id", 1))
-
+    plano = PLANOS_SITE.get(int(data.get("plano_id", 1)), PLANOS_SITE[1])
     if not link or ("chat.whatsapp.com" not in link and "whatsapp.com/channel" not in link):
-        return jsonify({"erro": "Apenas links oficiais de grupos ou canais do WhatsApp são permitidos!"}), 400
-
+        return jsonify({"erro": "Link de WhatsApp inválido!"}), 400
     if colecao_grupos.find_one({"link": link}):
-        return jsonify({"erro": "Este link de grupo já está publicado no site!"}), 400
+        return jsonify({"erro": "Este link já está publicado!"}), 400
 
-    plano = PLANOS_SITE.get(plano_id, PLANOS_SITE[1])
-    valor = plano["valor"]
-
-    url = "https://api.mercadopago.com/v1/payments"
-    headers = {
-        "Authorization": f"Bearer {MP_TOKEN}",
-        "Content-Type": "application/json",
-        "X-Idempotency-Key": str(uuid.uuid4())
-    }
-    payload = {
-        "transaction_amount": float(valor),
-        "description": f"Destaque Grupo: {nome}",
-        "payment_method_id": "pix",
-        "payer": {"email": f"cliente_{int(time.time())}@flowsite.com"}
-    }
-
+    headers = {"Authorization": f"Bearer {MP_TOKEN}", "Content-Type": "application/json", "X-Idempotency-Key": str(uuid.uuid4())}
+    payload = {"transaction_amount": float(plano["valor"]), "description": f"Destaque Grupo: {nome}", "payment_method_id": "pix", "payer": {"email": f"cliente_{int(time.time())}@flowsite.com"}}
+    
     try:
-        r = requests.post(url, json=payload, headers=headers, timeout=15)
+        r = requests.post("https://api.mercadopago.com/v1/payments", json=payload, headers=headers, timeout=15)
         if r.status_code == 201:
             res = r.json()
             pid = str(res["id"])
-            qr_code = res.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")
-
-            colecao_pagamentos.insert_one({
-                "payment_id": pid,
-                "nome": nome,
-                "link": link,
-                "categoria": categoria,
-                "descricao": descricao,
-                "foto": foto_final,
-                "ativado": False,
-                "criado_em": time.time()
-            })
-
-            return jsonify({"payment_id": pid, "pix_code": qr_code})
-        else:
-            print(f"Erro MP resposta: {r.text}")
-    except Exception as e:
-        print(f"Erro Mercado Pago: {e}")
-
-    return jsonify({"erro": "Falha ao gerar o Pix no Mercado Pago. Verifique o token."}), 500
+            colecao_pagamentos.insert_one({"payment_id": pid, "nome": nome, "link": link, "categoria": categoria, "descricao": descricao, "foto": foto_final, "ativado": False, "criado_em": time.time()})
+            return jsonify({"payment_id": pid, "pix_code": res.get("point_of_interaction", {}).get("transaction_data", {}).get("qr_code", "")})
+    except Exception as e: print(e)
+    return jsonify({"erro": "Falha ao gerar Pix"}), 500
 
 @app.route('/api/verificar-pagamento', methods=['GET'])
 def verificar_pagamento():
     pid = request.args.get("id")
     status = "pending"
-    
     try:
-        headers = {"Authorization": f"Bearer {MP_TOKEN}"}
-        r = requests.get(f"https://api.mercadopago.com/v1/payments/{pid}", headers=headers, timeout=10)
+        r = requests.get(f"https://api.mercadopago.com/v1/payments/{pid}", headers={"Authorization": f"Bearer {MP_TOKEN}"}, timeout=10)
         if r.status_code == 200:
             d = r.json()
             status = d.get("status", "pending")
             if status == "approved":
                 pendente = colecao_pagamentos.find_one({"payment_id": str(pid)})
                 if pendente and not pendente.get("ativado"):
-                    colecao_grupos.insert_one({
-                        "nome": pendente["nome"],
-                        "link": pendente["link"],
-                        "categoria": pendente["categoria"],
-                        "descricao": pendente["descricao"],
-                        "foto": pendente["foto"],
-                        "cliques_unicos": [],
-                        "criado_em": time.time()
-                    })
-
+                    colecao_grupos.insert_one({"nome": pendente["nome"], "link": pendente["link"], "categoria": pendente["categoria"], "descricao": pendente["descricao"], "foto": pendente["foto"], "cliques_unicos": [], "criado_em": time.time()})
                     colecao_pagamentos.update_one({"payment_id": str(pid)}, {"$set": {"ativado": True}})
-    except Exception as e:
-        print(f"Erro ao checar Pix: {e}")
-
+    except Exception as e: print(e)
     return jsonify({"status": status})
 
 @app.route('/api/denunciar', methods=['POST'])
 def denunciar():
     data = request.json or {}
-    colecao_denuncias.insert_one({
-        "grupo_id": data.get("grupo_id"),
-        "motivo": data.get("motivo"),
-        "data": time.time()
-    })
+    colecao_denuncias.insert_one({"grupo_id": data.get("grupo_id"), "motivo": data.get("motivo"), "data": time.time()})
     return jsonify({"sucesso": True})
-
-# ==============================================
-# 🎵 YOUTUBE DOWNLOADER (ÁUDIO E VÍDEO)
-# ==============================================
-@app.route('/api/adm/baixar-audio', methods=['POST'])
-def adm_baixar_audio():
-    data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    termo = data.get("termo", "").strip()
-    if not termo:
-        return jsonify({"erro": "Informe um link ou termo de pesquisa!"}), 400
-
-    pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
-    
-    output_dir = "downloads_temp"
-    os.makedirs(output_dir, exist_ok=True)
-    file_id = str(uuid.uuid4())
-    outtmpl = os.path.join(output_dir, f"{file_id}.%(ext)s")
-
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': outtmpl,
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-        'quiet': True
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(pesquisa, download=True)
-            if 'entries' in info:
-                info = info['entries'][0]
-            titulo = info.get('title', 'audio')
-            
-        final_path = os.path.join(output_dir, f"{file_id}.mp3")
-        if not os.path.exists(final_path):
-            return jsonify({"erro": "Falha ao processar o arquivo de áudio."}), 500
-
-        return send_file(final_path, as_attachment=True, download_name=f"{titulo[:50]}.mp3")
-    except Exception as e:
-        print(f"Erro no download de áudio: {e}")
-        return jsonify({"erro": str(e)}), 500
-
-@app.route('/api/adm/baixar-video', methods=['POST'])
-def adm_baixar_video():
-    data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    termo = data.get("termo", "").strip()
-    if not termo:
-        return jsonify({"erro": "Informe um link ou termo de pesquisa!"}), 400
-
-    pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
-    
-    output_dir = "downloads_temp"
-    os.makedirs(output_dir, exist_ok=True)
-    file_id = str(uuid.uuid4())
-    outtmpl = os.path.join(output_dir, f"{file_id}.%(ext)s")
-
-    ydl_opts = {
-        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
-        'outtmpl': outtmpl,
-        'quiet': True
-    }
-
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(pesquisa, download=True)
-            if 'entries' in info:
-                info = info['entries'][0]
-            titulo = info.get('title', 'video')
-            ext = info.get('ext', 'mp4')
-            
-        final_path = os.path.join(output_dir, f"{file_id}.{ext}")
-        if not os.path.exists(final_path):
-            return jsonify({"erro": "Falha ao processar o arquivo de vídeo."}), 500
-
-        return send_file(final_path, as_attachment=True, download_name=f"{titulo[:50]}.{ext}")
-    except Exception as e:
-        print(f"Erro no download de vídeo: {e}")
-        return jsonify({"erro": str(e)}), 500
-
-# ==============================================
-# 🛡️ ROTAS DO PAINEL ADM (POST E ADMIN_PASSWORD)
-# ==============================================
 
 @app.route('/api/adm/dados', methods=['POST'])
 def adm_dados():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
     denuncias = list(colecao_denuncias.find({}))
-    for d in denuncias:
-        d["_id"] = str(d["_id"])
-
+    for d in denuncias: d["_id"] = str(d["_id"])
     grupos = list(colecao_grupos.find({}))
-    for g in grupos:
-        g["_id"] = str(g["_id"])
-
+    for g in grupos: g["_id"] = str(g["_id"])
     grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
-    config_promo = colecao_config.find_one({"_id": "card_promo"})
-
-    return jsonify({"denuncias": denuncias, "grupos": grupos, "promo": config_promo})
+    return jsonify({"denuncias": denuncias, "grupos": grupos, "promo": colecao_config.find_one({"_id": "card_promo"})})
 
 @app.route('/api/adm/salvar-promo', methods=['POST'])
 def adm_salvar_promo():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    promo_data = data.get("promo", {})
-    promo_data["_id"] = "card_promo"
-    
-    colecao_config.replace_one({"_id": "card_promo"}, promo_data, upsert=True)
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
+    promo = data.get("promo", {})
+    promo["_id"] = "card_promo"
+    colecao_config.replace_one({"_id": "card_promo"}, promo, upsert=True)
     return jsonify({"sucesso": True})
 
 @app.route('/api/adm/apagar-promo', methods=['POST'])
 def adm_apagar_promo():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
     colecao_config.delete_one({"_id": "card_promo"})
     return jsonify({"sucesso": True})
 
 @app.route('/api/adm/atualizar-cliques', methods=['POST'])
 def adm_atualizar_cliques():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    gid = data.get("id")
-    novos_cliques = int(data.get("cliques", 0))
-
-    try:
-        obj_id = ObjectId(gid)
-    except:
-        obj_id = gid
-
-    lista_ficticia = [f"adm_click_{i}" for i in range(novos_cliques)]
-
-    resultado = colecao_grupos.update_one(
-        {"_id": obj_id},
-        {"$set": {"cliques_unicos": lista_ficticia}}
-    )
-
-    if resultado.modified_count > 0 or resultado.matched_count > 0:
-        return jsonify({"sucesso": True})
-    else:
-        return jsonify({"sucesso": False, "erro": "Grupo não encontrado"}), 404
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
+    gid, novos_cliques = data.get("id"), int(data.get("cliques", 0))
+    try: obj_id = ObjectId(gid)
+    except: obj_id = gid
+    res = colecao_grupos.update_one({"_id": obj_id}, {"$set": {"cliques_unicos": [f"adm_{i}" for i in range(novos_cliques)]}})
+    return jsonify({"sucesso": res.modified_count > 0 or res.matched_count > 0})
 
 @app.route('/api/adm/cadastrar', methods=['POST'])
 def adm_cadastrar_direto():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
+    nome, link, categoria = data.get("nome"), data.get("link", "").strip(), data.get("categoria", "Outros")
+    descricao, foto_input = data.get("descricao", "")[:30], data.get("foto", "").strip()
+    if not link: return jsonify({"erro": "Link obrigatório!"}), 400
+    if colecao_grupos.find_one({"link": link}): return jsonify({"erro": "Link já cadastrado!"}), 400
     
-    nome = data.get("nome")
-    link = data.get("link", "").strip()
-    categoria = data.get("categoria", "Outros")
-    descricao = data.get("descricao", "")[:30]
-    foto_input = data.get("foto", "").strip()
-    
-    if not link:
-        return jsonify({"erro": "O link é obrigatório!"}), 400
-
-    if colecao_grupos.find_one({"link": link}):
-        return jsonify({"erro": "Este link de grupo já está publicado no site!"}), 400
-
     foto_final = "https://files.catbox.moe/0aa6f2.png"
     if foto_input and "base64," in foto_input:
         try:
-            header, encoded = foto_input.split(",", 1)
-            img_data = base64.b64decode(encoded)
-            img = Image.open(io.BytesIO(img_data))
-            img = img.convert("RGB")
+            _, encoded = foto_input.split(",", 1)
+            img = Image.open(io.BytesIO(base64.b64decode(encoded))).convert("RGB")
             img.thumbnail((300, 300))
             output = io.BytesIO()
             img.save(output, format="JPEG", quality=85)
-            compressed_base64 = base64.b64encode(output.getvalue()).decode("utf-8")
-            foto_final = f"data:image/jpeg;base64,{compressed_base64}"
-        except Exception as img_err:
-            print(f"Erro ao processar imagem ADM: {img_err}")
-    elif foto_input:
-        foto_final = foto_input
+            foto_final = f"data:image/jpeg;base64,{base64.b64encode(output.getvalue()).decode('utf-8')}"
+        except Exception as e: print(e)
+    elif foto_input: foto_final = foto_input
 
-    colecao_grupos.insert_one({
-        "nome": nome,
-        "link": link,
-        "categoria": categoria,
-        "descricao": descricao,
-        "foto": foto_final,
-        "cliques_unicos": [],
-        "criado_em": time.time()
-    })
-
+    colecao_grupos.insert_one({"nome": nome, "link": link, "categoria": categoria, "descricao": descricao, "foto": foto_final, "cliques_unicos": [], "criado_em": time.time()})
     return jsonify({"sucesso": True})
 
 @app.route('/api/adm/remover', methods=['POST'])
 def adm_remover():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    gid = data.get("id")
-    try:
-        colecao_grupos.delete_one({"_id": ObjectId(gid)})
-    except:
-        colecao_grupos.delete_one({"_id": gid})
-        
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
+    try: colecao_grupos.delete_one({"_id": ObjectId(data.get("id"))})
+    except: colecao_grupos.delete_one({"_id": data.get("id")})
     return jsonify({"sucesso": True})
 
 @app.route('/api/adm/remover-denuncia', methods=['POST'])
 def adm_remover_denuncia():
     data = request.json or {}
-    if data.get("senha") != ADMIN_PASSWORD:
-        return jsonify({"erro": "Senha incorreta!"}), 401
-    
-    did = data.get("id")
-    try:
-        colecao_denuncias.delete_one({"_id": ObjectId(did)})
-    except:
-        colecao_denuncias.delete_one({"_id": did})
-        
+    if data.get("senha") != ADMIN_PASSWORD: return jsonify({"erro": "Senha incorreta!"}), 401
+    try: colecao_denuncias.delete_one({"_id": ObjectId(data.get("id"))})
+    except: colecao_denuncias.delete_one({"_id": data.get("id")})
     return jsonify({"sucesso": True})
 
 if __name__ == "__main__":
