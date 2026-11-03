@@ -170,7 +170,7 @@
             flex-shrink: 0;
         }
 
-        /* Card de Grupos no ADM com Sistema de Mover */
+        /* Card de Grupos no ADM */
         .card-grupo {
             display: flex;
             align-items: center;
@@ -178,21 +178,8 @@
             background: var(--card-bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 10px 14px;
+            padding: 12px 14px;
             margin-bottom: 10px;
-            transition: transform 0.2s, background 0.2s;
-        }
-        .card-grupo.arrastando {
-            opacity: 0.5;
-            background: #21262d;
-            border: 2px dashed var(--primary);
-        }
-        .drag-handle {
-            cursor: grab;
-            font-size: 18px;
-            color: #8b949e;
-            user-select: none;
-            padding: 5px;
         }
         .card-grupo img {
             width: 48px;
@@ -205,32 +192,35 @@
         .grupo-info { flex: 1; overflow: hidden; }
         .grupo-nome { font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .grupo-cat { font-size: 11px; color: #ffd700; margin-top: 2px; }
-        .grupo-link { font-size: 11px; color: #58a6ff; text-decoration: none; word-break: break-all; display: inline-block; margin-top: 2px; }
-        .grupo-cliques {
-            font-size: 11px;
-            color: #25d366;
-            font-weight: bold;
-            margin-top: 3px;
-        }
-
-        /* Controles de Ordem e Ações */
-        .grupo-controles-ordem {
+        
+        .grupo-edit-cliques {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
             align-items: center;
+            gap: 6px;
+            margin-top: 4px;
         }
-        .btn-ordem {
-            background: #21262d;
-            color: #fff;
+        .grupo-edit-cliques input {
+            width: 70px;
+            padding: 4px 8px;
+            background: #0d1117;
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 4px 8px;
-            font-size: 11px;
-            cursor: pointer;
+            color: #25d366;
             font-weight: bold;
+            font-size: 13px;
+            outline: none;
+            text-align: center;
         }
-        .btn-ordem:hover { background: #30363d; color: var(--primary); }
+        .btn-salvar-cliques {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
         .grupo-acoes-diretas {
             display: flex;
@@ -278,17 +268,6 @@
             align-items: center;
             margin-bottom: 15px;
         }
-        .btn-salvar-ordem {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(37,211,102,0.3);
-        }
         .btn-atualizar {
             background: #21262d;
             color: var(--text);
@@ -305,7 +284,7 @@
 <div class="container">
     <header>
         <h1>⚡ FLOW — Painel ADM</h1>
-        <p>Gestão de Grupos, Moderação, Ordenação e Anúncios</p>
+        <p>Gestão de Grupos, Moderação e Anúncios</p>
     </header>
 
     <!-- BOX DE LOGIN -->
@@ -320,8 +299,7 @@
         <div class="top-bar">
             <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado</b></span>
             <div>
-                <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar</button>
-                <button class="btn-salvar-ordem" onclick="salvarOrdemServidor()">💾 Salvar Nova Ordem</button>
+                <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Painel</button>
             </div>
         </div>
 
@@ -396,10 +374,9 @@
             <p class="vazio">Carregando denúncias...</p>
         </div>
 
-        <!-- SEÇÃO DE GERENCIAMENTO DE POSIÇÃO E REORDENAÇÃO -->
+        <!-- SEÇÃO DE GERENCIAMENTO DE CLIQUES DOS GRUPOS -->
         <div class="secao-titulo">
-            <span>☰ Mover Posição dos Grupos (Arraste ou Use ⬆️⬇️)</span>
-            <button class="btn-salvar-ordem" onclick="salvarOrdemServidor()" style="font-size:11px; padding:4px 10px;">💾 Salvar Ordem</button>
+            <span>📊 Gerenciar Cliques / Posição dos Grupos</span>
         </div>
         <div id="listaGrupos">
             <p class="vazio">Carregando grupos...</p>
@@ -409,7 +386,6 @@
 
 <script>
 let senhaSalva = "";
-let listaGruposLocais = [];
 
 async function autenticar() {
     const senhaInput = document.getElementById('senhaAdm').value;
@@ -451,16 +427,7 @@ async function carregarDados() {
         }
 
         renderizarDenuncias(data.denuncias || []);
-        
-        // ORDENAÇÃO AUTOMÁTICA POR CLIQUES (EXATAMENTE IGUAL AO SITE PRINCIPAL)
-        listaGruposLocais = data.grupos || [];
-        listaGruposLocais.sort((a, b) => {
-            let cliquesA = (a.cliques_unicos && Array.isArray(a.cliques_unicos)) ? a.cliques_unicos.length : (a.acessos || a.cliques || 0);
-            let cliquesB = (b.cliques_unicos && Array.isArray(b.cliques_unicos)) ? b.cliques_unicos.length : (b.acessos || b.cliques || 0);
-            return cliquesB - cliquesA;
-        });
-
-        renderizarGrupos(listaGruposLocais);
+        renderizarGrupos(data.grupos || []);
 
     } catch(e) {
         console.error(e);
@@ -475,7 +442,6 @@ function escaparHTML(str) {
     );
 }
 
-// SISTEMA DE RENDERIZAÇÃO E REORDENAÇÃO DE GRUPOS VIA ADM
 function renderizarGrupos(grupos) {
     const cont = document.getElementById('listaGrupos');
     if(grupos.length === 0) {
@@ -484,20 +450,19 @@ function renderizarGrupos(grupos) {
     }
 
     cont.innerHTML = grupos.map((g, index) => {
-        let totalCliques = (g.cliques_unicos && Array.isArray(g.cliques_unicos)) ? g.cliques_unicos.length : (g.acessos || g.cliques || 0);
+        let totalCliques = (g.cliques_unicos && Array.isArray(g.cliques_unicos)) ? g.cliques_unicos.length : 0;
 
         return `
-            <div class="card-grupo" draggable="true" data-index="${index}" data-id="${g._id}">
-                <div class="drag-handle" title="Arraste para mover">☰</div>
+            <div class="card-grupo" data-id="${g._id}">
                 <img src="${escaparHTML(g.foto || 'https://files.catbox.moe/0aa6f2.png')}" alt="Foto">
                 <div class="grupo-info">
                     <div class="grupo-nome">#${index + 1} - ${escaparHTML(g.nome)}</div>
                     <div class="grupo-cat">${escaparHTML(g.categoria)}</div>
-                    <div class="grupo-cliques">🔥 Cliques: ${totalCliques}</div>
-                </div>
-                <div class="grupo-controles-ordem">
-                    <button class="btn-ordem" onclick="moverItemLocal(${index}, -1)">⬆️</button>
-                    <button class="btn-ordem" onclick="moverItemLocal(${index}, 1)">⬇️</button>
+                    <div class="grupo-edit-cliques">
+                        <span style="font-size:11px; color:#8b949e;">Cliques:</span>
+                        <input type="number" id="cliques-${g._id}" value="${totalCliques}" min="0">
+                        <button class="btn-salvar-cliques" onclick="atualizarCliques('${g._id}')">💾 Salvar</button>
+                    </div>
                 </div>
                 <div class="grupo-acoes-diretas">
                     <button class="btn-remover" onclick="removerGrupo('${escaparHTML(g._id)}')">🗑️ Rem</button>
@@ -505,72 +470,25 @@ function renderizarGrupos(grupos) {
             </div>
         `;
     }).join('');
-
-    iniciarDragAndDrop();
 }
 
-// LÓGICA DE MOVER LOCALMENTE (SUBIR / DESCER)
-function moverItemLocal(index, direcao) {
-    let novoIndex = index + direcao;
-    if(novoIndex < 0 || novoIndex >= listaGruposLocais.length) return;
-
-    let temp = listaGruposLocais[index];
-    listaGruposLocais[index] = listaGruposLocais[novoIndex];
-    listaGruposLocais[novoIndex] = temp;
-
-    renderizarGrupos(listaGruposLocais);
-}
-
-// LÓGICA DE ARRASTAR E SOLTAR (DRAG & DROP)
-let itemArrastadoIndex = null;
-
-function iniciarDragAndDrop() {
-    const cards = document.querySelectorAll('.card-grupo');
-    cards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-            itemArrastadoIndex = parseInt(card.getAttribute('data-index'));
-            card.classList.add('arrastando');
-        });
-
-        card.addEventListener('dragend', () => {
-            card.classList.remove('arrastando');
-        });
-
-        card.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        card.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const alvoIndex = parseInt(card.getAttribute('data-index'));
-            if (itemArrastadoIndex !== null && itemArrastadoIndex !== alvoIndex) {
-                const itemRemovido = listaGruposLocais.splice(itemArrastadoIndex, 1)[0];
-                listaGruposLocais.splice(alvoIndex, 0, itemRemovido);
-                renderizarGrupos(listaGruposLocais);
-            }
-        });
-    });
-}
-
-// SALVAR A NOVA POSIÇÃO NO BANCO DE DADOS DO SERVIDOR
-async function salvarOrdemServidor() {
-    if(listaGruposLocais.length === 0) return;
-
-    let novaOrdemIds = listaGruposLocais.map(g => g._id);
+async function atualizarCliques(id) {
+    let inputVal = document.getElementById(`cliques-${id}`).value;
+    let novosCliques = parseInt(inputVal) || 0;
 
     try {
-        let res = await fetch('/api/adm/salvar-ordem', {
+        let res = await fetch('/api/adm/atualizar-cliques', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ senha: senhaSalva, ordem: novaOrdemIds })
+            body: JSON.stringify({ senha: senhaSalva, id: id, cliques: novosCliques })
         });
         let data = await res.json();
 
         if(data.sucesso) {
-            alert("✅ Nova ordem dos grupos salva com sucesso no banco!");
+            alert("✅ Número de cliques atualizado! O site já recalculou a posição.");
             carregarDados();
         } else {
-            alert("❌ Erro ao salvar ordem: " + (data.erro || 'Erro desconhecido'));
+            alert("❌ Erro: " + (data.erro || 'Erro desconhecido'));
         }
     } catch(err) {
         console.error(err);
@@ -719,7 +637,7 @@ async function removerGrupo(id) {
 }
 
 async function removerDenuncia(id) {
-    if(-!confirm("Deseja limpar este aviso de denúncia?")) return;
+    if(!confirm("Deseja limpar este aviso de denúncia?")) return;
 
     try {
         let res = await fetch('/api/adm/remover-denuncia', {
