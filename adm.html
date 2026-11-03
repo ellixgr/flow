@@ -451,6 +451,8 @@ async function carregarDados() {
         }
 
         renderizarDenuncias(data.denuncias || []);
+        
+        // Carrega os grupos na mesma ordem exata retornada pelo servidor (que já respeita a ordem salva ou o ranking)
         listaGruposLocais = data.grupos || [];
         renderizarGrupos(listaGruposLocais);
 
