@@ -15,21 +15,23 @@
             align-items: center;
             padding: 20px;
             position: relative;
-            overflow-x: hidden;
+            overflow: hidden;
         }
-        /* Vídeo de fundo cobrindo a tela toda */
+        /* Vídeo de fundo cobrindo a tela inteira sem bordas pretas */
         .video-fundo {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
             object-fit: cover;
             z-index: -2;
-            /* Filtro mais claro para o vídeo não ficar escuro demais */
             filter: brightness(0.7); 
         }
-        /* Overlay mais leve para preservar a visibilidade do vídeo */
+        /* Overlay leve para dar contraste ao botão e anúncio */
         .overlay-fundo {
             position: fixed;
             top: 0;
@@ -38,14 +40,6 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.35);
             z-index: -1;
-        }
-        /* Botão de som do vídeo */
-        .mute-btn { 
-            position: absolute; top: 20px; left: 20px; z-index: 15; 
-            background: rgba(0,0,0,0.6); border-radius: 50%; 
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; border: 1px solid rgba(255,255,255,0.3);
-            color: #fff; font-size: 16px;
         }
         /* Container do script de anúncio */
         .ad-container {
@@ -77,14 +71,11 @@
 </head>
 <body>
 
-    <!-- Vídeo de Fundo Atualizado -->
-    <video class="video-fundo" id="meuVideo" autoplay loop muted playsinline>
+    <!-- Vídeo de Fundo Preenchendo a Tela -->
+    <video class="video-fundo" autoplay loop muted playsinline>
         <source src="https://raw.githubusercontent.com/ellixgr/flow/main/lv_0_20260314181033.mp4" type="video/mp4">
     </video>
     <div class="overlay-fundo"></div>
-
-    <!-- Botão Mute / Som -->
-    <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
 
     <!-- Script de Anúncio Adsterra -->
     <div class="ad-container">
@@ -104,15 +95,6 @@
     <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
 
     <script>
-        const video = document.getElementById('meuVideo');
-        const muteIcon = document.getElementById('muteIcon');
-
-        function toggleMute(e) { 
-            if(e) { e.preventDefault(); e.stopPropagation(); } 
-            video.muted = !video.muted; 
-            muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
-        }
-
         function abrirCorreto(event) {
             event.preventDefault();
             
