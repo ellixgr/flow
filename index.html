@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grupos WhatsApp 💬 FLOW</title>
-    <meta name="description" content="Clique para acessar os melhores grupos de WhatsApp ativos.">
     <style>
         * {
             box-sizing: border-box;
@@ -13,86 +12,60 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            background-color: #0d1117;
-            color: #f0f6fc;
+            background-color: #000000;
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
         }
-        .container {
-            text-align: center;
-            background: #161b22;
-            border: 1px solid #30363d;
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            max-width: 400px;
-            width: 100%;
-        }
-        h1 {
-            font-size: 24px;
-            color: #25d366;
-            margin-bottom: 10px;
-            font-weight: 800;
-        }
-        p {
-            font-size: 14px;
-            color: #8b949e;
-            margin-bottom: 30px;
-            line-height: 1.5;
-        }
         .btn-ver-grupos {
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
-            padding: 16px;
+            max-width: 320px;
+            padding: 18px;
             background: #25d366;
             color: #000;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 20px;
+            font-weight: 800;
             text-decoration: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
             transition: transform 0.2s, opacity 0.2s;
             cursor: pointer;
             border: none;
+            outline: none;
         }
         .btn-ver-grupos:hover {
             opacity: 0.9;
-            transform: scale(1.02);
+            transform: scale(1.03);
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>⚡ FLOW Grupos</h1>
-        <p>Clique no botão abaixo para entrar na nossa lista de comunidades ativas e atualizadas diariamente.</p>
-        
-        <!-- Botão com a função de abrir o anúncio em 2º plano e redirecionar o usuário -->
-        <button class="btn-ver-grupos" onclick="abrirRedirect(event)">Ver Grupos</button>
-    </div>
+    <button class="btn-ver-grupos" onclick="abrirRedirect(event)">Ver Grupos</button>
 
     <script>
         function abrirRedirect(event) {
             event.preventDefault();
             
-            // Cole aqui o link direto (Direct Link) do seu Adsterra
+            // Link do seu anúncio do Adsterra
             const linkAnuncioAdsterra = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             
-            // O seu site principal para onde o usuário vai navegar
+            // Seu site principal no Render
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // Abre o anúncio do Adsterra em uma nova aba em segundo plano
+            // Abre o Adsterra em segundo plano
             const abaAnuncio = window.open(linkAnuncioAdsterra, '_blank');
             
             if (abaAnuncio) {
-                // Tira o foco da aba do anúncio e foca de volta na página atual (mantém em segundo plano)
                 window.focus();
             }
 
-            // Redireciona imediatamente a aba atual do usuário para o seu site principal
+            // Redireciona imediatamente para o seu site
             setTimeout(() => {
                 window.location.href = sitePrincipal;
             }, 100);
