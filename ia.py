@@ -80,6 +80,11 @@ def adm_panel():
     with open("adm.html", "r", encoding="utf-8") as f:
         return f.read()
 
+@app.route('/msc')
+def pagina_download():
+    with open("MSC.html", "r", encoding="utf-8") as f:
+        return f.read()
+
 @app.route('/api/grupos', methods=['GET'])
 def listar_grupos():
     grupos = list(colecao_grupos.find({}, {"_id": 1, "nome": 1, "link": 1, "categoria": 1, "descricao": 1, "foto": 1}))
@@ -256,7 +261,7 @@ def denunciar():
     return jsonify({"sucesso": True})
 
 # ==============================================
-# 🎵 YOUTUBE DOWNLOADER (ÁUDIO E VÍDEO NO ADM)
+# 🎵 YOUTUBE DOWNLOADER (ÁUDIO E VÍDEO)
 # ==============================================
 @app.route('/api/adm/baixar-audio', methods=['POST'])
 def adm_baixar_audio():
