@@ -92,21 +92,8 @@ def site_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
     
-    # Busca a ordem personalizada salva pelo ADM
-    config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
-    if config_ordem and "ordem" in config_ordem:
-        ordem_ids = config_ordem["ordem"]
-        grupos_dict = {str(g["_id"]): g for g in grupos}
-        grupos_ordenados = []
-        for gid in ordem_ids:
-            if gid in grupos_dict:
-                grupos_ordenados.append(grupos_dict.pop(gid))
-        for gid, g in grupos_dict.items():
-            grupos_ordenados.append(g)
-        grupos = grupos_ordenados
-    else:
-        # Se não houver ordem manual salva, ordena automaticamente pelos mais acessados (cliques)
-        grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
+    # Ordena estritamente pelo número de cliques (do maior para o menor) em tempo real
+    grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
     
     config_promo = colecao_config.find_one({"_id": "card_promo"}) or {
         "ativo": True,
@@ -241,7 +228,7 @@ def verificar_pagamento():
             if status == "approved":
                 pendente = colecao_pagamentos.find_one({"payment_id": str(pid)})
                 if pendente and not pendente.get("ativado"):
-                    novo_id = colecao_grupos.insert_one({
+                    colecao_grupos.insert_one({
                         "nome": pendente["nome"],
                         "link": pendente["link"],
                         "categoria": pendente["categoria"],
@@ -249,12 +236,7 @@ def verificar_pagamento():
                         "foto": pendente["foto"],
                         "cliques_unicos": [],
                         "criado_em": time.time()
-                    }).inserted_id
-                    
-                    config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
-                    if config_ordem and "ordem" in config_ordem:
-                        config_ordem["ordem"].insert(0, str(novo_id))
-                        colecao_config.replace_one({"_id": "ordem_grupos"}, config_ordem)
+                    })
 
                     colecao_pagamentos.update_one({"payment_id": str(pid)}, {"$set": {"ativado": True}})
     except Exception as e:
@@ -290,20 +272,8 @@ def adm_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
 
-    # Carrega a ordem salva ou ordena automaticamente por cliques para ficar igualzinho ao site
-    config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
-    if config_ordem and "ordem" in config_ordem:
-        ordem_ids = config_ordem["ordem"]
-        grupos_dict = {str(g["_id"]): g for g in grupos}
-        grupos_ordenados = []
-        for gid in ordem_ids:
-            if gid in grupos_dict:
-                grupos_ordenados.append(grupos_dict.pop(gid))
-        for gid, g in grupos_dict.items():
-            grupos_ordenados.append(g)
-        grupos = grupos_ordenados
-    else:
-        grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
+    # Ordena os grupos por cliques para o painel ADM exibir na mesma ordem do site
+    grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
 
     config_promo = colecao_config.find_one({"_id": "card_promo"})
 
@@ -330,20 +300,33 @@ def adm_apagar_promo():
     colecao_config.delete_one({"_id": "card_promo"})
     return jsonify({"sucesso": True})
 
-# 🔄 ROTA NOVA: SALVA A ORDEM DOS GRUPOS DEFINIDA PELO DONO NO PAINEL ADM
-@app.route('/api/adm/salvar-ordem', methods=['POST'])
-def adm_salvar_ordem():
+# 🔄 ROTA PARA ATUALIZAR OS CLIQUES DIRETAMENTE PELO PAINEL ADM
+@app.route('/api/adm/atualizar-cliques', methods=['POST'])
+def adm_atualizar_cliques():
     data = request.json or {}
     if data.get("senha") != ADMIN_PASSWORD:
         return jsonify({"erro": "Senha incorreta!"}), 401
     
-    nova_ordem = data.get("ordem", [])
-    colecao_config.replace_one(
-        {"_id": "ordem_grupos"},
-        {"_id": "ordem_grupos", "ordem": nova_ordem},
-        upsert=True
+    gid = data.get("id")
+    novos_cliques = int(data.get("cliques", 0))
+
+    try:
+        obj_id = ObjectId(gid)
+    except:
+        obj_id = gid
+
+    # Gera uma lista fictícia de IDs únicos com o tamanho exato da quantidade de cliques desejada
+    lista_ficticia = [f"adm_click_{i}" for i in range(novos_cliques)]
+
+    resultado = colecao_grupos.update_one(
+        {"_id": obj_id},
+        {"$set": {"cliques_unicos": lista_ficticia}}
     )
-    return jsonify({"sucesso": True})
+
+    if resultado.modified_count > 0 or resultado.matched_count > 0:
+        return jsonify({"sucesso": True})
+    else:
+        return jsonify({"sucesso": False, "erro": "Grupo não encontrado"}), 404
 
 @app.route('/api/adm/cadastrar', methods=['POST'])
 def adm_cadastrar_direto():
@@ -380,7 +363,7 @@ def adm_cadastrar_direto():
     elif foto_input:
         foto_final = foto_input
 
-    novo_id = colecao_grupos.insert_one({
+    colecao_grupos.insert_one({
         "nome": nome,
         "link": link,
         "categoria": categoria,
@@ -388,13 +371,7 @@ def adm_cadastrar_direto():
         "foto": foto_final,
         "cliques_unicos": [],
         "criado_em": time.time()
-    }).inserted_id
-
-    # Adiciona o novo grupo cadastrado pelo ADM no topo da ordem salva
-    config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
-    if config_ordem and "ordem" in config_ordem:
-        config_ordem["ordem"].insert(0, str(novo_id))
-        colecao_config.replace_one({"_id": "ordem_grupos"}, config_ordem)
+    })
 
     return jsonify({"sucesso": True})
 
@@ -409,13 +386,6 @@ def adm_remover():
         colecao_grupos.delete_one({"_id": ObjectId(gid)})
     except:
         colecao_grupos.delete_one({"_id": gid})
-        
-    # Remove também o ID da lista de ordenação salva
-    config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
-    if config_ordem and "ordem" in config_ordem:
-        if str(gid) in config_ordem["ordem"]:
-            config_ordem["ordem"].remove(str(gid))
-            colecao_config.replace_one({"_id": "ordem_grupos"}, config_ordem)
         
     return jsonify({"sucesso": True})
 
