@@ -1,7 +1,6 @@
 import os
 import uuid
 import time
-import yt_dlp
 import requests
 from flask import request, jsonify, send_file, render_template_string
 
@@ -9,6 +8,9 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
     colecao_downloads = db["downloads_usuarios"]
     colecao_vip = db["usuarios_vip"]
     colecao_pagamentos = db["pagamentos_pendentes"]
+
+    # Instância pública do Invidious para buscar dados e streams sem bloqueio
+    INVIDIOUS_API = "https://inv.nadeko.net"
 
     @app.route('/msc')
     def pagina_download():
@@ -251,7 +253,7 @@ async function prepararDownload(tipo) {
         let data = await res.json();
         if (!res.ok) throw new Error(data.erro || "Erro ao buscar mídia");
 
-        dadosPendentes = { tipo: tipo, termo: termo };
+        dadosPendentes = { tipo: tipo, videoId: data.videoId, title: data.title };
         
         document.getElementById('previewImg').src = data.thumbnail;
         document.getElementById('previewTitle').innerText = data.title;
@@ -274,7 +276,7 @@ async function confirmarVideo(confirmado) {
     }
 
     let tipo = dadosPendentes.tipo;
-    let termo = dadosPendentes.termo;
+    let videoId = dadosPendentes.videoId;
     let statusDiv = document.getElementById('statusMsg');
 
     document.getElementById('previewBox').style.display = 'none';
@@ -287,7 +289,7 @@ async function confirmarVideo(confirmado) {
         let res = await fetch(rota, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ usuario_id: usuarioId, termo: termo })
+            body: JSON.stringify({ usuario_id: usuarioId, videoId: videoId })
         });
 
         if (!res.ok) {
@@ -446,61 +448,53 @@ async function verificarPagamentoVip() {
         if not permitido: return jsonify({"erro": msg}), 403
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
-        pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
-        
-        # Adicionado o extractor-args para evitar o bloqueio de bot do YouTube
-        ydl_opts = {
-            'quiet': True,
-            'skip_download': True,
-            'default_search': 'ytsearch',
-            'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
-        }
-
         try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(pesquisa, download=False)
-                if 'entries' in info:
-                    entries = info.get('entries', [])
-                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
-                    info = entries[0]
-                
-                titulo = info.get('title', 'Sem Título')
-                thumbnail = info.get('thumbnail', 'https://files.catbox.moe/0aa6f2.png')
-                
-            return jsonify({"title": titulo, "thumbnail": thumbnail})
+            # Extrai o ID se for link direto ou usa busca via Invidious API
+            if "watch?v=" in termo:
+                video_id = termo.split("watch?v=")[1].split("&")[0]
+            opt_url = f"{INVIDIOUS_API}/api/v1/videos/{video_id}" if "watch?v=" in termo else f"{INVIDIOUS_API}/api/v1/search?q={requests.utils.quote(termo)}"
+            
+            resp = requests.get(opt_url, timeout=10).json()
+            
+            if "watch?v=" in termo:
+                titulo = resp.get("title", "Sem Título")
+                thumbnail = resp.get("videoThumbnails", [{}])[0].get("url", "https://files.catbox.moe/0aa6f2.png")
+            else:
+                if not resp or len(resp) == 0:
+                    return jsonify({"erro": "Nenhum resultado encontrado."}), 404
+                item = resp[0]
+                video_id = item.get("videoId")
+                titulo = item.get("title", "Sem Título")
+                thumbnail = item.get("videoThumbnails", [{}])[0].get("url", "https://files.catbox.moe/0aa6f2.png")
+
+            return jsonify({"videoId": video_id, "title": titulo, "thumbnail": thumbnail})
         except Exception as e:
-            return jsonify({"erro": "Erro ao buscar preview: " + str(e)}), 500
+            return jsonify({"erro": "Erro ao buscar preview via Invidious: " + str(e)}), 500
 
     @app.route('/api/adm/baixar-audio', methods=['POST'])
     def adm_baixar_audio():
         data = request.json or {}
-        usuario_id, termo = data.get("usuario_id"), data.get("termo", "").strip()
-        if not usuario_id: return jsonify({"erro": "ID obrigatório"}), 400
+        usuario_id, video_id = data.get("usuario_id"), data.get("videoId")
+        if not usuario_id or not video_id: return jsonify({"erro": "Dados obrigatórios faltando"}), 400
         
         permitido, tipo_ou_msg = checar_permissao(usuario_id)
         if not permitido: return jsonify({"erro": tipo_ou_msg}), 403
-        if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
-        pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
         out_dir = "downloads_temp"
         os.makedirs(out_dir, exist_ok=True)
         fid = str(uuid.uuid4())
         
         try:
+            url_youtube = f"https://www.youtube.com/watch?v={video_id}"
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
                 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
                 'quiet': True,
-                'default_search': 'ytsearch',
-                'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
+                'extractor_args': {'youtube': {'player_client': ['mweb', 'android']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(pesquisa, download=True)
-                if 'entries' in info:
-                    entries = info.get('entries', [])
-                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
-                    info = entries[0]
+                info = ydl.extract_info(url_youtube, download=True)
                 titulo = info.get('title', 'audio')
                 
             path = os.path.join(out_dir, f"{fid}.mp3")
@@ -514,32 +508,26 @@ async function verificarPagamentoVip() {
     @app.route('/api/adm/baixar-video', methods=['POST'])
     def adm_baixar_video():
         data = request.json or {}
-        usuario_id, termo = data.get("usuario_id"), data.get("termo", "").strip()
-        if not usuario_id: return jsonify({"erro": "ID obrigatório"}), 400
+        usuario_id, video_id = data.get("usuario_id"), data.get("videoId")
+        if not usuario_id or not video_id: return jsonify({"erro": "Dados obrigatórios faltando"}), 400
         
         permitido, tipo_ou_msg = checar_permissao(usuario_id)
         if not permitido: return jsonify({"erro": tipo_ou_msg}), 403
-        if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
-        pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
         out_dir = "downloads_temp"
         os.makedirs(out_dir, exist_ok=True)
         fid = str(uuid.uuid4())
         
         try:
+            url_youtube = f"https://www.youtube.com/watch?v={video_id}"
             ydl_opts = {
                 'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
                 'quiet': True,
-                'default_search': 'ytsearch',
-                'extractor_args': {'youtube': {'player_client': ['web_safari', 'web']}}
+                'extractor_args': {'youtube': {'player_client': ['mweb', 'android']}}
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(pesquisa, download=True)
-                if 'entries' in info:
-                    entries = info.get('entries', [])
-                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
-                    info = entries[0]
+                info = ydl.extract_info(url_youtube, download=True)
                 titulo, ext = info.get('title', 'video'), info.get('ext', 'mp4')
                 
             path = os.path.join(out_dir, f"{fid}.{ext}")
