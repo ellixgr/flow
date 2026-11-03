@@ -17,14 +17,14 @@
             position: relative;
             overflow: hidden;
         }
-        /* Vídeo forçado a cobrir 100% da tela sem bordas pretas */
+        /* Vídeo de fundo cobrindo a tela inteira sem distorção */
         .video-fundo {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            object-fit: fill; /* Força o preenchimento total da tela */
+            object-fit: cover; 
             z-index: -2;
             filter: brightness(0.7); 
         }
@@ -68,9 +68,9 @@
 </head>
 <body>
 
-    <!-- Vídeo de Fundo Preenchendo a Tela Inteira -->
+    <!-- Vídeo de Fundo Atualizado -->
     <video class="video-fundo" autoplay loop muted playsinline>
-        <source src="https://raw.githubusercontent.com/ellixgr/flow/main/lv_0_20260314181033.mp4" type="video/mp4">
+        <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
     </video>
     <div class="overlay-fundo"></div>
 
@@ -89,23 +89,4 @@
     </div>
 
     <!-- Botão Centralizado -->
-    <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
-
-    <script>
-        function abrirCorreto(event) {
-            event.preventDefault();
-            
-            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-            const sitePrincipal = "https://flow-af3j.onrender.com";
-
-            // 1. Abre o teu site principal numa nova aba e puxa ele para a frente (foco)
-            const novaAba = window.open(sitePrincipal, '_blank');
-            if (novaAba) { novaAba.focus(); }
-
-            // 2. A aba atual onde o utilizador clicou vira imediatamente o anúncio do Adsterra
-            window.location.href = linkAnuncio;
-        }
-    </script>
-
-</body>
-</html>
+    <button class="btn-ver-grupos" onclick="abrirCorreto(
