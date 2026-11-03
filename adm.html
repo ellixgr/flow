@@ -452,8 +452,14 @@ async function carregarDados() {
 
         renderizarDenuncias(data.denuncias || []);
         
-        // Carrega os grupos na mesma ordem exata retornada pelo servidor (que já respeita a ordem salva ou o ranking)
+        // ORDENAÇÃO AUTOMÁTICA POR CLIQUES (EXATAMENTE IGUAL AO SITE PRINCIPAL)
         listaGruposLocais = data.grupos || [];
+        listaGruposLocais.sort((a, b) => {
+            let cliquesA = (a.cliques_unicos && Array.isArray(a.cliques_unicos)) ? a.cliques_unicos.length : (a.acessos || a.cliques || 0);
+            let cliquesB = (b.cliques_unicos && Array.isArray(b.cliques_unicos)) ? b.cliques_unicos.length : (b.acessos || b.cliques || 0);
+            return cliquesB - cliquesA;
+        });
+
         renderizarGrupos(listaGruposLocais);
 
     } catch(e) {
@@ -713,7 +719,7 @@ async function removerGrupo(id) {
 }
 
 async function removerDenuncia(id) {
-    if(!confirm("Deseja limpar este aviso de denúncia?")) return;
+    if(-!confirm("Deseja limpar este aviso de denúncia?")) return;
 
     try {
         let res = await fetch('/api/adm/remover-denuncia', {
