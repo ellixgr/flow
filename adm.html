@@ -21,7 +21,7 @@
             padding: 20px 12px 60px;
         }
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
         }
         header {
@@ -77,11 +77,11 @@
             margin: 25px 0 12px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
             color: var(--primary);
         }
 
-        /* Caixa de Cadastro Direto pelo ADM */
+        /* Caixa de Formulários */
         .form-adm-box {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -170,51 +170,82 @@
             flex-shrink: 0;
         }
 
-        /* Card de Grupos */
+        /* Card de Grupos no ADM com Sistema de Mover */
         .card-grupo {
             display: flex;
             align-items: center;
             gap: 12px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .card-grupo.arrastando {
+            opacity: 0.5;
+            background: #21262d;
+            border: 2px dashed var(--primary);
+        }
+        .drag-handle {
+            cursor: grab;
+            font-size: 18px;
+            color: #8b949e;
+            user-select: none;
+            padding: 5px;
         }
         .card-grupo img {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             object-fit: cover;
             border: 2px solid var(--primary);
             flex-shrink: 0;
         }
         .grupo-info { flex: 1; overflow: hidden; }
-        .grupo-nome { font-weight: bold; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .grupo-nome { font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .grupo-cat { font-size: 11px; color: #ffd700; margin-top: 2px; }
         .grupo-link { font-size: 11px; color: #58a6ff; text-decoration: none; word-break: break-all; display: inline-block; margin-top: 2px; }
-        
-        /* 📊 Estilo do Contador de Cliques no Painel ADM */
         .grupo-cliques {
-            font-size: 12px;
+            font-size: 11px;
             color: #25d366;
             font-weight: bold;
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            margin-top: 3px;
         }
+
+        /* Controles de Ordem e Ações */
+        .grupo-controles-ordem {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            align-items: center;
+        }
+        .btn-ordem {
+            background: #21262d;
+            color: #fff;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-ordem:hover { background: #30363d; color: var(--primary); }
 
         .grupo-acoes-diretas {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
+            gap: 6px;
             flex-shrink: 0;
+            margin-left: 8px;
         }
-
         .btn-remover {
             background: var(--danger);
             color: #fff;
             border: none;
-            padding: 8px 12px;
+            padding: 8px 10px;
             border-radius: 8px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             cursor: pointer;
             white-space: nowrap;
@@ -247,6 +278,17 @@
             align-items: center;
             margin-bottom: 15px;
         }
+        .btn-salvar-ordem {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(37,211,102,0.3);
+        }
         .btn-atualizar {
             background: #21262d;
             color: var(--text);
@@ -263,7 +305,7 @@
 <div class="container">
     <header>
         <h1>⚡ FLOW — Painel ADM</h1>
-        <p>Gestão de Grupos, Moderação e Anúncios</p>
+        <p>Gestão de Grupos, Moderação, Ordenação e Anúncios</p>
     </header>
 
     <!-- BOX DE LOGIN -->
@@ -276,12 +318,17 @@
     <!-- CONTEÚDO DO PAINEL -->
     <div id="painelConteudo">
         <div class="top-bar">
-            <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado com Segurança</b></span>
-            <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar Dados</button>
+            <span style="font-size: 13px; color: #8b949e;">Status: <b style="color:var(--primary);">Autenticado</b></span>
+            <div>
+                <button class="btn-atualizar" onclick="carregarDados()">🔄 Atualizar</button>
+                <button class="btn-salvar-ordem" onclick="salvarOrdemServidor()">💾 Salvar Nova Ordem</button>
+            </div>
         </div>
 
         <!-- ⚙️ GESTÃO DO CARD FLUTUANTE DE DESTAQUE -->
-        <div class="secao-titulo">⚙️ Configurar Card Flutuante (Destaque)</div>
+        <div class="secao-titulo">
+            <span>⚙️ Configurar Card Flutuante</span>
+        </div>
         <div class="form-adm-box">
             <form onsubmit="salvarPromo(event)">
                 <label>Status do Card:</label>
@@ -299,25 +346,27 @@
                 <label>Texto Descritivo:</label>
                 <input type="text" id="promoTexto" required placeholder="Ex: Clique abaixo para garantir sua vaga!">
 
-                <label>Link de Destino (Aceita qualquer link):</label>
+                <label>Link de Destino:</label>
                 <input type="text" id="promoLink" required placeholder="Cole qualquer link aqui...">
 
-                <label>Duração do Contador (Segundos para liberar o botão X):</label>
+                <label>Duração do Contador (Segundos):</label>
                 <input type="number" id="promoDuracao" required min="1" max="60" value="5">
 
-                <button type="submit" class="btn-cadastrar-adm" style="margin-top:15px;">💾 Salvar Configurações do Card</button>
-                <button type="button" class="btn-apagar-anuncio" onclick="apagarPromo()">🗑️ Apagar/Resetar Anúncio do Banco</button>
+                <button type="submit" class="btn-cadastrar-adm">💾 Salvar Configurações do Card</button>
+                <button type="button" class="btn-apagar-anuncio" onclick="apagarPromo()">🗑️ Apagar Anúncio do Banco</button>
             </form>
         </div>
 
-        <!-- FORMULÁRIO DE CADASTRO LIVRE PELO ADM -->
-        <div class="secao-titulo">🚀 Cadastrar Link/Grupo Gratuitamente (ADM)</div>
+        <!-- FORMULÁRIO DE CADASTRO LIVRE -->
+        <div class="secao-titulo">
+            <span>🚀 Cadastrar Link/Grupo Gratuitamente</span>
+        </div>
         <div class="form-adm-box">
             <form id="formCadAdm" onsubmit="cadastrarDiretoAdm(event)">
                 <label>Nome do Grupo / Título:</label>
                 <input type="text" id="admNome" required placeholder="Ex: Meu Link / Grupo VIP">
                 
-                <label>Link de Destino (Aceita qualquer link livre):</label>
+                <label>Link de Destino:</label>
                 <input type="text" id="admLink" required placeholder="Cole qualquer link aqui...">
                 
                 <label>Categoria:</label>
@@ -340,13 +389,18 @@
         </div>
 
         <!-- SEÇÃO DE DENÚNCIAS -->
-        <div class="secao-titulo">🚨 Denúncias Recebidas</div>
+        <div class="secao-titulo">
+            <span>🚨 Denúncias Recebidas</span>
+        </div>
         <div id="listaDenuncias">
             <p class="vazio">Carregando denúncias...</p>
         </div>
 
-        <!-- SEÇÃO DE GRUPOS ATIVOS -->
-        <div class="secao-titulo">📋 Grupos/Links Ativos no Site (Com Estatísticas)</div>
+        <!-- SEÇÃO DE GERENCIAMENTO DE POSIÇÃO E REORDENAÇÃO -->
+        <div class="secao-titulo">
+            <span>☰ Mover Posição dos Grupos (Arraste ou Use ⬆️⬇️)</span>
+            <button class="btn-salvar-ordem" onclick="salvarOrdemServidor()" style="font-size:11px; padding:4px 10px;">💾 Salvar Ordem</button>
+        </div>
         <div id="listaGrupos">
             <p class="vazio">Carregando grupos...</p>
         </div>
@@ -355,6 +409,7 @@
 
 <script>
 let senhaSalva = "";
+let listaGruposLocais = [];
 
 async function autenticar() {
     const senhaInput = document.getElementById('senhaAdm').value;
@@ -362,12 +417,11 @@ async function autenticar() {
         alert("Por favor, digite a senha!");
         return;
     }
-    
     senhaSalva = senhaInput;
+    localStorage.setItem('flow_admin_auth', 'true');
     await carregarDados();
 }
 
-// 🛡️ REQUISIÇÃO SEGURA VIA POST (Envia a senha no body)
 async function carregarDados() {
     try {
         let res = await fetch('/api/adm/dados', {
@@ -387,7 +441,6 @@ async function carregarDados() {
         document.getElementById('loginBox').style.display = 'none';
         document.getElementById('painelConteudo').style.display = 'block';
 
-        // Preencher formulário do Card Flutuante se existir
         if(data.promo) {
             document.getElementById('promoAtivo').value = data.promo.ativo ? "true" : "false";
             document.getElementById('promoFoto').value = data.promo.foto || "";
@@ -398,7 +451,8 @@ async function carregarDados() {
         }
 
         renderizarDenuncias(data.denuncias || []);
-        renderizarGrupos(data.grupos || []);
+        listaGruposLocais = data.grupos || [];
+        renderizarGrupos(listaGruposLocais);
 
     } catch(e) {
         console.error(e);
@@ -406,12 +460,114 @@ async function carregarDados() {
     }
 }
 
-// 🛡️ FUNÇÃO SEGURA CONTRA INJEÇÃO DE HTML (XSS)
 function escaparHTML(str) {
     if (!str) return '';
     return str.replace(/[&<>'"]/g, 
         tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
     );
+}
+
+// SISTEMA DE RENDERIZAÇÃO E REORDENAÇÃO DE GRUPOS VIA ADM
+function renderizarGrupos(grupos) {
+    const cont = document.getElementById('listaGrupos');
+    if(grupos.length === 0) {
+        cont.innerHTML = '<p class="vazio">Nenhum grupo cadastrado no banco de dados.</p>';
+        return;
+    }
+
+    cont.innerHTML = grupos.map((g, index) => {
+        let totalCliques = (g.cliques_unicos && Array.isArray(g.cliques_unicos)) ? g.cliques_unicos.length : (g.acessos || g.cliques || 0);
+
+        return `
+            <div class="card-grupo" draggable="true" data-index="${index}" data-id="${g._id}">
+                <div class="drag-handle" title="Arraste para mover">☰</div>
+                <img src="${escaparHTML(g.foto || 'https://files.catbox.moe/0aa6f2.png')}" alt="Foto">
+                <div class="grupo-info">
+                    <div class="grupo-nome">#${index + 1} - ${escaparHTML(g.nome)}</div>
+                    <div class="grupo-cat">${escaparHTML(g.categoria)}</div>
+                    <div class="grupo-cliques">🔥 Cliques: ${totalCliques}</div>
+                </div>
+                <div class="grupo-controles-ordem">
+                    <button class="btn-ordem" onclick="moverItemLocal(${index}, -1)">⬆️</button>
+                    <button class="btn-ordem" onclick="moverItemLocal(${index}, 1)">⬇️</button>
+                </div>
+                <div class="grupo-acoes-diretas">
+                    <button class="btn-remover" onclick="removerGrupo('${escaparHTML(g._id)}')">🗑️ Rem</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    iniciarDragAndDrop();
+}
+
+// LÓGICA DE MOVER LOCALMENTE (SUBIR / DESCER)
+function moverItemLocal(index, direcao) {
+    let novoIndex = index + direcao;
+    if(novoIndex < 0 || novoIndex >= listaGruposLocais.length) return;
+
+    let temp = listaGruposLocais[index];
+    listaGruposLocais[index] = listaGruposLocais[novoIndex];
+    listaGruposLocais[novoIndex] = temp;
+
+    renderizarGrupos(listaGruposLocais);
+}
+
+// LÓGICA DE ARRASTAR E SOLTAR (DRAG & DROP)
+let itemArrastadoIndex = null;
+
+function iniciarDragAndDrop() {
+    const cards = document.querySelectorAll('.card-grupo');
+    cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            itemArrastadoIndex = parseInt(card.getAttribute('data-index'));
+            card.classList.add('arrastando');
+        });
+
+        card.addEventListener('dragend', () => {
+            card.classList.remove('arrastando');
+        });
+
+        card.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        card.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const alvoIndex = parseInt(card.getAttribute('data-index'));
+            if (itemArrastadoIndex !== null && itemArrastadoIndex !== alvoIndex) {
+                const itemRemovido = listaGruposLocais.splice(itemArrastadoIndex, 1)[0];
+                listaGruposLocais.splice(alvoIndex, 0, itemRemovido);
+                renderizarGrupos(listaGruposLocais);
+            }
+        });
+    });
+}
+
+// SALVAR A NOVA POSIÇÃO NO BANCO DE DADOS DO SERVIDOR
+async function salvarOrdemServidor() {
+    if(listaGruposLocais.length === 0) return;
+
+    let novaOrdemIds = listaGruposLocais.map(g => g._id);
+
+    try {
+        let res = await fetch('/api/adm/salvar-ordem', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: senhaSalva, ordem: novaOrdemIds })
+        });
+        let data = await res.json();
+
+        if(data.sucesso) {
+            alert("✅ Nova ordem dos grupos salva com sucesso no banco!");
+            carregarDados();
+        } else {
+            alert("❌ Erro ao salvar ordem: " + (data.erro || 'Erro desconhecido'));
+        }
+    } catch(err) {
+        console.error(err);
+        alert("Erro na requisição ao servidor.");
+    }
 }
 
 async function salvarPromo(e) {
@@ -433,18 +589,18 @@ async function salvarPromo(e) {
         });
         let data = await res.json();
         if(data.sucesso) {
-            alert("✅ Configurações do card flutuante salvas com sucesso!");
+            alert("✅ Configurações salvas com sucesso!");
         } else {
             alert("❌ Erro ao salvar: " + (data.erro || 'Desconhecido'));
         }
     } catch(err) {
         console.error(err);
-        alert("Erro na requisição ao servidor.");
+        alert("Erro na requisição.");
     }
 }
 
 async function apagarPromo() {
-    if(!confirm("Tem certeza de que deseja apagar/desativar completamente o anúncio flutuante do banco de dados?")) return;
+    if(!confirm("Tem certeza de que deseja apagar o anúncio flutuante?")) return;
 
     try {
         let res = await fetch('/api/adm/apagar-promo', {
@@ -454,27 +610,21 @@ async function apagarPromo() {
         });
         let data = await res.json();
         if(data.sucesso) {
-            alert("✅ Anúncio removido/limpo do banco com sucesso!");
-            document.getElementById('promoAtivo').value = "false";
-            document.getElementById('promoFoto').value = "";
-            document.getElementById('promoNome').value = "";
-            document.getElementById('promoTexto').value = "";
-            document.getElementById('promoLink').value = "";
-            document.getElementById('promoDuracao').value = 5;
+            alert("✅ Anúncio removido!");
             carregarDados();
         } else {
-            alert("❌ Erro ao apagar anúncio: " + (data.erro || 'Desconhecido'));
+            alert("❌ Erro: " + (data.erro || 'Desconhecido'));
         }
     } catch(err) {
         console.error(err);
-        alert("Erro na requisição ao servidor.");
+        alert("Erro na requisição.");
     }
 }
 
 function renderizarDenuncias(denuncias) {
     const cont = document.getElementById('listaDenuncias');
     if(denuncias.length === 0) {
-        cont.innerHTML = '<p class="vazio">Nenhuma denúncia pendente no momento. 🎉</p>';
+        cont.innerHTML = '<p class="vazio">Nenhuma denúncia pendente. 🎉</p>';
         return;
     }
 
@@ -482,49 +632,19 @@ function renderizarDenuncias(denuncias) {
         <div class="card card-denuncia">
             <div>
                 <div class="motivo">⚠️ Motivo: ${escaparHTML(d.motivo)}</div>
-                <div class="meta">ID do Grupo: <code>${escaparHTML(d.grupo_id || 'N/A')}</code></div>
+                <div class="meta">ID Grupo: <code>${escaparHTML(d.grupo_id || 'N/A')}</code></div>
             </div>
             <div class="denuncia-botoes">
                 ${d.grupo_id ? `<button class="btn-remover" onclick="removerGrupo('${escaparHTML(d.grupo_id)}')">🗑️ Apagar Grupo</button>` : ''}
-                <button class="btn-secundario" onclick="removerDenuncia('${escaparHTML(d._id || d.id)}')">❌ Limpar Denúncia</button>
+                <button class="btn-secundario" onclick="removerDenuncia('${escaparHTML(d._id || d.id)}')">❌ Limpar</button>
             </div>
         </div>
     `).join('');
 }
 
-function renderizarGrupos(grupos) {
-    const cont = document.getElementById('listaGrupos');
-    if(grupos.length === 0) {
-        cont.innerHTML = '<p class="vazio">Nenhum grupo cadastrado no banco de dados.</p>';
-        return;
-    }
-
-    cont.innerHTML = grupos.map(g => {
-        let totalCliques = (g.cliques_unicos && Array.isArray(g.cliques_unicos)) ? g.cliques_unicos.length : (g.cliques || 0);
-
-        return `
-            <div class="card card-grupo">
-                <img src="${escaparHTML(g.foto || 'https://files.catbox.moe/0aa6f2.png')}" alt="Foto">
-                <div class="grupo-info">
-                    <div class="grupo-nome">${escaparHTML(g.nome)}</div>
-                    <div class="grupo-cat">${escaparHTML(g.categoria)}</div>
-                    <div class="grupo-cliques">🔥 Cliques únicos: ${totalCliques}</div>
-                    <a href="${escaparHTML(g.link)}" target="_blank" class="grupo-link">Abrir Link</a>
-                </div>
-                <div class="grupo-acoes-diretas">
-                    <button class="btn-remover" onclick="removerGrupo('${escaparHTML(g._id)}')">🗑️ APAGAR</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
 function converterArquivoParaBase64(file) {
     return new Promise((resolve, reject) => {
-        if (!file) {
-            resolve("");
-            return;
-        }
+        if (!file) { resolve(""); return; }
         let reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => resolve(reader.result);
@@ -542,11 +662,8 @@ async function cadastrarDiretoAdm(e) {
 
     let fotoBase64 = "";
     if (fotoFile) {
-        try {
-            fotoBase64 = await converterArquivoParaBase64(fotoFile);
-        } catch(err) {
-            console.error("Erro ao processar imagem:", err);
-        }
+        try { fotoBase64 = await converterArquivoParaBase64(fotoFile); } 
+        catch(err) { console.error(err); }
     }
 
     try {
@@ -558,7 +675,7 @@ async function cadastrarDiretoAdm(e) {
         let data = await res.json();
 
         if(data.sucesso) {
-            alert("✅ Link publicado com sucesso no site!");
+            alert("✅ Link publicado!");
             document.getElementById('formCadAdm').reset();
             carregarDados();
         } else {
@@ -566,12 +683,12 @@ async function cadastrarDiretoAdm(e) {
         }
     } catch(err) {
         console.error(err);
-        alert("Erro na requisição ao servidor.");
+        alert("Erro na requisição.");
     }
 }
 
 async function removerGrupo(id) {
-    if(!confirm("Tem certeza de que deseja apagar este item permanentemente do site?")) return;
+    if(!confirm("Deseja apagar este grupo permanentemente?")) return;
 
     try {
         let res = await fetch('/api/adm/remover', {
@@ -582,19 +699,19 @@ async function removerGrupo(id) {
         let data = await res.json();
 
         if(data.sucesso) {
-            alert("✅ Removido com sucesso!");
+            alert("✅ Removido!");
             carregarDados();
         } else {
-            alert("❌ Erro ao remover: " + (data.erro || 'Erro desconhecido'));
+            alert("❌ Erro: " + (data.erro || 'Erro desconhecido'));
         }
     } catch(e) {
         console.error(e);
-        alert("Erro na requisição ao servidor.");
+        alert("Erro na requisição.");
     }
 }
 
 async function removerDenuncia(id) {
-    if(!confirm("Deseja apagar este aviso de denúncia?")) return;
+    if(!confirm("Deseja limpar este aviso de denúncia?")) return;
 
     try {
         let res = await fetch('/api/adm/remover-denuncia', {
@@ -605,17 +722,16 @@ async function removerDenuncia(id) {
         let data = await res.json();
 
         if(data.sucesso) {
-            alert("✅ Denúncia removida com sucesso!");
+            alert("✅ Denúncia limpa!");
             carregarDados();
         } else {
-            alert("❌ Erro ao remover denúncia: " + (data.erro || 'Erro desconhecido'));
+            alert("❌ Erro: " + (data.erro || 'Erro desconhecido'));
         }
     } catch(e) {
         console.error(e);
-        alert("Erro na requisição ao servidor.");
+        alert("Erro na requisição.");
     }
 }
 </script>
-
 </body>
 </html>
