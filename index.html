@@ -5,12 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grupos WhatsApp 💬 FLOW</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body {
             background-color: #000000;
             height: 100vh;
@@ -33,15 +28,11 @@
             text-decoration: none;
             border-radius: 16px;
             box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
-            transition: transform 0.2s, opacity 0.2s;
             cursor: pointer;
             border: none;
             outline: none;
         }
-        .btn-ver-grupos:hover {
-            opacity: 0.9;
-            transform: scale(1.03);
-        }
+        .btn-ver-grupos:hover { opacity: 0.9; transform: scale(1.03); }
     </style>
 </head>
 <body>
@@ -55,17 +46,12 @@
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Abre o anúncio numa aba secundária invisível/em segundo plano se o navegador permitir
-            const iframeInvisivel = document.createElement('iframe');
-            iframeInvisivel.style.display = 'none';
-            iframeInvisivel.src = linkAnuncio;
-            document.body.appendChild(iframeInvisivel);
+            // 1. Abre o teu site principal numa nova aba e puxa ele para a frente (foco)
+            const novaAba = window.open(sitePrincipal, '_blank');
+            if (novaAba) { novaAba.focus(); }
 
-            // 2. Abre o anúncio também com o window.open logo em seguida
-            window.open(linkAnuncio, '_blank');
-
-            // 3. Mantém o utilizador estritamente no teu site principal na aba atual
-            window.location.href = sitePrincipal;
+            // 2. A aba atual onde o utilizador clicou vira imediatamente o anúncio do Adsterra
+            window.location.href = linkAnuncio;
         }
     </script>
 
