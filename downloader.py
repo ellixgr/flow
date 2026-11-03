@@ -9,8 +9,12 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
     colecao_vip = db["usuarios_vip"]
     colecao_pagamentos = db["pagamentos_pendentes"]
 
-    # Instância pública do Invidious para buscar dados e streams sem bloqueio
-    INVIDIOUS_API = "https://inv.nadeko.net"
+    # Lista de instâncias públicas do Invidious (se uma falhar, testa a próxima)
+    INVIDIOUS_INSTANCES = [
+        "https://inv.nadeko.net",
+        "https://invidious.nerdvpn.de",
+        "https://yt.chocolatemoo53.com"
+    ]
 
     @app.route('/msc')
     def pagina_download():
@@ -448,28 +452,41 @@ async function verificarPagamentoVip() {
         if not permitido: return jsonify({"erro": msg}), 403
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
+        # Tenta varrer as instâncias até encontrar uma que responda com sucesso
+        resp_json = None
+        for instancia in INVIDIOUS_INSTANCES:
+            try:
+                if "watch?v=" in termo:
+                    video_id = termo.split("watch?v=")[1].split("&")[0]
+                    opt_url = f"{instancia}/api/v1/videos/{video_id}"
+                else:
+                    opt_url = f"{instancia}/api/v1/search?q={requests.utils.quote(termo)}"
+                
+                r = requests.get(opt_url, timeout=5)
+                if r.status_code == 200:
+                    resp_json = r.json()
+                    break
+            except Exception:
+                continue
+
+        if not resp_json:
+            return jsonify({"erro": "Todas as instâncias do Invidious falharam. Tente novamente em instantes."}), 502
+
         try:
-            # Extrai o ID se for link direto ou usa busca via Invidious API
             if "watch?v=" in termo:
-                video_id = termo.split("watch?v=")[1].split("&")[0]
-            opt_url = f"{INVIDIOUS_API}/api/v1/videos/{video_id}" if "watch?v=" in termo else f"{INVIDIOUS_API}/api/v1/search?q={requests.utils.quote(termo)}"
-            
-            resp = requests.get(opt_url, timeout=10).json()
-            
-            if "watch?v=" in termo:
-                titulo = resp.get("title", "Sem Título")
-                thumbnail = resp.get("videoThumbnails", [{}])[0].get("url", "https://files.catbox.moe/0aa6f2.png")
+                titulo = resp_json.get("title", "Sem Título")
+                thumbnail = resp_json.get("videoThumbnails", [{}])[0].get("url", "https://files.catbox.moe/0aa6f2.png")
             else:
-                if not resp or len(resp) == 0:
+                if not resp_json or len(resp_json) == 0:
                     return jsonify({"erro": "Nenhum resultado encontrado."}), 404
-                item = resp[0]
+                item = resp_json[0]
                 video_id = item.get("videoId")
                 titulo = item.get("title", "Sem Título")
                 thumbnail = item.get("videoThumbnails", [{}])[0].get("url", "https://files.catbox.moe/0aa6f2.png")
 
             return jsonify({"videoId": video_id, "title": titulo, "thumbnail": thumbnail})
         except Exception as e:
-            return jsonify({"erro": "Erro ao buscar preview via Invidious: " + str(e)}), 500
+            return jsonify({"erro": "Erro ao processar dados da mídia: " + str(e)}), 500
 
     @app.route('/api/adm/baixar-audio', methods=['POST'])
     def adm_baixar_audio():
