@@ -114,6 +114,30 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
         .loading { color: #ffd700 !important; font-weight: bold; }
         .bloqueado { opacity: 0.5; pointer-events: none; }
         
+        /* ESTILO DO PREVIEW */
+        #previewBox {
+            display: none;
+            margin-top: 15px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px;
+            text-align: center;
+        }
+        #previewImg {
+            width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        #previewTitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f0f6fc;
+            margin-bottom: 12px;
+        }
+
         #vipModal {
             display: none;
             position: fixed;
@@ -141,12 +165,23 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
     <h1>📥 FLOW Downloader</h1>
     <p id="infoLimite">Verificando seus downloads gratuitos...</p>
 
-    <div id="areaBotoes">
+    <div id="areaBusca">
         <input type="text" id="termoInput" placeholder="Ex: Nome da música ou link...">
 
+        <div class="botoes-acao" id="botoesBusca">
+            <button class="btn-audio" onclick="prepararDownload('audio')">🎵 Buscar MP3</button>
+            <button class="btn-video" onclick="prepararDownload('video')">🎬 Buscar MP4</button>
+        </div>
+    </div>
+
+    <!-- CAIXA DE PREVIEW DA MÍDIA -->
+    <div id="previewBox">
+        <img id="previewImg" src="" alt="Capa da Mídia">
+        <p id="previewTitle"></p>
+        <p style="font-size: 12px; color: #ffd700; margin-bottom: 10px;">É esta mídia que deseja baixar?</p>
         <div class="botoes-acao">
-            <button class="btn-audio" id="btnAudio" onclick="baixar('audio')">🎵 Baixar MP3</button>
-            <button class="btn-video" id="btnVideo" onclick="baixar('video')">🎬 Baixar MP4</button>
+            <button class="btn-video" onclick="confirmarDownload(true)">✅ Sim</button>
+            <button class="btn-voltar" onclick="confirmarDownload(false)" style="margin-top:0; background:var(--danger); color:#fff; border:none;">❌ Não</button>
         </div>
     </div>
 
@@ -180,6 +215,7 @@ if (!usuarioId) {
 }
 
 let pagamentoIdAtual = null;
+let dadosPendentes = null;
 
 async function checarStatus() {
     try {
@@ -191,8 +227,7 @@ async function checarStatus() {
         } else {
             info.innerHTML = `🎁 Downloads grátis restantes: <b style="color:var(--primary);">${data.restantes} / 3</b>`;
             if (data.restantes <= 0) {
-                document.getElementById('btnAudio').classList.add('bloqueado');
-                document.getElementById('btnVideo').classList.add('bloqueado');
+                document.getElementById('botoesBusca').classList.add('bloqueado');
                 info.innerHTML = `<span style="color:var(--danger);">⚠️ Limite gratuito esgotado! Seja VIP para continuar.</span>`;
             }
         }
@@ -200,14 +235,55 @@ async function checarStatus() {
 }
 checarStatus();
 
-async function baixar(tipo) {
+async function prepararDownload(tipo) {
     let termo = document.getElementById('termoInput').value.trim();
     let statusDiv = document.getElementById('statusMsg');
     if(!termo) { alert("Por favor, digite um nome ou cole um link!"); return; }
 
-    let rota = tipo === 'audio' ? '/api/adm/baixar-audio' : '/api/adm/baixar-video';
+    statusDiv.className = "loading";
+    statusDiv.innerText = "🔍 Buscando informações e capa da mídia...";
+
+    try {
+        let res = await fetch('/api/adm/preview-midia', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ usuario_id: usuarioId, termo: termo })
+        });
+
+        let data = await res.json();
+        if (!res.ok) throw new Error(data.erro || "Erro ao buscar mídia");
+
+        dadosPendentes = { tipo: tipo, termo: termo };
+        
+        document.getElementById('previewImg').src = data.thumbnail;
+        document.getElementById('previewTitle').innerText = data.title;
+        document.getElementById('previewBox').style.display = 'block';
+        document.getElementById('areaBusca').style.display = 'none';
+        statusDiv.innerText = "";
+    } catch(err) {
+        statusDiv.className = "";
+        statusDiv.style.color = "var(--danger)";
+        statusDiv.innerText = "❌ Erro: " + err.message;
+    }
+}
+
+async function confirmarVideo(confirmado) {
+    if (!confirmado) {
+        document.getElementById('previewBox').style.display = 'none';
+        document.getElementById('areaBusca').style.display = 'block';
+        document.getElementById('statusMsg').innerText = "";
+        return;
+    }
+
+    let tipo = dadosPendentes.tipo;
+    let termo = dadosPendentes.termo;
+    let statusDiv = document.getElementById('statusMsg');
+
+    document.getElementById('previewBox').style.display = 'none';
     statusDiv.className = "loading";
     statusDiv.innerText = "⏳ A processar e a preparar o download... Aguarde!";
+
+    let rota = tipo === 'audio' ? '/api/adm/baixar-audio' : '/api/adm/baixar-video';
 
     try {
         let res = await fetch(rota, {
@@ -240,14 +316,21 @@ async function baixar(tipo) {
         statusDiv.className = "";
         statusDiv.style.color = "var(--primary)";
         statusDiv.innerText = "✅ Download concluído com sucesso!";
+        document.getElementById('areaBusca').style.display = 'block';
         checarStatus();
     } catch(err) {
         console.error(err);
         statusDiv.className = "";
         statusDiv.style.color = "var(--danger)";
         statusDiv.innerText = "❌ Erro: " + err.message;
+        document.getElementById('areaBusca').style.display = 'block';
         checarStatus();
     }
+}
+
+// Atalho para a função do botão de confirmação
+function confirmarDownload(sim) {
+    confirmarVideo(sim);
 }
 
 function abrirModalVip() { document.getElementById('vipModal').style.display = 'flex'; }
@@ -333,60 +416,131 @@ async function verificarPagamentoVip() {
         except Exception as e: print(e)
         return jsonify({"status": status})
 
-    def validar_e_contar(usuario_id):
+    def checar_permissao(usuario_id):
         hoje = time.strftime("%Y-%m-%d")
         vip = colecao_vip.find_one({"usuario_id": usuario_id, "expira_em": {"$gt": time.time()}})
         if vip:
-            usados = vip.get("usados_hoje", {})
-            if usados.get(hoje, 0) >= 20: return False, "Limite VIP diário atingido!"
+            if vip.get("usados_hoje", {}).get(hoje, 0) >= 20: 
+                return False, "Limite VIP diário atingido!"
+            return True, "vip"
+        
+        reg = colecao_downloads.find_one({"usuario_id": usuario_id}) or {"total_baixados": 0}
+        if reg.get("total_baixados", 0) >= 3: 
+            return False, "Limite gratuito esgotado! Assine o VIP por R$ 10/mês."
+        return True, "gratuito"
+
+    def registrar_sucesso_download(usuario_id, tipo_conta):
+        hoje = time.strftime("%Y-%m-%d")
+        if tipo_conta == "vip":
+            vip = colecao_vip.find_one({"usuario_id": usuario_id})
+            usados = vip.get("usados_hoje", {}) if vip else {}
             usados[hoje] = usados.get(hoje, 0) + 1
             colecao_vip.update_one({"usuario_id": usuario_id}, {"$set": {"usados_hoje": usados}})
-            return True, ""
-        reg = colecao_downloads.find_one({"usuario_id": usuario_id}) or {"total_baixados": 0}
-        if reg.get("total_baixados", 0) >= 3: return False, "Limite gratuito esgotado! Assine o VIP por R$ 10/mês."
-        colecao_downloads.update_one({"usuario_id": usuario_id}, {"$inc": {"total_baixados": 1}}, upsert=True)
-        return True, ""
+        else:
+            colecao_downloads.update_one({"usuario_id": usuario_id}, {"$inc": {"total_baixados": 1}}, upsert=True)
+
+    # ROTA DE PREVIEW (BUSCA OS DADOS SEM BAIXAR NEM DESCONTAR CRÉDITO)
+    @app.route('/api/adm/preview-midia', methods=['POST'])
+    def adm_preview_midia():
+        data = request.json or {}
+        usuario_id, termo = data.get("usuario_id"), data.get("termo", "").strip()
+        if not usuario_id: return jsonify({"erro": "ID obrigatório"}), 400
+        
+        permitido, msg = checar_permissao(usuario_id)
+        if not permitido: return jsonify({"erro": msg}), 403
+        if not termo: return jsonify({"erro": "Termo vazio"}), 400
+
+        pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
+        ydl_opts = {'quiet': True, 'skip_download': True, 'default_search': 'ytsearch'}
+
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(pesquisa, download=False)
+                if 'entries' in info:
+                    entries = info.get('entries', [])
+                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
+                    info = entries[0]
+                
+                titulo = info.get('title', 'Sem Título')
+                thumbnail = info.get('thumbnail', 'https://files.catbox.moe/0aa6f2.png')
+                
+            return jsonify({"title": titulo, "thumbnail": thumbnail})
+        except Exception as e:
+            return jsonify({"erro": "Erro ao buscar preview: " + str(e)}), 500
 
     @app.route('/api/adm/baixar-audio', methods=['POST'])
     def adm_baixar_audio():
         data = request.json or {}
         usuario_id, termo = data.get("usuario_id"), data.get("termo", "").strip()
         if not usuario_id: return jsonify({"erro": "ID obrigatório"}), 400
-        ok, msg = validar_e_contar(usuario_id)
-        if not ok: return jsonify({"erro": msg}), 403
+        
+        permitido, tipo_ou_msg = checar_permissao(usuario_id)
+        if not permitido: return jsonify({"erro": tipo_ou_msg}), 403
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
         pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
         out_dir = "downloads_temp"
         os.makedirs(out_dir, exist_ok=True)
         fid = str(uuid.uuid4())
+        
         try:
-            with yt_dlp.YoutubeDL({'format': 'bestaudio/best', 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"), 'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}], 'quiet': True}) as ydl:
+            ydl_opts = {
+                'format': 'bestaudio/best',
+                'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
+                'postprocessors': [{'key': 'FFmpegExtractAudio', 'preferredcodec': 'mp3', 'preferredquality': '192'}],
+                'quiet': True,
+                'default_search': 'ytsearch'
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(pesquisa, download=True)
-                if 'entries' in info: info = info['entries'][0]
+                if 'entries' in info:
+                    entries = info.get('entries', [])
+                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
+                    info = entries[0]
                 titulo = info.get('title', 'audio')
+                
             path = os.path.join(out_dir, f"{fid}.mp3")
+            if not os.path.exists(path): return jsonify({"erro": "Falha ao gerar MP3."}), 500
+
+            registrar_sucesso_download(usuario_id, tipo_ou_msg)
             return send_file(path, as_attachment=True, download_name=f"{titulo[:50]}.mp3")
-        except Exception as e: return jsonify({"erro": str(e)}), 500
+        except Exception as e:
+            return jsonify({"erro": "Erro ao processar áudio: " + str(e)}), 500
 
     @app.route('/api/adm/baixar-video', methods=['POST'])
     def adm_baixar_video():
         data = request.json or {}
         usuario_id, termo = data.get("usuario_id"), data.get("termo", "").strip()
         if not usuario_id: return jsonify({"erro": "ID obrigatório"}), 400
-        ok, msg = validar_e_contar(usuario_id)
-        if not ok: return jsonify({"erro": msg}), 403
+        
+        permitido, tipo_ou_msg = checar_permissao(usuario_id)
+        if not permitido: return jsonify({"erro": tipo_ou_msg}), 403
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
         pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
         out_dir = "downloads_temp"
         os.makedirs(out_dir, exist_ok=True)
         fid = str(uuid.uuid4())
+        
         try:
-            with yt_dlp.YoutubeDL({'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best', 'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"), 'quiet': True}) as ydl:
+            ydl_opts = {
+                'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+                'outtmpl': os.path.join(out_dir, f"{fid}.%(ext)s"),
+                'quiet': True,
+                'default_search': 'ytsearch'
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(pesquisa, download=True)
-                if 'entries' in info: info = info['entries'][0]
+                if 'entries' in info:
+                    entries = info.get('entries', [])
+                    if not entries: return jsonify({"erro": "Nenhum resultado encontrado."}), 404
+                    info = entries[0]
                 titulo, ext = info.get('title', 'video'), info.get('ext', 'mp4')
+                
             path = os.path.join(out_dir, f"{fid}.{ext}")
+            if not os.path.exists(path): return jsonify({"erro": "Falha ao gerar MP4."}), 500
+
+            registrar_sucesso_download(usuario_id, tipo_ou_msg)
             return send_file(path, as_attachment=True, download_name=f"{titulo[:50]}.{ext}")
-        except Exception as e: return jsonify({"erro": str(e)}), 500
+        except Exception as e:
+            return jsonify({"erro": "Erro ao processar vídeo: " + str(e)}), 500
