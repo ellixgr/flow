@@ -5,11 +5,12 @@ import time
 import base64
 import io
 import requests
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from PIL import Image
+import yt_dlp
 
 app = Flask(__name__)
 
@@ -253,6 +254,93 @@ def denunciar():
         "data": time.time()
     })
     return jsonify({"sucesso": True})
+
+# ==============================================
+# 🎵 YOUTUBE DOWNLOADER (ÁUDIO E VÍDEO NO ADM)
+# ==============================================
+@app.route('/api/adm/baixar-audio', methods=['POST'])
+def adm_baixar_audio():
+    data = request.json or {}
+    if data.get("senha") != ADMIN_PASSWORD:
+        return jsonify({"erro": "Senha incorreta!"}), 401
+    
+    termo = data.get("termo", "").strip()
+    if not termo:
+        return jsonify({"erro": "Informe um link ou termo de pesquisa!"}), 400
+
+    pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
+    
+    output_dir = "downloads_temp"
+    os.makedirs(output_dir, exist_ok=True)
+    file_id = str(uuid.uuid4())
+    outtmpl = os.path.join(output_dir, f"{file_id}.%(ext)s")
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': outtmpl,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'quiet': True
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(pesquisa, download=True)
+            if 'entries' in info:
+                info = info['entries'][0]
+            titulo = info.get('title', 'audio')
+            
+        final_path = os.path.join(output_dir, f"{file_id}.mp3")
+        if not os.path.exists(final_path):
+            return jsonify({"erro": "Falha ao processar o arquivo de áudio."}), 500
+
+        return send_file(final_path, as_attachment=True, download_name=f"{titulo[:50]}.mp3")
+    except Exception as e:
+        print(f"Erro no download de áudio: {e}")
+        return jsonify({"erro": str(e)}), 500
+
+@app.route('/api/adm/baixar-video', methods=['POST'])
+def adm_baixar_video():
+    data = request.json or {}
+    if data.get("senha") != ADMIN_PASSWORD:
+        return jsonify({"erro": "Senha incorreta!"}), 401
+    
+    termo = data.get("termo", "").strip()
+    if not termo:
+        return jsonify({"erro": "Informe um link ou termo de pesquisa!"}), 400
+
+    pesquisa = termo if termo.startswith("http") else f"ytsearch1:{termo}"
+    
+    output_dir = "downloads_temp"
+    os.makedirs(output_dir, exist_ok=True)
+    file_id = str(uuid.uuid4())
+    outtmpl = os.path.join(output_dir, f"{file_id}.%(ext)s")
+
+    ydl_opts = {
+        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
+        'outtmpl': outtmpl,
+        'quiet': True
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(pesquisa, download=True)
+            if 'entries' in info:
+                info = info['entries'][0]
+            titulo = info.get('title', 'video')
+            ext = info.get('ext', 'mp4')
+            
+        final_path = os.path.join(output_dir, f"{file_id}.{ext}")
+        if not os.path.exists(final_path):
+            return jsonify({"erro": "Falha ao processar o arquivo de vídeo."}), 500
+
+        return send_file(final_path, as_attachment=True, download_name=f"{titulo[:50]}.{ext}")
+    except Exception as e:
+        print(f"Erro no download de vídeo: {e}")
+        return jsonify({"erro": str(e)}), 500
 
 # ==============================================
 # 🛡️ ROTAS DO PAINEL ADM (POST E ADMIN_PASSWORD)
