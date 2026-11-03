@@ -96,16 +96,17 @@ def site_dados():
     config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
     if config_ordem and "ordem" in config_ordem:
         ordem_ids = config_ordem["ordem"]
-        # Organiza a lista de grupos respeitando estritamente a ordem definida pelo dono
         grupos_dict = {str(g["_id"]): g for g in grupos}
         grupos_ordenados = []
         for gid in ordem_ids:
             if gid in grupos_dict:
                 grupos_ordenados.append(grupos_dict.pop(gid))
-        # Adiciona no final os novos grupos que ainda não estavam salvos na ordem manual
         for gid, g in grupos_dict.items():
             grupos_ordenados.append(g)
         grupos = grupos_ordenados
+    else:
+        # Se não houver ordem manual salva, ordena automaticamente pelos mais acessados (cliques)
+        grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
     
     config_promo = colecao_config.find_one({"_id": "card_promo"}) or {
         "ativo": True,
@@ -250,7 +251,6 @@ def verificar_pagamento():
                         "criado_em": time.time()
                     }).inserted_id
                     
-                    # Atualiza a ordem salva para incluir o novo grupo no topo ou final
                     config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
                     if config_ordem and "ordem" in config_ordem:
                         config_ordem["ordem"].insert(0, str(novo_id))
@@ -290,7 +290,7 @@ def adm_dados():
     for g in grupos:
         g["_id"] = str(g["_id"])
 
-    # Carrega a ordem salva para exibir corretamente no painel do ADM
+    # Carrega a ordem salva ou ordena automaticamente por cliques para ficar igualzinho ao site
     config_ordem = colecao_config.find_one({"_id": "ordem_grupos"})
     if config_ordem and "ordem" in config_ordem:
         ordem_ids = config_ordem["ordem"]
@@ -302,6 +302,8 @@ def adm_dados():
         for gid, g in grupos_dict.items():
             grupos_ordenados.append(g)
         grupos = grupos_ordenados
+    else:
+        grupos.sort(key=lambda x: len(x.get("cliques_unicos", [])), reverse=True)
 
     config_promo = colecao_config.find_one({"_id": "card_promo"})
 
