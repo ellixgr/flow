@@ -8,11 +8,48 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
         body {
             background-color: #000000;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        /* Vídeo de fundo cobrindo a tela toda de forma discreta */
+        .video-fundo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -2;
+            filter: brightness(0.35); /* Escurece o vídeo para o botão destacar bem */
+        }
+        /* Overlay escuro para garantir legibilidade */
+        .overlay-fundo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: -1;
+        }
+        /* Botão de som do vídeo */
+        .mute-btn { 
+            position: absolute; top: 20px; left: 20px; z-index: 15; 
+            background: rgba(0,0,0,0.6); border-radius: 50%; 
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; border: 1px solid rgba(255,255,255,0.3);
+            color: #fff; font-size: 16px;
+        }
+        /* Container do script de anúncio no topo ou rodapé */
+        .ad-container {
+            margin-bottom: 30px;
+            z-index: 2;
         }
         .btn-ver-grupos {
             display: flex;
@@ -31,15 +68,50 @@
             cursor: pointer;
             border: none;
             outline: none;
+            z-index: 2;
+            transition: transform 0.2s, opacity 0.2s;
         }
         .btn-ver-grupos:hover { opacity: 0.9; transform: scale(1.03); }
     </style>
 </head>
 <body>
 
+    <!-- Vídeo de Fundo -->
+    <video class="video-fundo" id="meuVideo" autoplay loop muted playsinline>
+        <source src="https://github.com/ellixgr/flow/raw/main/1629e9d243f25775400ef63d3c93648b.mp4" type="video/mp4">
+    </video>
+    <div class="overlay-fundo"></div>
+
+    <!-- Botão Mute / Som -->
+    <div class="mute-btn" onclick="toggleMute(event)"><span id="muteIcon">🔇</span></div>
+
+    <!-- Script de Anúncio Adsterra -->
+    <div class="ad-container">
+        <script type="text/javascript">
+          atOptions = {
+            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
+            'format' : 'iframe',
+            'height' : 50,
+            'width' : 320,
+            'params' : {}
+          };
+        </script>
+        <script type="text/javascript" src="https://bicea.org/22/e64f39c609130dc8030efa1e7737a3bd"></script>
+    </div>
+
+    <!-- Botão Centralizado -->
     <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
 
     <script>
+        const video = document.getElementById('meuVideo');
+        const muteIcon = document.getElementById('muteIcon');
+
+        function toggleMute(e) { 
+            if(e) { e.preventDefault(); e.stopPropagation(); } 
+            video.muted = !video.muted; 
+            muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
+        }
+
         function abrirCorreto(event) {
             event.preventDefault();
             
