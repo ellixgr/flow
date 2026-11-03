@@ -17,7 +17,7 @@
             position: relative;
             overflow: hidden;
         }
-        /* Vídeo de fundo cobrindo a tela inteira sem distorção */
+        /* Vídeo de fundo fixo e travado para não interagir nem baixar */
         .video-fundo {
             position: fixed;
             top: 0;
@@ -27,8 +27,9 @@
             object-fit: cover; 
             z-index: -2;
             filter: brightness(0.7); 
+            pointer-events: none; /* Impede qualquer clique direto no vídeo */
         }
-        /* Overlay leve para dar contraste ao botão e anúncio */
+        /* Overlay para dar contraste */
         .overlay-fundo {
             position: fixed;
             top: 0;
@@ -37,6 +38,7 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.35);
             z-index: -1;
+            pointer-events: none;
         }
         /* Container do script de anúncio */
         .ad-container {
@@ -68,8 +70,8 @@
 </head>
 <body>
 
-    <!-- Vídeo de Fundo com o link correto -->
-    <video class="video-fundo" autoplay loop muted playsinline>
+    <!-- Vídeo de Fundo travado contra download/cliques -->
+    <video class="video-fundo" autoplay loop muted playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
         <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
     </video>
     <div class="overlay-fundo"></div>
@@ -98,11 +100,11 @@
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Abre o teu site principal numa nova aba e puxa ele para a frente (foco)
+            // 1. Abre o site principal numa nova aba com foco
             const novaAba = window.open(sitePrincipal, '_blank');
             if (novaAba) { novaAba.focus(); }
 
-            // 2. A aba atual onde o utilizador clicou vira imediatamente o anúncio do Adsterra
+            // 2. Transforma a aba atual no anúncio do Adsterra
             window.location.href = linkAnuncio;
         }
     </script>
