@@ -17,17 +17,14 @@
             position: relative;
             overflow: hidden;
         }
-        /* Vídeo de fundo cobrindo a tela inteira sem bordas pretas */
+        /* Vídeo forçado a cobrir 100% da tela sem bordas pretas */
         .video-fundo {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            min-width: 100%;
-            min-height: 100%;
-            width: auto;
-            height: auto;
-            transform: translate(-50%, -50%);
-            object-fit: cover;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: fill; /* Força o preenchimento total da tela */
             z-index: -2;
             filter: brightness(0.7); 
         }
@@ -71,7 +68,7 @@
 </head>
 <body>
 
-    <!-- Vídeo de Fundo Preenchendo a Tela -->
+    <!-- Vídeo de Fundo Preenchendo a Tela Inteira -->
     <video class="video-fundo" autoplay loop muted playsinline>
         <source src="https://raw.githubusercontent.com/ellixgr/flow/main/lv_0_20260314181033.mp4" type="video/mp4">
     </video>
