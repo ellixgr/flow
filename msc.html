@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLOW — Baixar Músicas e Vídeos</title>
+    <style>
+        :root {
+            --primary: #25d366;
+            --dark-bg: #0d1117;
+            --card-bg: #161b22;
+            --text: #f0f6fc;
+            --border: #30363d;
+            --danger: #ff4d4d;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        h1 { font-size: 22px; color: var(--primary); margin-bottom: 8px; font-weight: 800; }
+        p { font-size: 13px; color: #8b949e; margin-bottom: 20px; }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 14px;
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 15px;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+        input[type="text"]:focus { border-color: var(--primary); }
+
+        .botoes-acao {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        button:hover { opacity: 0.9; transform: scale(1.02); }
+        .btn-audio { background: #1f6feb; color: #fff; }
+        .btn-video { background: var(--primary); color: #000; }
+
+        #statusMsg {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .loading {
+            color: #ffd700 !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📥 FLOW Downloader</h1>
+    <p>Cole o link do YouTube ou digite o nome da música/vídeo</p>
+
+    <input type="text" id="termoInput" placeholder="Ex: Nome da música ou link...">
+
+    <div class="botoes-acao">
+        <button class="btn-audio" onclick="baixar('audio')">🎵 Baixar MP3</button>
+        <button class="btn-video" onclick="baixar('video')">🎬 Baixar MP4</button>
+    </div>
+
+    <div id="statusMsg"></div>
+</div>
+
+<script>
+async function baixar(tipo) {
+    let termo = document.getElementById('termoInput').value.trim();
+    let statusDiv = document.getElementById('statusMsg');
+
+    if(!termo) {
+        alert("Por favor, digite um nome ou cole um link!");
+        return;
+    }
+
+    let rota = tipo === 'audio' ? '/api/adm/baixar-audio' : '/api/adm/baixar-video';
+    statusDiv.className = "loading";
+    statusDiv.innerText = "⏳ A processar e a preparar o download... Aguarde!";
+
+    try {
+        let res = await fetch(rota, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ senha: "123", termo: termo }) // Nota: Se quiser proteger a página MSC.html, pode pedir senha ou criar uma rota aberta no Flask.
+        });
+
+        if (!res.ok) {
+            let errData = await res.json();
+            throw new Error(errData.erro || "Erro ao baixar arquivo");
+        }
+
+        // Pega o nome do arquivo enviado pelo header do Flask
+        let disposition = res.headers.get('content-disposition');
+        let filename = "arquivo";
+        if (disposition && disposition.includes('filename=')) {
+            let match = disposition.match(/filename="?([^"]+)"?/);
+            if (match && match[1]) filename = decodeURIComponent(match[1]);
+        }
+
+        let blob = await res.blob();
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+
+        statusDiv.className = "";
+        statusDiv.style.color = "var(--primary)";
+        statusDiv.innerText = "✅ Download concluído com sucesso!";
+    } catch(err) {
+        console.error(err);
+        statusDiv.className = "";
+        statusDiv.style.color = "var(--danger)";
+        statusDiv.innerText = "❌ Erro: " + err.message;
+    }
+}
+</script>
+
+</body>
+</html>
