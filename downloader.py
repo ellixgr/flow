@@ -1,6 +1,7 @@
 import os
 import uuid
 import time
+import yt_dlp
 import requests
 from flask import request, jsonify, send_file, render_template_string
 
@@ -9,7 +10,6 @@ def registrar_rotas_downloader(app, db, MP_TOKEN):
     colecao_vip = db["usuarios_vip"]
     colecao_pagamentos = db["pagamentos_pendentes"]
 
-    # Lista de instâncias públicas do Invidious (se uma falhar, testa a próxima)
     INVIDIOUS_INSTANCES = [
         "https://inv.nadeko.net",
         "https://invidious.nerdvpn.de",
@@ -452,7 +452,6 @@ async function verificarPagamentoVip() {
         if not permitido: return jsonify({"erro": msg}), 403
         if not termo: return jsonify({"erro": "Termo vazio"}), 400
 
-        # Tenta varrer as instâncias até encontrar uma que responda com sucesso
         resp_json = None
         for instancia in INVIDIOUS_INSTANCES:
             try:
