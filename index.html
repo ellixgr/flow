@@ -46,29 +46,29 @@
 </head>
 <body>
 
-    <button class="btn-ver-grupos" onclick="abrirRedirect(event)">Ver Grupos</button>
+    <button class="btn-ver-grupos" onclick="abrirPopunder(event)">Ver Grupos</button>
 
     <script>
-        function abrirRedirect(event) {
+        function abrirPopunder(event) {
             event.preventDefault();
             
-            // Link do seu anúncio do Adsterra
-            const linkAnuncioAdsterra = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+            // Seu anúncio do Adsterra
+            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             
-            // Seu site principal no Render
+            // Seu site principal que DEVE ficar na frente
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // Abre o Adsterra em segundo plano
-            const abaAnuncio = window.open(linkAnuncioAdsterra, '_blank');
+            // 1. Abre o anúncio em uma nova aba
+            const abaAnuncio = window.open(linkAnuncio, '_blank');
             
+            // 2. Tira o foco da nova aba e joga o anúncio para trás (segundo plano)
             if (abaAnuncio) {
+                abaAnuncio.blur();
                 window.focus();
             }
 
-            // Redireciona imediatamente para o seu site
-            setTimeout(() => {
-                window.location.href = sitePrincipal;
-            }, 100);
+            // 3. Redireciona a aba principal para o seu site na frente
+            window.location.href = sitePrincipal;
         }
     </script>
 
