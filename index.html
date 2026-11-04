@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://ellixgr.github.io/flow/">
     <meta name="twitter:title" content="Grupos WhatsApp 💬 FLOW">
-    <meta name="twitter:description" content="Encontre e divulgue os melhores grupos de WhatsApp e Telegram ativos.">
+    <meta name="twitter:description" content="Encontre e divulgar os melhores grupos de WhatsApp e Telegram ativos.">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/ellixgr/flow/main/Screenshot_20261103-174901%20(1).png">
     <meta name="robots" content="index, follow">
     <script data-cfasync="false" src="https://afders.org/1/b97f0402af5fa803ef8d137e4050caf4"></script>
@@ -141,19 +141,29 @@
         ⚠️ <span>Aviso:</span> Se abrir algum aplicativo ou anúncio, basta <b>voltar para esta página</b> que os grupos serão liberados!
     </div>
 
-    <!-- O link usa target="_blank" nativo e rel="noopener" -->
-    <a href="https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3" target="_blank" rel="noopener" class="btn-ver-grupos" onclick="irParaSite(event)">Ver Grupos</a>
+    <!-- Botão tratado por JavaScript para controlar a abertura em segundo plano -->
+    <button class="btn-ver-grupos" onclick="abrirTudo(event)">Ver Grupos</button>
 
     <script>
-        function irParaSite(event) {
+        function abrirTudo(event) {
+            if (event) event.preventDefault();
+            
+            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // Em vez de mudar o location da aba atual, redirecionamos a aba atual para o site principal.
-            // Como o botão já tem nativamente target="_blank" para o anúncio, 
-            // o navegador abre o anúncio em segundo plano (embaixo) e mantém o usuário na aba atual indo para o site!
+            // 1. Cria um link invisível simulando o clique do usuário para o anúncio ir para trás (background)
+            let a = document.createElement('a');
+            a.href = linkAnuncio;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            // 2. Imediatamente joga a aba atual para o seu site principal no Render
             setTimeout(function() {
                 window.location.href = sitePrincipal;
-            }, 50);
+            }, 100);
         }
     </script>
 </body>
