@@ -141,28 +141,19 @@
         ⚠️ <span>Aviso:</span> Se abrir algum aplicativo ou anúncio, basta <b>voltar para esta página</b> que os grupos serão liberados!
     </div>
 
-    <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
+    <!-- O link usa target="_blank" nativo e rel="noopener" -->
+    <a href="https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3" target="_blank" rel="noopener" class="btn-ver-grupos" onclick="irParaSite(event)">Ver Grupos</a>
 
     <script>
-        function abrirCorreto(event) {
-            if (event) event.preventDefault();
-            
-            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+        function irParaSite(event) {
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Força a abertura do Anúncio numa nova aba imitando clique direto do usuário
-            let a = document.createElement('a');
-            a.href = linkAnuncio;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-
-            // 2. Garante o redirecionamento imediato da aba atual para o seu site
+            // Em vez de mudar o location da aba atual, redirecionamos a aba atual para o site principal.
+            // Como o botão já tem nativamente target="_blank" para o anúncio, 
+            // o navegador abre o anúncio em segundo plano (embaixo) e mantém o usuário na aba atual indo para o site!
             setTimeout(function() {
                 window.location.href = sitePrincipal;
-            }, 150);
+            }, 50);
         }
     </script>
 </body>
