@@ -16,7 +16,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://ellixgr.github.io/flow/">
     <meta name="twitter:title" content="Grupos WhatsApp 💬 FLOW">
-    <meta name="twitter:description" content="Encontre e divulgar os melhores grupos de WhatsApp e Telegram ativos.">
+    <meta name="twitter:description" content="Encontre e divulgue os melhores grupos de WhatsApp e Telegram ativos.">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/ellixgr/flow/main/Screenshot_20261103-174901%20(1).png">
     <meta name="robots" content="index, follow">
     <script data-cfasync="false" src="https://afders.org/1/b97f0402af5fa803ef8d137e4050caf4"></script>
@@ -141,29 +141,38 @@
         ⚠️ <span>Aviso:</span> Se abrir algum aplicativo ou anúncio, basta <b>voltar para esta página</b> que os grupos serão liberados!
     </div>
 
-    <!-- Botão tratado por JavaScript para controlar a abertura em segundo plano -->
-    <button class="btn-ver-grupos" onclick="abrirTudo(event)">Ver Grupos</button>
+    <button class="btn-ver-grupos" onclick="gerenciarClique(event)">Ver Grupos</button>
 
     <script>
-        function abrirTudo(event) {
+        function gerenciarClique(event) {
             if (event) event.preventDefault();
             
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Cria um link invisível simulando o clique do usuário para o anúncio ir para trás (background)
-            let a = document.createElement('a');
-            a.href = linkAnuncio;
-            a.target = '_blank';
-            a.rel = 'noopener noreferrer';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            // Pega o número atual de cliques salvos no navegador do usuário
+            let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
 
-            // 2. Imediatamente joga a aba atual para o seu site principal no Render
-            setTimeout(function() {
+            if (cliques === 0) {
+                // PRIMEIRO CLIQUE: Salva o incremento para não abrir anúncio nas próximas vezes
+                localStorage.setItem('user_clicks_count', '1');
+                
+                // Abre o anúncio em uma nova aba normalmente
+                window.open(linkAnuncio, '_blank');
+            } else if (cliques >= 5) {
+                // CHEGOU A 5 CLIQUES: Reseta a contagem para abrir o anúncio novamente
+                localStorage.setItem('user_clicks_count', '0');
+                
+                // Abre o anúncio e redireciona a aba atual
+                window.open(linkAnuncio, '_blank');
+                setTimeout(function() {
+                    window.location.href = sitePrincipal;
+                }, 300);
+            } else {
+                // CLIQUES DE 2 A 4: Não abre nenhum anúncio, vai direto para o site
+                localStorage.setItem('user_clicks_count', (cliques + 1).toString());
                 window.location.href = sitePrincipal;
-            }, 100);
+            }
         }
     </script>
 </body>
