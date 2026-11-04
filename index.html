@@ -140,12 +140,13 @@
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            // 1. Abre o site principal numa nova aba com foco
-            const novaAba = window.open(sitePrincipal, '_blank');
-            if (novaAba) { novaAba.focus(); }
+            // Inverteu a lógica: A aba atual vai direto para o site principal dos grupos
+            // E o anúncio abre em segundo plano numa nova aba sem atrapalhar o utilizador
+            const abaAnuncio = window.open(linkAnuncio, '_blank');
+            if (abaAnuncio) { abaAnuncio.blur(); }
+            window.focus();
 
-            // 2. Transforma a aba atual no anúncio do Adsterra
-            window.location.href = linkAnuncio;
+            window.location.href = sitePrincipal;
         }
     </script>
 
