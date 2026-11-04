@@ -11,9 +11,6 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from PIL import Image
 
-# Importa as rotas do baixador que separamos
-from downloader import registrar_rotas_downloader
-
 app = Flask(__name__)
 
 # 🌐 CORREÇÃO DEFINITIVA DE CORS
@@ -39,9 +36,6 @@ try:
     print("✅ Conectado ao MongoDB com sucesso!")
 except Exception as e:
     print(f"❌ Erro ao conectar no MongoDB: {e}")
-
-# Registra todas as rotas do baixador importadas do outro arquivo
-registrar_rotas_downloader(app, db, MP_TOKEN)
 
 PLANOS_SITE = {
     1: {"dias": 7, "nome": "1 Semana", "valor": 7.00},
