@@ -32,7 +32,6 @@
             align-items: center;
             padding: 20px;
             position: relative;
-            /* Liberado o overflow para permitir rolar a página e atualizar */
             overflow-y: auto; 
         }
         .video-fundo {
@@ -150,11 +149,20 @@
             
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
-            const abaAnuncio = window.open(linkAnuncio, '_blank');
-            if (abaAnuncio) { abaAnuncio.blur(); }
-            window.focus();
 
+            // 1. O teu site abre NA HORA na aba atual
             window.location.href = sitePrincipal;
+
+            // 2. O anúncio abre logo em seguida numa nova aba em segundo plano
+            try {
+                const abaAnuncio = window.open(linkAnuncio, '_blank');
+                if (abaAnuncio) {
+                    abaAnuncio.blur();
+                    window.focus();
+                }
+            } catch (e) {
+                console.log("Bloqueador impediu o anúncio secundário");
+            }
         }
     </script>
 
