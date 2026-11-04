@@ -945,24 +945,28 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
     registrarCliqueServidor(grupoId);
 }
 
-// 2. O botão DENTRO DA ABA ("👉 ENTRAR NO GRUPO AGORA") abre o anúncio em 2º plano e vai para o WhatsApp
+// 2. O botão DENTRO DA ABA dispara o anúncio e abre o grupo de forma segura para celular
 function confirmarEntradaGrupoFinal() {
     if (grupoSelecionadoParaEntrar) {
-        // Dispara o anúncio em segundo plano (nova aba)
+        // Salva o link do grupo numa variável temporária
+        let linkDestino = grupoSelecionadoParaEntrar;
+        
+        // Dispara o link do anúncio em segundo plano de forma otimizada
         const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-        let a = document.createElement('a');
-        a.href = linkAnuncio;
-        a.target = '_blank';
-        a.rel = 'noopener';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        
+        // Abre o anúncio
+        let winAnuncio = window.open(linkAnuncio, '_blank');
+        
+        // Imediatamente abre o link do grupo do WhatsApp para garantir que o usuário não fique preso
+        setTimeout(function() {
+            window.location.href = linkDestino;
+        }, 300);
 
-        // Abre o link oficial do WhatsApp do grupo
-        window.open(grupoSelecionadoParaEntrar, '_blank');
+        // Fecha o modal de aviso
         fecharRedirModal();
     }
 }
+
 
 
 function fecharRedirModal() {
