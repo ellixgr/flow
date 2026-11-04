@@ -39,7 +39,33 @@
             background: #000000;
             color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column;
             padding-bottom: 120px; padding-top: 70px;
+            position: relative;
         }
+
+        /* === ESTILOS DO VÍDEO DE FUNDO FIXO === */
+        .video-fundo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover; 
+            z-index: -2;
+            filter: brightness(0.7); 
+            pointer-events: none;
+        }
+        .overlay-fundo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: -1;
+            pointer-events: none;
+        }
+        /* ===================================== */
+
         main {max-width:480px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
         .topo-titulo-area {
             text-align: center; 
@@ -456,6 +482,13 @@
     </style>
 </head>
 <body>
+
+<!-- VÍDEO DE FUNDO ANIMADO COLOCADO LOGO ABRIR O BODY -->
+<video class="video-fundo" autoplay loop muted playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
+    <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
+</video>
+<div class="overlay-fundo"></div>
+
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu(event)"></div>
@@ -463,7 +496,7 @@
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:#000;">🚀 CADASTRAR MEU GRUPO</button>
-    
+
     <!-- ANÚNCIO ADSTERRA NO MENU LATERAL -->
     <div style="margin: 10px 0; text-align:center;">
         <script type="text/javascript">
