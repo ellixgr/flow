@@ -7,8 +7,6 @@
     <meta name="description" content="Encontre e divulgue os melhores grupos de WhatsApp e Telegram ativos. Participe de comunidades de amizade, namoro, zoeira, memes e muito mais!">
     <meta name="keywords" content="divulgar whatsapp, divulgar telegram, grupos de amizade, amigos, grupo de namoro, zoeira, meme, links de grupos whatsapp, entrar em grupos, divulgar link de grupo">
     <link rel="canonical" href="https://ellixgr.github.io/flow/" />
-    
-    <!-- Open Graph / WhatsApp / Telegram Preview -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ellixgr.github.io/flow/">
     <meta property="og:title" content="Grupos WhatsApp 💬 FLOW | Divulgar Grupos">
@@ -21,8 +19,6 @@
     <meta name="twitter:description" content="Encontre e divulgue os melhores grupos de WhatsApp e Telegram ativos.">
     <meta name="twitter:image" content="https://raw.githubusercontent.com/ellixgr/flow/main/Screenshot_20261103-174901%20(1).png">
     <meta name="robots" content="index, follow">
-
-    <!-- Script Anti-Adblock da Adsterra -->
     <script data-cfasync="false" src="https://afders.org/1/b97f0402af5fa803ef8d137e4050caf4"></script>
 
     <style>
@@ -38,7 +34,6 @@
             position: relative;
             overflow: hidden;
         }
-        /* Vídeo de fundo fixo e travado para não interagir nem baixar */
         .video-fundo {
             position: fixed;
             top: 0;
@@ -48,9 +43,8 @@
             object-fit: cover; 
             z-index: -2;
             filter: brightness(0.7); 
-            pointer-events: none; /* Impede qualquer clique direto no vídeo */
+            pointer-events: none;
         }
-        /* Overlay para dar contraste */
         .overlay-fundo {
             position: fixed;
             top: 0;
@@ -61,13 +55,10 @@
             z-index: -1;
             pointer-events: none;
         }
-        /* Container do script de anúncio */
         .ad-container {
             margin-bottom: 15px;
             z-index: 2;
         }
-        
-        /* AVISO ANTI-FECHAMENTO / ANÚNCIO */
         .aviso-anuncio {
             background: rgba(0, 0, 0, 0.75);
             border: 1px solid rgba(37, 211, 102, 0.5);
@@ -110,8 +101,6 @@
             transition: transform 0.2s, opacity 0.2s;
         }
         .btn-ver-grupos:hover { opacity: 0.9; transform: scale(1.03); }
-
-        /* SEO semântico oculto para os robôs do Google lerem as palavras-chave */
         .seo-text-hidden {
             position: absolute;
             width: 1px;
@@ -126,20 +115,14 @@
     </style>
 </head>
 <body>
-
-    <!-- Conteúdo textual otimizado estritamente para os robôs de busca do Google -->
     <div class="seo-text-hidden">
         <h1>Divulgar Grupos de WhatsApp e Telegram</h1>
         <p>Plataforma ideal para divulgar WhatsApp, divulgar Telegram, encontrar links de grupos de amizade, fazer novos amigos, participar de grupos de namoro, zoeira e memes. Os melhores links ativos e atualizados diariamente para você entrar e divulgar seu link de grupo grátis.</p>
     </div>
-
-    <!-- Vídeo de Fundo travado contra download/cliques -->
     <video class="video-fundo" autoplay loop muted playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
         <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
     </video>
     <div class="overlay-fundo"></div>
-
-    <!-- Script de Anúncio Adsterra (Banner Iframe) -->
     <div class="ad-container">
         <script type="text/javascript">
           atOptions = {
@@ -152,13 +135,10 @@
         </script>
         <script type="text/javascript" src="https://bicea.org/22/e64f39c609130dc8030efa1e7737a3bd"></script>
     </div>
-
-    <!-- BOX DE AVISO AO USUÁRIO -->
     <div class="aviso-anuncio">
         ⚠️ <span>Aviso:</span> Se abrir algum aplicativo ou anúncio, basta <b>voltar para esta página</b> que os grupos serão liberados!
     </div>
 
-    <!-- Botão Centralizado -->
     <button class="btn-ver-grupos" onclick="abrirCorreto(event)">Ver Grupos</button>
 
     <script>
@@ -167,9 +147,6 @@
             
             const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
             const sitePrincipal = "https://flow-af3j.onrender.com";
-
-            // Inverteu a lógica: A aba atual vai direto para o site principal dos grupos
-            // E o anúncio abre em segundo plano numa nova aba sem atrapalhar o utilizador
             const abaAnuncio = window.open(linkAnuncio, '_blank');
             if (abaAnuncio) { abaAnuncio.blur(); }
             window.focus();
