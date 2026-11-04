@@ -63,9 +63,32 @@
         }
         /* Container do script de anúncio */
         .ad-container {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             z-index: 2;
         }
+        
+        /* AVISO ANTI-FECHAMENTO / ANÚNCIO */
+        .aviso-anuncio {
+            background: rgba(0, 0, 0, 0.75);
+            border: 1px solid rgba(37, 211, 102, 0.5);
+            color: #fff;
+            font-size: 13px;
+            text-align: center;
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 320px;
+            width: 100%;
+            margin-bottom: 12px;
+            z-index: 2;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            line-height: 1.4;
+        }
+        .aviso-anuncio span {
+            color: #25d366;
+            font-weight: bold;
+        }
+
         .btn-ver-grupos {
             display: flex;
             justify-content: center;
@@ -128,6 +151,11 @@
           };
         </script>
         <script type="text/javascript" src="https://bicea.org/22/e64f39c609130dc8030efa1e7737a3bd"></script>
+    </div>
+
+    <!-- BOX DE AVISO AO USUÁRIO -->
+    <div class="aviso-anuncio">
+        ⚠️ <span>Aviso:</span> Se abrir algum aplicativo ou anúncio, basta <b>voltar para esta página</b> que os grupos serão liberados!
     </div>
 
     <!-- Botão Centralizado -->
