@@ -665,8 +665,15 @@
         <img id="redirFoto" src="" class="redir-img" alt="Foto Grupo">
         <h2 id="redirNome" style="color:#25d366; font-size:17px; margin-bottom:4px;">Nome do Grupo</h2>
         <p id="redirCat" style="color:#ffd700; font-size:11px; margin-bottom:8px; text-transform:uppercase;"></p>
-        <p id="redirDesc" style="color:#ccc; font-size:12px; margin-bottom:12px; line-height:1.4;"></p>
+        <p id="redirDesc" style="color:#ccc; font-size:12px; margin-bottom:10px; line-height:1.4;"></p>
         
+        <!-- AVISO SOLICITADO POR VOCÊ -->
+        <div style="background: rgba(37, 211, 102, 0.1); border: 1px dashed #25d366; border-radius: 8px; padding: 8px; margin-bottom: 12px;">
+            <p style="color: #25d366; font-size: 11px; line-height: 1.3; font-weight: bold;">
+                ⚠️ Se abrir algum anúncio ou app, é só voltar para esta aba que o link do grupo será liberado abaixo!
+            </p>
+        </div>
+
         <!-- ANÚNCIO ADSTERRA NA ABA DE REDIRECIONAMENTO -->
         <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:10px; margin-bottom:12px;">
             <script type="text/javascript">
@@ -679,6 +686,7 @@
         <button onclick="fecharRedirModal()" style="background:transparent; color:#8b949e; border:none; margin-top:10px; cursor:pointer; font-size:12px;">Voltar ao site</button>
     </div>
 </div>
+
 
 <!-- MODAL DE CADASTRO -->
 <div id="modalForm" class="modal">
@@ -918,9 +926,11 @@ function mudarPagina(direcao) {
     window.scrollTo({top: 300, behavior: 'smooth'});
 }
 
-// TELA DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ANÚNCIOS DO ADSTERRA
+// TELA DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ABERTURA DE ANÚNCIO EM 2º PLANO
 function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, desc) {
+    if (e) e.preventDefault();
     e.stopPropagation();
+    
     grupoSelecionadoParaEntrar = decodeURIComponent(link);
     
     document.getElementById('redirNome').textContent = decodeURIComponent(nome);
@@ -928,11 +938,23 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
     document.getElementById('redirDesc').textContent = decodeURIComponent(desc);
     document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     
+    // 1. DISPARA O LINK DO ANÚNCIO EM SEGUNDO PLANO (NOVA ABA)
+    const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+    let a = document.createElement('a');
+    a.href = linkAnuncio;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    // 2. ABRE O MODAL DE REDIRECIONAMENTO DO GRUPO COM O AVISO NA TELA ATUAL
     document.getElementById('grupoRedirModal').style.display = 'flex';
 
     // Registra o clique e atualiza o ranking em tempo real
     registrarCliqueServidor(grupoId);
 }
+
 
 function confirmarEntradaGrupoFinal() {
     if(grupoSelecionadoParaEntrar) {
