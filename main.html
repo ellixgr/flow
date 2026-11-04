@@ -926,7 +926,7 @@ function mudarPagina(direcao) {
     window.scrollTo({top: 300, behavior: 'smooth'});
 }
 
-// TELA DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ABERTURA DE ANÚNCIO EM 2º PLANO
+// 1. O primeiro botão da lista apenas abre a aba de aviso (SEM ANÚNCIO)
 function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, desc) {
     if (e) e.preventDefault();
     e.stopPropagation();
@@ -938,30 +938,32 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
     document.getElementById('redirDesc').textContent = decodeURIComponent(desc);
     document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     
-    // 1. DISPARA O LINK DO ANÚNCIO EM SEGUNDO PLANO (NOVA ABA)
-    const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-    let a = document.createElement('a');
-    a.href = linkAnuncio;
-    a.target = '_blank';
-    a.rel = 'noopener';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-
-    // 2. ABRE O MODAL DE REDIRECIONAMENTO DO GRUPO COM O AVISO NA TELA ATUAL
+    // Abre apenas o modal com o aviso na tela
     document.getElementById('grupoRedirModal').style.display = 'flex';
 
     // Registra o clique e atualiza o ranking em tempo real
     registrarCliqueServidor(grupoId);
 }
 
-
+// 2. O botão DENTRO DA ABA ("👉 ENTRAR NO GRUPO AGORA") abre o anúncio em 2º plano e vai para o WhatsApp
 function confirmarEntradaGrupoFinal() {
-    if(grupoSelecionadoParaEntrar) {
+    if (grupoSelecionadoParaEntrar) {
+        // Dispara o anúncio em segundo plano (nova aba)
+        const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+        let a = document.createElement('a');
+        a.href = linkAnuncio;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // Abre o link oficial do WhatsApp do grupo
         window.open(grupoSelecionadoParaEntrar, '_blank');
         fecharRedirModal();
     }
 }
+
 
 function fecharRedirModal() {
     document.getElementById('grupoRedirModal').style.display = 'none';
