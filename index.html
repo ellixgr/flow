@@ -143,33 +143,44 @@
 
     <button class="btn-ver-grupos" onclick="gerenciarClique(event)">Ver Grupos</button>
 
-    <script>
-        function gerenciarClique(event) {
-            if (event) event.preventDefault();
-            
-            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-            const sitePrincipal = "https://flow-af3j.onrender.com";
+<script>
+    function gerenciarClique(event) {
+        if (event) event.preventDefault();
+        
+        const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+        const sitePrincipal = "https://flow-af3j.onrender.com";
 
-            let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
+        let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
 
-            if (cliques === 0) {
-                localStorage.setItem('user_clicks_count', '1');
-                // Abre o anúncio em nova aba e joga o usuário direto para o site principal na aba atual
-                window.open(linkAnuncio, '_blank');
-                window.location.href = sitePrincipal;
-
-            } else if (cliques >= 5) {
-                localStorage.setItem('user_clicks_count', '0');
-                window.open(linkAnuncio, '_blank');
-                setTimeout(function() {
-                    window.location.href = sitePrincipal;
-                }, 300);
-
-            } else {
-                localStorage.setItem('user_clicks_count', (cliques + 1).toString());
-                window.location.href = sitePrincipal;
+        if (cliques === 0) {
+            localStorage.setItem('user_clicks_count', '1');
+            // 1️⃣ Abre anúncio em nova aba
+            const abaAnuncio = window.open(linkAnuncio, '_blank');
+            // 2️⃣ Tenta focar a aba atual (bloqueado na maioria dos celulares)
+            if (abaAnuncio) {
+                abaAnuncio.blur();
+                window.focus();
             }
+            // 3️⃣ Aba atual vai ao Flow (esse é o que queremos na frente)
+            setTimeout(()=>{
+                window.location.href = sitePrincipal;
+            }, 200);
+
+        } else if (cliques >= 5) {
+            localStorage.setItem('user_clicks_count', '0');
+            const abaAnuncio = window.open(linkAnuncio, '_blank');
+            if (abaAnuncio) {
+                abaAnuncio.blur();
+                window.focus();
+            }
+            setTimeout(()=>window.location.href = sitePrincipal, 200);
+
+        } else {
+            localStorage.setItem('user_clicks_count', (cliques + 1).toString());
+            window.location.href = sitePrincipal;
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
