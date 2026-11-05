@@ -1026,12 +1026,19 @@ async function carregarDadosDoServidor() {
 }
 
 let promoTimer = null;
+let promoAtivoRodando = false;
+
 function iniciarContadorPromo(segundosRestantes) {
     const label = document.getElementById('promoContadorLabel');
     const btnFechar = document.getElementById('promoBtnFechar');
     
+    // Se o contador já estiver ativo rodando, não reinicia para não bugar ao clicar nos grupos
+    if (promoAtivoRodando) return;
+    promoAtivoRodando = true;
+
     btnFechar.disabled = true;
     btnFechar.classList.remove('liberado');
+    label.style.display = 'block';
 
     if(promoTimer) clearInterval(promoTimer);
 
@@ -1040,10 +1047,11 @@ function iniciarContadorPromo(segundosRestantes) {
         if(segundosRestantes > 0) {
             label.textContent = `Fechando em ${segundosRestantes}s`;
         } else {
-            label.textContent = `Fechar card`;
+            label.style.display = 'none'; // Some o texto e deixa apenas o X visível
             btnFechar.disabled = false;
             btnFechar.classList.add('liberado');
             clearInterval(promoTimer);
+            promoAtivoRodando = false;
         }
     }, 1000);
 }
@@ -1052,8 +1060,11 @@ function fecharCardPromo() {
     const btnFechar = document.getElementById('promoBtnFechar');
     if(!btnFechar.disabled) {
         document.getElementById('cardFlutuantePromo').style.display = 'none';
+        promoAtivoRodando = false;
+        if(promoTimer) clearInterval(promoTimer);
     }
 }
+
 
 function renderizarPaginaGrupos() {
     const lista = document.getElementById('lista-grupos');
