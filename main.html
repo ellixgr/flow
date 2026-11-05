@@ -243,48 +243,78 @@
         }
         .btn-entrar:hover { opacity: 0.9; }
 
-        /* === CARD FLUTUANTE DE DESTAQUE VINDOS DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA === */
+        /* === CARD FLUTUANTE DE DESTAQUE REFEITO === */
         #cardFlutuantePromo {
             display: none;
             position: fixed;
             bottom: 80px;
             right: 15px;
             width: 260px;
-            background: #161b22;
-            border: 2px solid #25d366;
+            height: 320px;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             z-index: 99999;
             overflow: hidden;
             animation: slideRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: fixed;
         }
         @keyframes slideRight {
             from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+        /* A foto preenche o card todo */
+        #promoImgCard {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        /* Gradiente escuro de sombreado em cima da foto no terço inferior para legibilidade */
+        .promo-overlay-gradiente {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
         .promo-header-bar {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(37,211,102,0.15);
-            padding: 6px 10px;
-            font-size: 11px;
+            z-index: 10;
+        }
+        #promoContadorLabel {
+            background: rgba(0,0,0,0.7);
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 10px;
             font-weight: bold;
             color: #25d366;
-            border-bottom: 1px solid #30363d;
+            backdrop-filter: blur(4px);
         }
         .promo-fechar-btn {
-            background: #21262d;
-            border: 1px solid #30363d;
+            background: rgba(0,0,0,0.6);
+            border: none;
             color: #8b949e;
             border-radius: 50%;
-            width: 22px;
-            height: 22px;
+            width: 26px;
+            height: 26px;
             font-size: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: not-allowed;
+            backdrop-filter: blur(4px);
         }
         .promo-fechar-btn.liberado {
             background: #da3633;
@@ -292,50 +322,57 @@
             cursor: pointer;
         }
         .promo-body {
-            padding: 10px;
-            text-align: center;
-        }
-        .promo-body img {
+            position: absolute;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            /* Foto com leve sombreado */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            text-align: left;
         }
         .promo-titulo {
-            font-size: 13px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 800;
             color: #fff;
-            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .promo-texto {
             font-size: 11px;
-            color: #aaa;
-            margin-bottom: 10px;
+            color: #ddd;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
             line-height: 1.3;
         }
-        /* Botão transparente, sem borda e sombreado */
+        /* BOTÃO SEM BORDAS, TRANSPARENTE COM SOMBRA */
         .promo-btn-acao {
             display: block;
             width: 100%;
-            background: rgba(37, 211, 102, 0.2);
-            backdrop-filter: blur(6px);
-            color: #25d366;
-            padding: 9px;
-            border-radius: 8px;
+            background: rgba(37, 211, 102, 0.25);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            padding: 10px;
+            border-radius: 10px;
             font-weight: 800;
             font-size: 12px;
             text-decoration: none;
             text-align: center;
-            border: none;
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+            border: none !important;
+            outline: none !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             transition: background 0.2s, transform 0.2s;
+            margin-top: 4px;
         }
         .promo-btn-acao:hover {
-            background: rgba(37, 211, 102, 0.35);
+            background: rgba(37, 211, 102, 0.45);
             transform: scale(1.02);
         }
 
@@ -363,7 +400,7 @@
         .btn-pag:disabled { opacity: 0.4; cursor: not-allowed; }
         .pag-info { font-size: 12px; color: #aaa; }
 
-        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ADSTERRA */
+        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ANÚNCIO APENAS AQUI */
         #grupoRedirModal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 999999;
@@ -585,14 +622,15 @@
 </video>
 <div class="overlay-fundo"></div>
 
-<!-- CARD FLUTUANTE DE DESTAQUE (VEM DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA) -->
+<!-- CARD FLUTUANTE DE DESTAQUE REFEITO (FOTO FUNDO TODO + SOMBRA + BOTÃO SEM BORDA) -->
 <div id="cardFlutuantePromo">
+    <img id="promoImgCard" src="" alt="Destaque">
+    <div class="promo-overlay-gradiente"></div>
     <div class="promo-header-bar">
         <span id="promoContadorLabel">Fechando em 5s</span>
         <button id="promoBtnFechar" class="promo-fechar-btn" onclick="fecharCardPromo()" disabled>✕</button>
     </div>
     <div class="promo-body">
-        <img id="promoImgCard" src="" alt="Destaque">
         <div id="promoNomeCard" class="promo-titulo">Título</div>
         <div id="promoTextoCard" class="promo-texto">Texto descritivo</div>
         <a id="promoLinkCard" href="#" target="_blank" rel="noopener" class="promo-btn-acao">Acessar</a>
@@ -670,14 +708,9 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- LISTA DE GRUPOS EM GRADE 2x2 -->
+    <!-- LISTA DE GRUPOS EM GRADE 2x2 (SEM NENHUM ANÚNCIO INTRUSIVO AQUI) -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
-    </div>
-
-    <!-- SCRIPT ANTI-ADBLOCK DA ADSTERRA ENTRE OS GRUPOS -->
-    <div class="ad-script-container">
-        <script data-cfasync="false" src="https://afders.org/1/b97f0402af5fa803ef8d137e4050caf4"></script>
     </div>
 
     <div class="video-container">
@@ -769,7 +802,7 @@
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
 
-<!-- PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA COM ANÚNCIOS ADSTERRA -->
+<!-- PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA COM ANÚNCIO ADSTERRA EXCLUSIVO AQUI -->
 <div id="grupoRedirModal">
     <div class="redir-box">
         <img id="redirFoto" src="" class="redir-img" alt="Foto Grupo">
@@ -777,14 +810,14 @@
         <p id="redirCat" style="color:#ffd700; font-size:11px; margin-bottom:8px; text-transform:uppercase;"></p>
         <p id="redirDesc" style="color:#ccc; font-size:12px; margin-bottom:10px; line-height:1.4;"></p>
         
-        <!-- AVISO SOLICITADO POR VOCÊ -->
+        <!-- AVISO -->
         <div style="background: rgba(37, 211, 102, 0.1); border: 1px dashed #25d366; border-radius: 8px; padding: 8px; margin-bottom: 12px;">
             <p style="color: #25d366; font-size: 11px; line-height: 1.3; font-weight: bold;">
                 ⚠️ Se abrir algum anúncio ou app, é só voltar para esta aba que o link do grupo será liberado abaixo!
             </p>
         </div>
 
-        <!-- ANÚNCIO ADSTERRA NA ABA DE REDIRECIONAMENTO -->
+        <!-- ANÚNCIO ADSTERRA EXCLUSIVO DENTRO DO MODAL -->
         <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:10px; margin-bottom:12px;">
             <script type="text/javascript">
                 atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
