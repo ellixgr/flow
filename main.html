@@ -926,23 +926,47 @@ function mudarPagina(direcao) {
     window.scrollTo({top: 300, behavior: 'smooth'});
 }
 
-// O botão "Entrar no Grupo" da lista agora vai direto para o WhatsApp de forma limpa, sem anúncios nem loops
+// 1. O primeiro botão da lista apenas abre a aba de aviso (SEM ANÚNCIO)
 function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, desc) {
     if (e) e.preventDefault();
     e.stopPropagation();
     
-    let linkDestino = decodeURIComponent(link);
+    grupoSelecionadoParaEntrar = decodeURIComponent(link);
     
-    // Registra o clique e atualiza o ranking no servidor em segundo plano
+    document.getElementById('redirNome').textContent = decodeURIComponent(nome);
+    document.getElementById('redirCat').textContent = decodeURIComponent(categoria);
+    document.getElementById('redirDesc').textContent = decodeURIComponent(desc);
+    document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
+    
+    // Abre apenas o modal com o aviso na tela
+    document.getElementById('grupoRedirModal').style.display = 'flex';
+
+    // Registra o clique e atualiza o ranking em tempo real
     registrarCliqueServidor(grupoId);
-    
-    // Abre o WhatsApp do grupo diretamente
-    window.open(linkDestino, '_blank');
 }
 
+// 2. O botão DENTRO DA ABA dispara o anúncio e abre o grupo de forma segura para celular
 function confirmarEntradaGrupoFinal() {
-    // Função desativada para evitar loops
+    if (grupoSelecionadoParaEntrar) {
+        // Salva o link do grupo numa variável temporária
+        let linkDestino = grupoSelecionadoParaEntrar;
+        
+        // Dispara o link do anúncio em segundo plano de forma otimizada
+        const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+        
+        // Abre o anúncio
+        let winAnuncio = window.open(linkAnuncio, '_blank');
+        
+        // Imediatamente abre o link do grupo do WhatsApp para garantir que o usuário não fique preso
+        setTimeout(function() {
+            window.location.href = linkDestino;
+        }, 300);
+
+        // Fecha o modal de aviso
+        fecharRedirModal();
+    }
 }
+
 
 
 function fecharRedirModal() {
