@@ -143,36 +143,33 @@
 
     <button class="btn-ver-grupos" onclick="gerenciarClique(event)">Ver Grupos</button>
 
-<script>
-    function gerenciarClique(event) {
-        if (event) event.preventDefault();
-        
-        const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-        const sitePrincipal = "https://flow-af3j.onrender.com";
-
-        let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
-
-        if (cliques === 0) {
-            localStorage.setItem('user_clicks_count', '1');
+    <script>
+        function gerenciarClique(event) {
+            if (event) event.preventDefault();
             
-            // ABRE O SEU SITE PRINCIPAL NA FRENTE (NOVA ABA COM FOCO)
-            window.open(sitePrincipal, '_blank');
-            // A ABA ATUAL VIRA O ANÚNCIO (FICA ATRÁS)
-            window.location.href = linkAnuncio;
+            const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+            const sitePrincipal = "https://flow-af3j.onrender.com";
 
-        } else if (cliques >= 5) {
-            localStorage.setItem('user_clicks_count', '0');
-            
-            window.open(sitePrincipal, '_blank');
-            window.location.href = linkAnuncio;
+            let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
 
-        } else {
-            // CLIQUES 2 A 4: VAI DIRETO PRO SEU SITE NA ABA ATUAL
-            localStorage.setItem('user_clicks_count', (cliques + 1).toString());
-            window.location.href = sitePrincipal;
+            if (cliques === 0) {
+                localStorage.setItem('user_clicks_count', '1');
+                // Abre o anúncio em nova aba e joga o usuário direto para o site principal na aba atual
+                window.open(linkAnuncio, '_blank');
+                window.location.href = sitePrincipal;
+
+            } else if (cliques >= 5) {
+                localStorage.setItem('user_clicks_count', '0');
+                window.open(linkAnuncio, '_blank');
+                setTimeout(function() {
+                    window.location.href = sitePrincipal;
+                }, 300);
+
+            } else {
+                localStorage.setItem('user_clicks_count', (cliques + 1).toString());
+                window.location.href = sitePrincipal;
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
