@@ -41,12 +41,6 @@
             padding-bottom: 120px; padding-top: 70px;
             position: relative;
         }
-        body.sem-video .video-fundo, body.sem-video .overlay-fundo {
-            display: none !important;
-        }
-        body.sem-video {
-            background: #000000 !important;
-        }
 
         /* === ESTILOS DO VÍDEO DE FUNDO FIXO === */
         .video-fundo {
@@ -123,44 +117,9 @@
             border-radius: 12px;
             padding: 8px 0;
         }
-        
-        /* ABAS DE CATEGORIAS MAIS BONITAS E TRANSPARENTES */
-        .abas {
-            display: flex; 
-            gap: 8px; 
-            overflow-x: auto; 
-            padding-bottom: 8px; 
-            margin: 10px 0 15px 0; 
-            position: sticky; 
-            top: 0; 
-            background: rgba(0, 0, 0, 0.85); 
-            backdrop-filter: blur(10px);
-            z-index: 10; 
-            padding-top: 8px;
-            scrollbar-width: none;
-        }
-        .abas::-webkit-scrollbar { display: none; }
-        .aba {
-            padding: 7px 16px; 
-            background: rgba(255, 255, 255, 0.06); 
-            backdrop-filter: blur(6px);
-            border-radius: 20px; 
-            white-space: nowrap; 
-            cursor: pointer; 
-            font-size: 13px; 
-            font-weight: 500;
-            color: #ddd;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.2s ease;
-        }
-        .aba:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
-        .aba.ativa {
-            background: linear-gradient(135deg, #25d366, #128c7e); 
-            color: #000; 
-            font-weight: 700;
-            border-color: #25d366;
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
-        }
+        .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 10px 0 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
+        .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
+        .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
         
         /* GRADE 2 POR 2 */
         .lista {
@@ -284,14 +243,15 @@
         }
         .btn-entrar:hover { opacity: 0.9; }
 
-        /* === CARD FLUTUANTE DE DESTAQUE REFEITO (BOTÃO TRANSPARENTE SEM BORDA + CONTADOR QUE SOME) === */
+        /* === CARD FLUTUANTE DE DESTAQUE VINDOS DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA === */
         #cardFlutuantePromo {
             display: none;
             position: fixed;
             bottom: 80px;
             right: 15px;
             width: 260px;
-            height: 320px;
+            background: #161b22;
+            border: 2px solid #25d366;
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
             z-index: 99999;
@@ -302,111 +262,80 @@
             from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        #promoImgCard {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-        }
-        .promo-overlay-gradiente {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.6) 40%, rgba(0,0,0,0.2) 100%);
-            z-index: 2;
-            pointer-events: none;
-        }
         .promo-header-bar {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            z-index: 10;
-        }
-        #promoContadorLabel {
-            background: rgba(0,0,0,0.7);
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 10px;
+            background: rgba(37,211,102,0.15);
+            padding: 6px 10px;
+            font-size: 11px;
             font-weight: bold;
             color: #25d366;
-            backdrop-filter: blur(4px);
-            transition: opacity 0.3s ease;
+            border-bottom: 1px solid #30363d;
         }
         .promo-fechar-btn {
-            background: rgba(0,0,0,0.6);
-            border: none;
-            color: #fff;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
             border-radius: 50%;
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             font-size: 11px;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: not-allowed;
+        }
+        .promo-fechar-btn.liberado {
+            background: #da3633;
+            color: #fff;
             cursor: pointer;
-            backdrop-filter: blur(4px);
         }
         .promo-body {
-            position: absolute;
-            bottom: 0;
-            left: 0;
+            padding: 10px;
+            text-align: center;
+        }
+        .promo-body img {
             width: 100%;
-            padding: 15px;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            text-align: left;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            /* Foto com leve sombreado */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .promo-titulo {
-            font-size: 14px;
-            font-weight: 800;
+            font-size: 13px;
+            font-weight: bold;
             color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            margin-bottom: 4px;
         }
         .promo-texto {
             font-size: 11px;
-            color: #ddd;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.8);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            color: #aaa;
+            margin-bottom: 10px;
             line-height: 1.3;
         }
-        /* BOTÃO TOTALMENTE TRANSPARENTE, SEM NENHUMA BORDA */
+        /* Botão transparente, sem borda e sombreado */
         .promo-btn-acao {
             display: block;
             width: 100%;
-            background: rgba(37, 211, 102, 0.25);
-            backdrop-filter: blur(8px);
-            color: #fff;
-            padding: 10px;
-            border-radius: 10px;
+            background: rgba(37, 211, 102, 0.2);
+            backdrop-filter: blur(6px);
+            color: #25d366;
+            padding: 9px;
+            border-radius: 8px;
             font-weight: 800;
             font-size: 12px;
             text-decoration: none;
             text-align: center;
-            border: none !important;
-            outline: none !important;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
             transition: background 0.2s, transform 0.2s;
-            margin-top: 4px;
         }
         .promo-btn-acao:hover {
-            background: rgba(37, 211, 102, 0.45);
+            background: rgba(37, 211, 102, 0.35);
             transform: scale(1.02);
         }
 
@@ -434,7 +363,7 @@
         .btn-pag:disabled { opacity: 0.4; cursor: not-allowed; }
         .pag-info { font-size: 12px; color: #aaa; }
 
-        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ANÚNCIO EXCLUSIVO */
+        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ADSTERRA */
         #grupoRedirModal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 999999;
@@ -448,24 +377,14 @@
         .redir-img { width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 2px solid #25d366; margin-bottom: 10px; }
 
         .vazio {text-align:center; color:#aaa; padding:30px 20px; font-size:15px; grid-column: span 2;}
-        
-        /* BOTÃO ENVIAR GRUPO COM SUPORTE A ROLAGEM DINÂMICA */
         .btn-enviar-topo-header {
-            position: fixed; 
-            top: 15px; 
-            right: 65px; 
-            z-index: 1000;
+            position: fixed; top: 15px; right: 65px; z-index: 1000;
             background: linear-gradient(135deg, #25d366, #128c7e);
             color: #000; font-weight: 800; font-size: 12px;
             padding: 10px 14px; border-radius: 12px; border: 2px solid var(--primary-green);
             cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px;
             box-shadow: 0 4px 15px rgba(37,211,102,0.4); white-space: nowrap;
-            transition: top 0.3s ease;
         }
-        body.rolado .btn-enviar-topo-header {
-            top: 8px; /* Sobe um pouco ao rolar a página para não tampar as abas */
-        }
-
         .anuncio-box-gigante {
             background: rgba(255, 255, 255, 0.03);
             border: none;
@@ -666,15 +585,14 @@
 </video>
 <div class="overlay-fundo"></div>
 
-<!-- CARD FLUTUANTE DE DESTAQUE REFEITO -->
+<!-- CARD FLUTUANTE DE DESTAQUE (VEM DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA) -->
 <div id="cardFlutuantePromo">
-    <img id="promoImgCard" src="" alt="Destaque">
-    <div class="promo-overlay-gradiente"></div>
     <div class="promo-header-bar">
         <span id="promoContadorLabel">Fechando em 5s</span>
-        <button id="promoBtnFechar" class="promo-fechar-btn" onclick="fecharCardPromo()">✕</button>
+        <button id="promoBtnFechar" class="promo-fechar-btn" onclick="fecharCardPromo()" disabled>✕</button>
     </div>
     <div class="promo-body">
+        <img id="promoImgCard" src="" alt="Destaque">
         <div id="promoNomeCard" class="promo-titulo">Título</div>
         <div id="promoTextoCard" class="promo-texto">Texto descritivo</div>
         <a id="promoLinkCard" href="#" target="_blank" rel="noopener" class="promo-btn-acao">Acessar</a>
@@ -688,9 +606,6 @@
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:#000;">🚀 CADASTRAR MEU GRUPO</button>
-
-    <!-- BOTÃO DE ESCOLHA PESSOAL: MODO SEM VÍDEO DE FUNDO -->
-    <button type="button" class="btn-menu-item" onclick="alternarModoSemVideo()" id="btnModoVideo" style="background:#21262d; color:#fff; border:1px solid #30363d;">🎥 Desativar Vídeo de Fundo</button>
 
     <!-- ANÚNCIO ADSTERRA NO MENU LATERAL -->
     <div style="margin: 10px 0; text-align:center;">
@@ -755,9 +670,14 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- LISTA DE GRUPOS EM GRADE 2x2 (COM BANNERS ADSTERRA ENTRE OS GRUPOS, NUNCA ENTRE 1 E 1) -->
+    <!-- LISTA DE GRUPOS EM GRADE 2x2 -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
+    </div>
+
+    <!-- SCRIPT ANTI-ADBLOCK DA ADSTERRA ENTRE OS GRUPOS -->
+    <div class="ad-script-container">
+        <script data-cfasync="false" src="https://afders.org/1/b97f0402af5fa803ef8d137e4050caf4"></script>
     </div>
 
     <div class="video-container">
@@ -849,7 +769,7 @@
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
 
-<!-- PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA COM ANÚNCIO ADSTERRA EXCLUSIVO AQUI -->
+<!-- PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA COM ANÚNCIOS ADSTERRA -->
 <div id="grupoRedirModal">
     <div class="redir-box">
         <img id="redirFoto" src="" class="redir-img" alt="Foto Grupo">
@@ -857,14 +777,14 @@
         <p id="redirCat" style="color:#ffd700; font-size:11px; margin-bottom:8px; text-transform:uppercase;"></p>
         <p id="redirDesc" style="color:#ccc; font-size:12px; margin-bottom:10px; line-height:1.4;"></p>
         
-        <!-- AVISO -->
+        <!-- AVISO SOLICITADO POR VOCÊ -->
         <div style="background: rgba(37, 211, 102, 0.1); border: 1px dashed #25d366; border-radius: 8px; padding: 8px; margin-bottom: 12px;">
             <p style="color: #25d366; font-size: 11px; line-height: 1.3; font-weight: bold;">
                 ⚠️ Se abrir algum anúncio ou app, é só voltar para esta aba que o link do grupo será liberado abaixo!
             </p>
         </div>
 
-        <!-- ANÚNCIO ADSTERRA EXCLUSIVO DENTRO DO MODAL -->
+        <!-- ANÚNCIO ADSTERRA NA ABA DE REDIRECIONAMENTO -->
         <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:10px; margin-bottom:12px;">
             <script type="text/javascript">
                 atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
@@ -1014,35 +934,6 @@ let gruposGlobais = [];
 let grupoSelecionadoParaEntrar = null;
 let checkInterval = null;
 
-// ROLAGEM DA PÁGINA PARA SUBIR O BOTÃO DE ENVIAR GRUPO
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 40) {
-        document.body.classList.add('rolado');
-    } else {
-        document.body.classList.remove('rolado');
-    }
-});
-
-// PREFERÊNCIA PESSOAL: MODO SEM VÍDEO DE FUNDO
-function verificarModoSemVideo() {
-    let semVideo = localStorage.getItem('flow_sem_video') === 'true';
-    if(semVideo) {
-        document.body.classList.add('sem-video');
-        document.getElementById('btnModoVideo').textContent = "🎥 Ativar Vídeo de Fundo";
-    } else {
-        document.body.classList.remove('sem-video');
-        document.getElementById('btnModoVideo').textContent = "🎥 Desativar Vídeo de Fundo";
-    }
-}
-verificarModoSemVideo();
-
-function alternarModoSemVideo() {
-    let semVideo = localStorage.getItem('flow_sem_video') === 'true';
-    localStorage.setItem('flow_sem_video', !semVideo);
-    verificarModoSemVideo();
-    toggleMenu();
-}
-
 function toggleMenu(e) { 
     if(e) { e.preventDefault(); e.stopPropagation(); } 
     document.getElementById('sideMenu').classList.toggle('active'); 
@@ -1065,13 +956,14 @@ function trocarCategoria(cat) {
     carregarDadosDoServidor();
 }
 
-// CARREGAR DADOS DO SERVIDOR E ORDENAR POR CLIQUES
+// CARREGAR DADOS DO SERVIDOR E APLICAR O RANKING AUTOMÁTICO POR ACESSOS/CLIQUES
 async function carregarDadosDoServidor() {
     try {
         let res = await fetch(API_BASE + '/api/site-dados');
         let data = await res.json();
         let grupos = data.grupos || [];
 
+        // TRATAR E EXIBIR O CARD FLUTUANTE DE DESTAQUE CADASTRADO NO ADM
         if (data.promo && data.promo.ativo) {
             document.getElementById('promoImgCard').src = data.promo.foto;
             document.getElementById('promoNomeCard').textContent = data.promo.nome;
@@ -1085,6 +977,7 @@ async function carregarDadosDoServidor() {
             document.getElementById('cardFlutuantePromo').style.display = 'none';
         }
 
+        // ORDENAÇÃO AUTOMÁTICA EM TEMPO REAL: Os mais acessados vão para o topo!
         grupos.sort((a, b) => {
             let cliquesA = (a.cliques_unicos && Array.isArray(a.cliques_unicos)) ? a.cliques_unicos.length : (a.acessos || a.cliques || 0);
             let cliquesB = (b.cliques_unicos && Array.isArray(b.cliques_unicos)) ? b.cliques_unicos.length : (b.acessos || b.cliques || 0);
@@ -1102,8 +995,10 @@ async function carregarDadosDoServidor() {
 let promoTimer = null;
 function iniciarContadorPromo(segundosRestantes) {
     const label = document.getElementById('promoContadorLabel');
-    label.style.opacity = '1';
-    label.textContent = `Fechando em ${segundosRestantes}s`;
+    const btnFechar = document.getElementById('promoBtnFechar');
+    
+    btnFechar.disabled = true;
+    btnFechar.classList.remove('liberado');
 
     if(promoTimer) clearInterval(promoTimer);
 
@@ -1112,14 +1007,19 @@ function iniciarContadorPromo(segundosRestantes) {
         if(segundosRestantes > 0) {
             label.textContent = `Fechando em ${segundosRestantes}s`;
         } else {
-            label.style.opacity = '0'; // O contador some e fica apenas o X
+            label.textContent = `Fechar card`;
+            btnFechar.disabled = false;
+            btnFechar.classList.add('liberado');
             clearInterval(promoTimer);
         }
     }, 1000);
 }
 
 function fecharCardPromo() {
-    document.getElementById('cardFlutuantePromo').style.display = 'none';
+    const btnFechar = document.getElementById('promoBtnFechar');
+    if(!btnFechar.disabled) {
+        document.getElementById('cardFlutuantePromo').style.display = 'none';
+    }
 }
 
 function renderizarPaginaGrupos() {
@@ -1137,13 +1037,11 @@ function renderizarPaginaGrupos() {
     const fim = inicio + itensPorPagina;
     const gruposPagina = gruposGlobais.slice(inicio, fim);
 
-    let htmlConteudo = '';
-    
-    gruposPagina.forEach((g, index) => {
+    let htmlConteudo = gruposPagina.map((g, index) => {
         const posicaoGlobal = inicio + index;
         const eTop1 = (posicaoGlobal === 0 && categoriaAtual === 'Todos');
         
-        htmlConteudo += `
+        return `
             <div class="card ${eTop1 ? 'top-1' : ''}">
                 ${eTop1 ? '<div class="fogo-animado">🔥 1º LUGAR</div>' : ''}
                 <div class="card-img-container">
@@ -1160,20 +1058,9 @@ function renderizarPaginaGrupos() {
                 </div>
             </div>
         `;
+    }).join('');
 
-        // INSERE BANNER ADSTERRA A CADA 2 GRUPOS (NUNCA ENTRE 1 E 1)
-        if ((index + 1) % 2 === 0 && index < gruposPagina.length - 1) {
-            htmlConteudo += `
-                <div class="ad-script-container" style="grid-column: span 2;">
-                    <script type="text/javascript">
-                        atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-                    </script>
-                    <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
-                </div>
-            `;
-        }
-    });
-
+    // Adiciona controles de paginação se houver mais de uma página
     if(totalPaginas > 1) {
         htmlConteudo += `
             <div class="paginacao-area">
