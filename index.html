@@ -10,7 +10,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://ellixgr.github.io/flow/">
     <meta property="og:title" content="Grupos WhatsApp 💬 FLOW | Divulgar Grupos">
-    <meta property="og:description" content="Encontre e divulgue os melhores grupos de WhatsApp e Telegram ativos. Amizade, namoro, zoeira e memes!">
+    <meta property="og:description" content="Encontre e divulgar os melhores grupos de WhatsApp e Telegram ativos. Amizade, namoro, zoeira e memes!">
     <meta property="og:image" content="https://raw.githubusercontent.com/ellixgr/flow/main/Screenshot_20261103-174901%20(1).png">
     
     <meta name="twitter:card" content="summary_large_image">
@@ -154,22 +154,31 @@
             let cliques = parseInt(localStorage.getItem('user_clicks_count') || '0');
 
             if (cliques === 0) {
-                // PRIMEIRO CLIQUE: Salva o incremento para não abrir anúncio nas próximas vezes
+                // PRIMEIRO CLIQUE: Abre o anúncio em background (trás) e manda o usuário direto para o site na frente
                 localStorage.setItem('user_clicks_count', '1');
                 
-                // Abre o anúncio em uma nova aba normalmente
-                window.open(linkAnuncio, '_blank');
+                let novaAba = window.open(linkAnuncio, '_blank');
+                if (novaAba) {
+                    novaAba.blur();
+                    window.focus();
+                }
+                window.location.href = sitePrincipal;
+
             } else if (cliques >= 5) {
-                // CHEGOU A 5 CLIQUES: Reseta a contagem para abrir o anúncio novamente
+                // CHEGOU A 5 CLIQUES: Reseta, joga o anúncio para trás e vai para o site
                 localStorage.setItem('user_clicks_count', '0');
                 
-                // Abre o anúncio e redireciona a aba atual
-                window.open(linkAnuncio, '_blank');
+                let novaAba = window.open(linkAnuncio, '_blank');
+                if (novaAba) {
+                    novaAba.blur();
+                    window.focus();
+                }
                 setTimeout(function() {
                     window.location.href = sitePrincipal;
                 }, 300);
+
             } else {
-                // CLIQUES DE 2 A 4: Não abre nenhum anúncio, vai direto para o site
+                // CLIQUES DE 2 A 4: Vai direto para o seu site na aba principal sem abrir anúncio novo
                 localStorage.setItem('user_clicks_count', (cliques + 1).toString());
                 window.location.href = sitePrincipal;
             }
