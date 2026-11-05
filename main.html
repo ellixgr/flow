@@ -945,29 +945,30 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
     registrarCliqueServidor(grupoId);
 }
 
-// 2. O botão DENTRO DA ABA dispara o anúncio e abre o grupo de forma segura para celular
 function confirmarEntradaGrupoFinal() {
     if (grupoSelecionadoParaEntrar) {
-        // Salva o link do grupo numa variável temporária
         let linkDestino = grupoSelecionadoParaEntrar;
-        
-        // Dispara o link do anúncio em segundo plano de forma otimizada
         const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-        
-        // Abre o anúncio
-        let winAnuncio = window.open(linkAnuncio, '_blank');
-        
-        // Imediatamente abre o link do grupo do WhatsApp para garantir que o usuário não fique preso
+
+        let cliques = parseInt(localStorage.getItem('modal_clicks_count') || '0');
+
+        if (cliques === 0) {
+            localStorage.setItem('modal_clicks_count', '1');
+            window.open(linkAnuncio, '_blank');
+        } else if (cliques >= 5) {
+            localStorage.setItem('modal_clicks_count', '0');
+            window.open(linkAnuncio, '_blank');
+        } else {
+            localStorage.setItem('modal_clicks_count', (cliques + 1).toString());
+        }
+
         setTimeout(function() {
             window.location.href = linkDestino;
-        }, 300);
+        }, 200);
 
-        // Fecha o modal de aviso
         fecharRedirModal();
     }
 }
-
-
 
 function fecharRedirModal() {
     document.getElementById('grupoRedirModal').style.display = 'none';
