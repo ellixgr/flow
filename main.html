@@ -243,6 +243,102 @@
         }
         .btn-entrar:hover { opacity: 0.9; }
 
+        /* === CARD FLUTUANTE DE DESTAQUE VINDOS DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA === */
+        #cardFlutuantePromo {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 15px;
+            width: 260px;
+            background: #161b22;
+            border: 2px solid #25d366;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 99999;
+            overflow: hidden;
+            animation: slideRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes slideRight {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .promo-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(37,211,102,0.15);
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #25d366;
+            border-bottom: 1px solid #30363d;
+        }
+        .promo-fechar-btn {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #8b949e;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: not-allowed;
+        }
+        .promo-fechar-btn.liberado {
+            background: #da3633;
+            color: #fff;
+            cursor: pointer;
+        }
+        .promo-body {
+            padding: 10px;
+            text-align: center;
+        }
+        .promo-body img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            /* Foto com leve sombreado */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .promo-titulo {
+            font-size: 13px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .promo-texto {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+        /* Botão transparente, sem borda e sombreado */
+        .promo-btn-acao {
+            display: block;
+            width: 100%;
+            background: rgba(37, 211, 102, 0.2);
+            backdrop-filter: blur(6px);
+            color: #25d366;
+            padding: 9px;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 12px;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .promo-btn-acao:hover {
+            background: rgba(37, 211, 102, 0.35);
+            transform: scale(1.02);
+        }
+
         /* PAGINAÇÃO */
         .paginacao-area {
             display: flex;
@@ -488,6 +584,20 @@
     <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
 </video>
 <div class="overlay-fundo"></div>
+
+<!-- CARD FLUTUANTE DE DESTAQUE (VEM DA DIREITA + FOTO COM SOMBRA + BOTÃO TRANSPARENTE SEM BORDA) -->
+<div id="cardFlutuantePromo">
+    <div class="promo-header-bar">
+        <span id="promoContadorLabel">Fechando em 5s</span>
+        <button id="promoBtnFechar" class="promo-fechar-btn" onclick="fecharCardPromo()" disabled>✕</button>
+    </div>
+    <div class="promo-body">
+        <img id="promoImgCard" src="" alt="Destaque">
+        <div id="promoNomeCard" class="promo-titulo">Título</div>
+        <div id="promoTextoCard" class="promo-texto">Texto descritivo</div>
+        <a id="promoLinkCard" href="#" target="_blank" rel="noopener" class="promo-btn-acao">Acessar</a>
+    </div>
+</div>
 
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
@@ -853,6 +963,20 @@ async function carregarDadosDoServidor() {
         let data = await res.json();
         let grupos = data.grupos || [];
 
+        // TRATAR E EXIBIR O CARD FLUTUANTE DE DESTAQUE CADASTRADO NO ADM
+        if (data.promo && data.promo.ativo) {
+            document.getElementById('promoImgCard').src = data.promo.foto;
+            document.getElementById('promoNomeCard').textContent = data.promo.nome;
+            document.getElementById('promoTextoCard').textContent = data.promo.texto;
+            document.getElementById('promoLinkCard').href = data.promo.link;
+            document.getElementById('cardFlutuantePromo').style.display = 'block';
+
+            let duracao = parseInt(data.promo.duracao) || 5;
+            iniciarContadorPromo(duracao);
+        } else {
+            document.getElementById('cardFlutuantePromo').style.display = 'none';
+        }
+
         // ORDENAÇÃO AUTOMÁTICA EM TEMPO REAL: Os mais acessados vão para o topo!
         grupos.sort((a, b) => {
             let cliquesA = (a.cliques_unicos && Array.isArray(a.cliques_unicos)) ? a.cliques_unicos.length : (a.acessos || a.cliques || 0);
@@ -865,6 +989,36 @@ async function carregarDadosDoServidor() {
     } catch(e) {
         console.error("Erro ao carregar dados:", e);
         document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
+    }
+}
+
+let promoTimer = null;
+function iniciarContadorPromo(segundosRestantes) {
+    const label = document.getElementById('promoContadorLabel');
+    const btnFechar = document.getElementById('promoBtnFechar');
+    
+    btnFechar.disabled = true;
+    btnFechar.classList.remove('liberado');
+
+    if(promoTimer) clearInterval(promoTimer);
+
+    promoTimer = setInterval(() => {
+        segundosRestantes--;
+        if(segundosRestantes > 0) {
+            label.textContent = `Fechando em ${segundosRestantes}s`;
+        } else {
+            label.textContent = `Fechar card`;
+            btnFechar.disabled = false;
+            btnFechar.classList.add('liberado');
+            clearInterval(promoTimer);
+        }
+    }, 1000);
+}
+
+function fecharCardPromo() {
+    const btnFechar = document.getElementById('promoBtnFechar');
+    if(!btnFechar.disabled) {
+        document.getElementById('cardFlutuantePromo').style.display = 'none';
     }
 }
 
@@ -906,7 +1060,7 @@ function renderizarPaginaGrupos() {
         `;
     }).join('');
 
-    // Adiciona controles de paginação (limite de 20 por página) se houver mais de uma página
+    // Adiciona controles de paginação se houver mais de uma página
     if(totalPaginas > 1) {
         htmlConteudo += `
             <div class="paginacao-area">
@@ -926,7 +1080,6 @@ function mudarPagina(direcao) {
     window.scrollTo({top: 300, behavior: 'smooth'});
 }
 
-// 1. O primeiro botão da lista apenas abre a aba de aviso (SEM ANÚNCIO)
 function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, desc) {
     if (e) e.preventDefault();
     e.stopPropagation();
@@ -938,10 +1091,7 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
     document.getElementById('redirDesc').textContent = decodeURIComponent(desc);
     document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     
-    // Abre apenas o modal com o aviso na tela
     document.getElementById('grupoRedirModal').style.display = 'flex';
-
-    // Registra o clique e atualiza o ranking em tempo real
     registrarCliqueServidor(grupoId);
 }
 
