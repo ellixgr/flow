@@ -143,6 +143,64 @@
             border: 2px solid #ffaa00;
             box-shadow: 0 0 18px rgba(255, 170, 0, 0.5);
         }
+        
+        /* ESTILO DO CARD DE ANÚNCIO DE TAREFAS NA LISTA (OCUPA A LINHA INTEIRA OU ENCAIXA NA GRADE) */
+        .card-anuncio-tarefas {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 27, 33, 0.95));
+            border: 2px solid #25d366;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.25);
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card-anuncio-tarefas:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+        }
+        .card-anuncio-tarefas img {
+            width: 90px;
+            height: 90px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid #25d366;
+            flex-shrink: 0;
+        }
+        .card-anuncio-tarefas .anuncio-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+        .card-anuncio-tarefas .anuncio-tag {
+            font-size: 9px;
+            color: #000;
+            background: #25d366;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            width: max-content;
+            text-transform: uppercase;
+        }
+        .card-anuncio-tarefas .anuncio-titulo {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+        .card-anuncio-tarefas .anuncio-btn-txt {
+            font-size: 11px;
+            color: #25d366;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
         .fogo-animado {
             position: absolute;
             top: 8px;
@@ -708,7 +766,7 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- LISTA DE GRUPOS EM GRADE 2x2 (SEM NENHUM ANÚNCIO INTRUSIVO AQUI) -->
+    <!-- LISTA DE GRUPOS EM GRADE 2x2 (COM O ANÚNCIO DE TAREFAS INSERIDO DENTRO DA LISTA) -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
     </div>
@@ -1103,6 +1161,32 @@ function renderizarPaginaGrupos() {
             </div>
         `;
     }).join('');
+
+    // AQUI ADICIONAMOS O ANÚNCIO DE TAREFAS DENTRO DA LISTA (EXEMPLO APÓS O 2º GRUPO OU NO TOPO)
+    const cardAnuncioTarefasHTML = `
+        <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="card-anuncio-tarefas">
+            <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
+            <div class="anuncio-info">
+                <span class="anuncio-tag">Patrocinado 💰</span>
+                <div class="anuncio-titulo">Ganhe dinheiro fazendo tarefas do dia a dia</div>
+                <div class="anuncio-btn-txt">Acessar Agora 🚀</div>
+            </div>
+        </a>
+    `;
+
+    // Inserir o anúncio de tarefas logo após o 2º card (ou no início)
+    if (htmlConteudo.length > 0) {
+        let partes = htmlConteudo.split('</div>');
+        // Insere após o segundo card se houver itens suficientes, senão insere no topo
+        if (partes.length > 4) {
+            let pontoInsercao = partes[0] + '</div>' + partes[1] + '</div>';
+            htmlConteudo = htmlConteudo.replace(pontoInsercao, pontoInsercao + cardAnuncioTarefasHTML);
+        } else {
+            htmlConteudo = cardAnuncioTarefasHTML + htmlConteudo;
+        }
+    } else {
+        htmlConteudo = cardAnuncioTarefasHTML;
+    }
 
     // Adiciona controles de paginação se houver mais de uma página
     if(totalPaginas > 1) {
