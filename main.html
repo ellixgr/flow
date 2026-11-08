@@ -144,7 +144,7 @@
             box-shadow: 0 0 18px rgba(255, 170, 0, 0.5);
         }
         
-        /* ESTILO DO CARD DE ANÚNCIO DE TAREFAS NA LISTA (OCUPA A LINHA INTEIRA OU ENCAIXA NA GRADE) */
+        /* ESTILO DO CARD DE ANÚNCIO DE TAREFAS NA LISTA (OCUPA A LINHA INTEIRA) */
         .card-anuncio-tarefas {
             grid-column: span 2;
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(17, 27, 33, 0.95));
@@ -320,7 +320,6 @@
             from { transform: translateX(120%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        /* A foto preenche o card todo */
         #promoImgCard {
             position: absolute;
             top: 0;
@@ -330,7 +329,6 @@
             object-fit: cover;
             z-index: 1;
         }
-        /* Gradiente escuro de sombreado em cima da foto no terço inferior para legibilidade */
         .promo-overlay-gradiente {
             position: absolute;
             top: 0;
@@ -410,7 +408,6 @@
             overflow: hidden;
             line-height: 1.3;
         }
-        /* BOTÃO SEM BORDAS, TRANSPARENTE COM SOMBRA */
         .promo-btn-acao {
             display: block;
             width: 100%;
@@ -766,7 +763,7 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- LISTA DE GRUPOS EM GRADE 2x2 (COM O ANÚNCIO DE TAREFAS INSERIDO DENTRO DA LISTA) -->
+    <!-- LISTA DE GRUPOS EM GRADE 2x2 (COM O ANÚNCIO DE TAREFAS INSERIDO DIRETAMENTE NO JS) -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
     </div>
@@ -1090,7 +1087,6 @@ function iniciarContadorPromo(segundosRestantes) {
     const label = document.getElementById('promoContadorLabel');
     const btnFechar = document.getElementById('promoBtnFechar');
     
-    // Se o contador já estiver ativo rodando, não reinicia para não bugar ao clicar nos grupos
     if (promoAtivoRodando) return;
     promoAtivoRodando = true;
 
@@ -1105,7 +1101,7 @@ function iniciarContadorPromo(segundosRestantes) {
         if(segundosRestantes > 0) {
             label.textContent = `Fechando em ${segundosRestantes}s`;
         } else {
-            label.style.display = 'none'; // Some o texto e deixa apenas o X visível
+            label.style.display = 'none';
             btnFechar.disabled = false;
             btnFechar.classList.add('liberado');
             clearInterval(promoTimer);
@@ -1139,7 +1135,19 @@ function renderizarPaginaGrupos() {
     const fim = inicio + itensPorPagina;
     const gruposPagina = gruposGlobais.slice(inicio, fim);
 
-    let htmlConteudo = gruposPagina.map((g, index) => {
+    // HTML DO ANÚNCIO DE TAREFAS QUE VAI ENTRAR DIRETO NA GRADE
+    const cardAnuncioTarefasHTML = `
+        <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="card-anuncio-tarefas">
+            <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
+            <div class="anuncio-info">
+                <span class="anuncio-tag">Patrocinado 💰</span>
+                <div class="anuncio-titulo">Ganhe dinheiro fazendo tarefas do dia a dia</div>
+                <div class="anuncio-btn-txt">Acessar Agora 🚀</div>
+            </div>
+        </a>
+    `;
+
+    let htmlCardsGrupos = gruposPagina.map((g, index) => {
         const posicaoGlobal = inicio + index;
         const eTop1 = (posicaoGlobal === 0 && categoriaAtual === 'Todos');
         
@@ -1160,33 +1168,16 @@ function renderizarPaginaGrupos() {
                 </div>
             </div>
         `;
-    }).join('');
+    });
 
-    // AQUI ADICIONAMOS O ANÚNCIO DE TAREFAS DENTRO DA LISTA (EXEMPLO APÓS O 2º GRUPO OU NO TOPO)
-    const cardAnuncioTarefasHTML = `
-        <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="card-anuncio-tarefas">
-            <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
-            <div class="anuncio-info">
-                <span class="anuncio-tag">Patrocinado 💰</span>
-                <div class="anuncio-titulo">Ganhe dinheiro fazendo tarefas do dia a dia</div>
-                <div class="anuncio-btn-txt">Acessar Agora 🚀</div>
-            </div>
-        </a>
-    `;
-
-    // Inserir o anúncio de tarefas logo após o 2º card (ou no início)
-    if (htmlConteudo.length > 0) {
-        let partes = htmlConteudo.split('</div>');
-        // Insere após o segundo card se houver itens suficientes, senão insere no topo
-        if (partes.length > 4) {
-            let pontoInsercao = partes[0] + '</div>' + partes[1] + '</div>';
-            htmlConteudo = htmlConteudo.replace(pontoInsercao, pontoInsercao + cardAnuncioTarefasHTML);
-        } else {
-            htmlConteudo = cardAnuncioTarefasHTML + htmlConteudo;
-        }
+    // Insere o anúncio de tarefas após o 2º elemento, ou na primeira posição se houver menos de 2 grupos
+    if (htmlCardsGrupos.length >= 2) {
+        htmlCardsGrupos.splice(2, 0, cardAnuncioTarefasHTML);
     } else {
-        htmlConteudo = cardAnuncioTarefasHTML;
+        htmlCardsGrupos.unshift(cardAnuncioTarefasHTML);
     }
+
+    let htmlConteudo = htmlCardsGrupos.join('');
 
     // Adiciona controles de paginação se houver mais de uma página
     if(totalPaginas > 1) {
