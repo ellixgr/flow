@@ -1135,22 +1135,18 @@ function renderizarPaginaGrupos() {
     const fim = inicio + itensPorPagina;
     const gruposPagina = gruposGlobais.slice(inicio, fim);
 
-    // HTML DO ANÚNCIO DE TAREFAS
+    // ANÚNCIO DE TAREFAS GRANDE EM 16:9 OCUPANDO A LINHA INTEIRA ENTRE OS GRUPOS
     const cardAnuncioTarefasHTML = `
-        <div class="card">
-            <div class="card-img-container">
-                <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
-            </div>
-            <div class="card-body">
-                <div>
-                    <div class="card-cat">Patrocinado 💰</div>
-                    <div class="card-nome">Ganhe dinheiro fazendo tarefas</div>
-                    <div class="card-desc">Faça tarefas simples e ganhe renda extra.</div>
-                </div>
-                <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="btn-entrar">Acessar Agora 🚀</a>
-            </div>
+        <div style="grid-column: span 2; background: rgba(255, 255, 255, 0.03); border: none; border-radius: 16px; padding: 12px; margin: 10px 0; text-align: center; width: 100%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
+            <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" title="Ganhe dinheiro fazendo tarefas">
+                <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; cursor: pointer; display: block;" loading="lazy">
+            </a>
+            <p style="font-size: 13px; color: #25d366; margin-top: 8px; font-weight: bold;">
+                💰 Ganhe dinheiro fazendo tarefas do dia a dia!
+            </p>
         </div>
     `;
+
 
     let htmlCardsGrupos = gruposPagina.map((g, index) => {
         const posicaoGlobal = inicio + index;
