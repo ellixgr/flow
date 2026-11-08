@@ -131,7 +131,7 @@
         
         .card {
             background: var(--card-bg); 
-            border: none; 
+            border: 1px solid rgba(37, 211, 102, 0.3); 
             border-radius: 14px; 
             overflow: hidden;
             display: flex;
@@ -218,7 +218,7 @@
         }
         .card-img-container {
             width: 100%;
-            aspect-ratio: 16 / 9;
+            height: 120px;
             position: relative;
             background: #1f2c34;
         }
@@ -1135,16 +1135,21 @@ function renderizarPaginaGrupos() {
     const fim = inicio + itensPorPagina;
     const gruposPagina = gruposGlobais.slice(inicio, fim);
 
-    // HTML DO ANÚNCIO DE TAREFAS QUE VAI ENTRAR DIRETO NA GRADE
+    // HTML DO ANÚNCIO DE TAREFAS
     const cardAnuncioTarefasHTML = `
-        <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="card-anuncio-tarefas">
-            <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
-            <div class="anuncio-info">
-                <span class="anuncio-tag">Patrocinado 💰</span>
-                <div class="anuncio-titulo">Ganhe dinheiro fazendo tarefas do dia a dia</div>
-                <div class="anuncio-btn-txt">Acessar Agora 🚀</div>
+        <div class="card">
+            <div class="card-img-container">
+                <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas">
             </div>
-        </a>
+            <div class="card-body">
+                <div>
+                    <div class="card-cat">Patrocinado 💰</div>
+                    <div class="card-nome">Ganhe dinheiro fazendo tarefas</div>
+                    <div class="card-desc">Faça tarefas simples e ganhe renda extra.</div>
+                </div>
+                <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" class="btn-entrar">Acessar Agora 🚀</a>
+            </div>
+        </div>
     `;
 
     let htmlCardsGrupos = gruposPagina.map((g, index) => {
