@@ -23,8 +23,6 @@
     <meta name="twitter:description" content="Encontre os melhores grupos de WhatsApp ativos.">
     <meta name="twitter:image" content="https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg">
     <meta name="robots" content="index, follow">
-    
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4510932258692849" crossorigin="anonymous"></script>
 
     <script>if (top !== self) {top.location = self.location;}</script>
@@ -64,7 +62,6 @@
             z-index: -1;
             pointer-events: none;
         }
-        /* ===================================== */
 
         main {max-width:480px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
         .topo-titulo-area {
@@ -670,14 +667,11 @@
     </style>
 </head>
 <body>
-
-<!-- VÍDEO DE FUNDO ANIMADO COLOCADO LOGO ABRIR O BODY -->
 <video class="video-fundo" autoplay loop muted playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
     <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
 </video>
 <div class="overlay-fundo"></div>
 
-<!-- CARD FLUTUANTE DE DESTAQUE REFEITO (FOTO FUNDO TODO + SOMBRA + BOTÃO SEM BORDA) -->
 <div id="cardFlutuantePromo">
     <img id="promoImgCard" src="" alt="Destaque">
     <div class="promo-overlay-gradiente"></div>
@@ -691,7 +685,6 @@
         <a id="promoLinkCard" href="#" target="_blank" rel="noopener" class="promo-btn-acao">Acessar</a>
     </div>
 </div>
-
 <button class="btn-enviar-topo-header" onclick="abrirFormulario()">🚀 ENVIAR GRUPO</button>
 <div class="menu-btn" onclick="toggleMenu(event)">☰</div>
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu(event)"></div>
@@ -699,8 +692,6 @@
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:#000;">🚀 CADASTRAR MEU GRUPO</button>
-
-    <!-- ANÚNCIO ADSTERRA NO MENU LATERAL -->
     <div style="margin: 10px 0; text-align:center;">
         <script type="text/javascript">
             atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
@@ -740,7 +731,6 @@
         <p class="topo-descricao">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
     </div>
 
-    <!-- ANÚNCIO ADSTERRA TOPO -->
     <div class="ad-script-container">
         <script type="text/javascript">
           atOptions = {
@@ -763,7 +753,6 @@
         <div class="aba" data-cat="Outros" onclick="trocarCategoria('Outros')">📌 Outros</div>
     </div>
 
-    <!-- LISTA DE GRUPOS EM GRADE 2x2 (COM O ANÚNCIO DE TAREFAS INSERIDO DIRETAMENTE NO JS) -->
     <div class="lista" id="lista-grupos">
         <p class="vazio">Carregando grupos do servidor...</p>
     </div>
@@ -791,7 +780,6 @@
         </a>
     </div>
 
-    <!-- SEÇÃO SEO / FAQ COMPLETA -->
     <div class="seo-section">
         <div class="seo-title">💬 Sobre o Grupos WhatsApp FLOW</div>
         <p style="font-size: 12px; color: #ccc; line-height: 1.5; margin-bottom: 12px;">
@@ -857,7 +845,6 @@
     <a href="#" onclick="mostrarPrivacidade()">Privacidade</a>
 </footer>
 
-<!-- PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA COM ANÚNCIO ADSTERRA EXCLUSIVO AQUI -->
 <div id="grupoRedirModal">
     <div class="redir-box">
         <img id="redirFoto" src="" class="redir-img" alt="Foto Grupo">
@@ -872,7 +859,6 @@
             </p>
         </div>
 
-        <!-- ANÚNCIO ADSTERRA EXCLUSIVO DENTRO DO MODAL -->
         <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:10px; margin-bottom:12px;">
             <script type="text/javascript">
                 atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
@@ -885,8 +871,6 @@
     </div>
 </div>
 
-
-<!-- MODAL DE CADASTRO -->
 <div id="modalForm" class="modal">
     <div class="modal-content">
         <h3>📝 Cadastrar Grupo</h3>
@@ -1043,35 +1027,27 @@ function trocarCategoria(cat) {
     });
     carregarDadosDoServidor();
 }
-
-// CARREGAR DADOS DO SERVIDOR E APLICAR O RANKING AUTOMÁTICO POR ACESSOS/CLIQUES
 async function carregarDadosDoServidor() {
     try {
         let res = await fetch(API_BASE + '/api/site-dados');
         let data = await res.json();
         let grupos = data.grupos || [];
-
-        // TRATAR E EXIBIR O CARD FLUTUANTE DE DESTAQUE CADASTRADO NO ADM
         if (data.promo && data.promo.ativo) {
             document.getElementById('promoImgCard').src = data.promo.foto;
             document.getElementById('promoNomeCard').textContent = data.promo.nome;
             document.getElementById('promoTextoCard').textContent = data.promo.texto;
             document.getElementById('promoLinkCard').href = data.promo.link;
             document.getElementById('cardFlutuantePromo').style.display = 'block';
-
             let duracao = parseInt(data.promo.duracao) || 5;
             iniciarContadorPromo(duracao);
         } else {
             document.getElementById('cardFlutuantePromo').style.display = 'none';
         }
-
-        // ORDENAÇÃO AUTOMÁTICA EM TEMPO REAL: Os mais acessados vão para o topo!
         grupos.sort((a, b) => {
             let cliquesA = (a.cliques_unicos && Array.isArray(a.cliques_unicos)) ? a.cliques_unicos.length : (a.acessos || a.cliques || 0);
             let cliquesB = (b.cliques_unicos && Array.isArray(b.cliques_unicos)) ? b.cliques_unicos.length : (b.acessos || b.cliques || 0);
             return cliquesB - cliquesA;
         });
-
         gruposGlobais = categoriaAtual === 'Todos' ? grupos : grupos.filter(g => g.categoria === categoriaAtual);
         renderizarPaginaGrupos();
     } catch(e) {
@@ -1079,23 +1055,17 @@ async function carregarDadosDoServidor() {
         document.getElementById('lista-grupos').innerHTML = '<p class="vazio">Erro ao carregar grupos do servidor.</p>';
     }
 }
-
 let promoTimer = null;
 let promoAtivoRodando = false;
-
 function iniciarContadorPromo(segundosRestantes) {
     const label = document.getElementById('promoContadorLabel');
-    const btnFechar = document.getElementById('promoBtnFechar');
-    
+    const btnFechar = document.getElementById('promoBtnFechar');   
     if (promoAtivoRodando) return;
     promoAtivoRodando = true;
-
     btnFechar.disabled = true;
     btnFechar.classList.remove('liberado');
     label.style.display = 'block';
-
     if(promoTimer) clearInterval(promoTimer);
-
     promoTimer = setInterval(() => {
         segundosRestantes--;
         if(segundosRestantes > 0) {
@@ -1109,7 +1079,6 @@ function iniciarContadorPromo(segundosRestantes) {
         }
     }, 1000);
 }
-
 function fecharCardPromo() {
     const btnFechar = document.getElementById('promoBtnFechar');
     if(!btnFechar.disabled) {
@@ -1118,40 +1087,30 @@ function fecharCardPromo() {
         if(promoTimer) clearInterval(promoTimer);
     }
 }
-
-
 function renderizarPaginaGrupos() {
-    const lista = document.getElementById('lista-grupos');
-    
+    const lista = document.getElementById('lista-grupos');    
     if (!gruposGlobais || gruposGlobais.length === 0) {
         lista.innerHTML = '<p class="vazio">Nenhum grupo cadastrado nesta categoria.<br>Seja o primeiro a cadastrar!</p>';
         return;
     }
-
     const totalPaginas = Math.ceil(gruposGlobais.length / itensPorPagina);
     if(paginaAtual > totalPaginas) paginaAtual = totalPaginas;
-
     const inicio = (paginaAtual - 1) * itensPorPagina;
     const fim = inicio + itensPorPagina;
     const gruposPagina = gruposGlobais.slice(inicio, fim);
-
-    // ANÚNCIO DE TAREFAS GRANDE EM 16:9 OCUPANDO A LINHA INTEIRA ENTRE OS GRUPOS
     const cardAnuncioTarefasHTML = `
         <div style="grid-column: span 2; background: rgba(255, 255, 255, 0.03); border: none; border-radius: 16px; padding: 12px; margin: 10px 0; text-align: center; width: 100%; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
             <a href="https://app.hub.xyz/r/NN4WTT5R" target="_blank" rel="noopener noreferrer" title="Ganhe dinheiro fazendo tarefas">
-                <img src="https://files.catbox.moe/prb59o.webp" alt="Ganhe dinheiro fazendo tarefas" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; cursor: pointer; display: block;" loading="lazy">
+                <img src="https://files.catbox.moe/ag6z7l.jpg" alt="Ganhe dinheiro fazendo tarefas" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 12px; cursor: pointer; display: block;" loading="lazy">
             </a>
             <p style="font-size: 13px; color: #25d366; margin-top: 8px; font-weight: bold;">
                 💰 Ganhe dinheiro fazendo tarefas do dia a dia!
             </p>
         </div>
     `;
-
-
     let htmlCardsGrupos = gruposPagina.map((g, index) => {
         const posicaoGlobal = inicio + index;
-        const eTop1 = (posicaoGlobal === 0 && categoriaAtual === 'Todos');
-        
+        const eTop1 = (posicaoGlobal === 0 && categoriaAtual === 'Todos');        
         return `
             <div class="card ${eTop1 ? 'top-1' : ''}">
                 ${eTop1 ? '<div class="fogo-animado">🔥 1º LUGAR</div>' : ''}
@@ -1170,17 +1129,12 @@ function renderizarPaginaGrupos() {
             </div>
         `;
     });
-
-    // Insere o anúncio de tarefas após o 2º elemento, ou na primeira posição se houver menos de 2 grupos
     if (htmlCardsGrupos.length >= 2) {
         htmlCardsGrupos.splice(2, 0, cardAnuncioTarefasHTML);
     } else {
         htmlCardsGrupos.unshift(cardAnuncioTarefasHTML);
     }
-
     let htmlConteudo = htmlCardsGrupos.join('');
-
-    // Adiciona controles de paginação se houver mais de uma página
     if(totalPaginas > 1) {
         htmlConteudo += `
             <div class="paginacao-area">
@@ -1193,35 +1147,27 @@ function renderizarPaginaGrupos() {
 
     lista.innerHTML = htmlConteudo;
 }
-
 function mudarPagina(direcao) {
     paginaAtual += direcao;
     renderizarPaginaGrupos();
     window.scrollTo({top: 300, behavior: 'smooth'});
 }
-
 function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, desc) {
     if (e) e.preventDefault();
-    e.stopPropagation();
-    
-    grupoSelecionadoParaEntrar = decodeURIComponent(link);
-    
+    e.stopPropagation();   
+    grupoSelecionadoParaEntrar = decodeURIComponent(link);    
     document.getElementById('redirNome').textContent = decodeURIComponent(nome);
     document.getElementById('redirCat').textContent = decodeURIComponent(categoria);
     document.getElementById('redirDesc').textContent = decodeURIComponent(desc);
-    document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
-    
+    document.getElementById('redirFoto').src = decodeURIComponent(foto) || 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';   
     document.getElementById('grupoRedirModal').style.display = 'flex';
     registrarCliqueServidor(grupoId);
 }
-
 function confirmarEntradaGrupoFinal() {
     if (grupoSelecionadoParaEntrar) {
         let linkDestino = grupoSelecionadoParaEntrar;
         const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
-
         let cliques = parseInt(localStorage.getItem('modal_clicks_count') || '0');
-
         if (cliques === 0) {
             localStorage.setItem('modal_clicks_count', '1');
             window.open(linkAnuncio, '_blank');
@@ -1231,7 +1177,6 @@ function confirmarEntradaGrupoFinal() {
         } else {
             localStorage.setItem('modal_clicks_count', (cliques + 1).toString());
         }
-
         setTimeout(function() {
             window.location.href = linkDestino;
         }, 200);
@@ -1239,11 +1184,9 @@ function confirmarEntradaGrupoFinal() {
         fecharRedirModal();
     }
 }
-
 function fecharRedirModal() {
     document.getElementById('grupoRedirModal').style.display = 'none';
 }
-
 async function registrarCliqueServidor(grupoId) {
     let usuarioId = localStorage.getItem('flow_user_id');
     if (!usuarioId) {
@@ -1261,14 +1204,12 @@ async function registrarCliqueServidor(grupoId) {
         console.error("Erro ao registrar clique:", err);
     }
 }
-
 function toggleFaq(id) {
     const item = document.getElementById(id);
     const estaAtivo = item.classList.contains('ativo');
     document.querySelectorAll('.seo-item').forEach(el => { el.classList.remove('ativo'); });
     if(!estaAtivo) { item.classList.add('ativo'); }
 }
-
 const video = document.getElementById('meuVideo');
 const muteIcon = document.getElementById('muteIcon');
 function toggleMute(e) { 
@@ -1276,14 +1217,12 @@ function toggleMute(e) {
     video.muted = !video.muted; 
     muteIcon.innerText = video.muted ? "🔇" : "🔊"; 
 }
-
 function toggleDropdown() { 
     const d = document.getElementById('telasDropdown');
     const b = document.getElementById('btnTelas');
     d.classList.toggle('active'); 
     b.innerHTML = d.classList.contains('active') ? '📺 Telas ↑' : '📺 Telas ↓'; 
 }
-
 function mostrarTermos() { document.getElementById('termosModal').style.display = 'flex'; }
 function fecharTermos() { document.getElementById('termosModal').style.display = 'none'; }
 function mostrarPrivacidade() { document.getElementById('privacidadeModal').style.display = 'flex'; }
@@ -1296,7 +1235,6 @@ function fecharModal(id) {
         checkInterval = null;
     }
 }
-
 function mostrarAlerta(msg, tipo = 'erro') {
     const iconEl = document.getElementById('customAlertIcon');
     const msgEl = document.getElementById('customAlertMsg');
@@ -1314,7 +1252,6 @@ function mostrarAlerta(msg, tipo = 'erro') {
     document.getElementById('customAlertModal').style.display = 'flex';
 }
 function fecharCustomAlert() { document.getElementById('customAlertModal').style.display = 'none'; }
-
 function atualizarPreview() {
     let nome = document.getElementById('gNome').value.trim();
     let cat = document.getElementById('gCat').value;
@@ -1323,7 +1260,6 @@ function atualizarPreview() {
     document.getElementById('prevCat').textContent = cat || 'Amizade';
     document.getElementById('prevDesc').textContent = desc || 'Descrição curta...';
 }
-
 function atualizarPreviewFoto(input) {
     if (input.files && input.files[0]) {
         let reader = new FileReader();
@@ -1335,7 +1271,6 @@ function atualizarPreviewFoto(input) {
         document.getElementById('prevFoto').src = 'https://i.postimg.cc/DzcFmFnN/Screenshot-20261021-165652-(1).jpg';
     }
 }
-
 function converterArquivoParaBase64(file) {
     return new Promise((resolve, reject) => {
         if (!file) { resolve(""); return; }
@@ -1345,7 +1280,6 @@ function converterArquivoParaBase64(file) {
         reader.onerror = error => reject(error);
     });
 }
-
 async function enviarFormulario(e) {
     e.preventDefault();
     let nome = document.getElementById('gNome').value;
@@ -1362,11 +1296,9 @@ async function enviarFormulario(e) {
             console.error("Erro ao processar imagem:", err);
         }
     }
- 
     fecharModal('modalForm');
     document.getElementById('loadingMsg').textContent = "Gerando código Pix...";
     document.getElementById('modalLoading').style.display = 'flex';
-
     try {
         let res = await fetch(API_BASE + '/api/criar-pagamento', {
             method: 'POST',
@@ -1381,7 +1313,6 @@ async function enviarFormulario(e) {
             mostrarAlerta(r.erro, 'erro');
             return;
         }
-
         document.getElementById('pixCode').value = r.pix_code;
         document.getElementById('modalPix').style.display = 'flex';
         verificarStatusPagamento(r.payment_id);
