@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<script> (function () { var clickUrl = "https://rm358.com/4/12359049?var=flow_tb"; function clickTbEventInit() { document.addEventListener('click', function () { window.onbeforeunload = null; window.open(clickUrl, '_blank', 'noreferrer,noopener'); }); } setTimeout(function () { clickTbEventInit(); }, 5000); })(); </script>
+<script> (function () { var clickUrl = "https://rm358.com/4/12359049?var=flow_tb"; function clickTbEventInit() { document.addEventListener('click', function () { window.onbeforeunload = null; window.open(clickUrl, '_blank', 'noreferrer,noopener'); }, { once: true }); } setTimeout(function () { clickTbEventInit(); }, 5000); })(); </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="google-site-verification" content="_LobfuJ5R20LE-mdBu9Z7sTrEbplFZFOUhzgHOvUH_o" />
@@ -40,29 +40,6 @@
             color: var(--text-color); min-height: 100vh; display: flex; flex-direction: column;
             padding-bottom: 120px; padding-top: 70px;
             position: relative;
-        }
-
-        /* === ESTILOS DO VÍDEO DE FUNDO FIXO === */
-        .video-fundo {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover; 
-            z-index: -2;
-            filter: brightness(0.7); 
-            pointer-events: none;
-        }
-        .overlay-fundo {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.35);
-            z-index: -1;
-            pointer-events: none;
         }
 
         main {max-width:480px; margin:0 auto; width:100%; padding:0 12px; flex:1;}
@@ -661,10 +638,6 @@
     </style>
 </head>
 <body>
-<video class="video-fundo" autoplay loop muted playsinline controlslist="nodownload nofullscreen noremoteplayback" disablepictureinpicture>
-    <source src="https://raw.githubusercontent.com/ellixgr/flow/main/VN20261103_172332.mp4" type="video/mp4">
-</video>
-<div class="overlay-fundo"></div>
 
 <div id="cardFlutuantePromo">
     <img id="promoImgCard" src="" alt="Destaque">
@@ -1167,7 +1140,6 @@ async function registrarCliqueServidor(grupoId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ grupo_id: grupoId, usuario_id: usuarioId })
         });
-        carregarDadosDoServidor();
     } catch (err) {
         console.error("Erro ao registrar clique:", err);
     }
