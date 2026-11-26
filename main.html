@@ -108,13 +108,6 @@
             position: absolute; bottom: 15px; right: 15px; width: 35px; height: 35px; 
             background: rgba(0,0,0,0.5); border-radius: 50%; padding: 7px; z-index: 10; 
         }
-        .ad-script-container {
-            display: flex; justify-content: center; align-items: center; 
-            margin: 10px 0 15px 0; width: 100%;
-            background: rgba(255, 255, 255, 0.02);
-            border-radius: 12px;
-            padding: 8px 0;
-        }
         .abas {display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 10px 0 15px 0; position:sticky; top:0; background:#000; z-index:10; padding-top:8px;}
         .aba {padding:8px 14px; background:rgba(255,255,255,0.1); border-radius:20px; white-space:nowrap; cursor:pointer; font-size:14px; border:1px solid transparent;}
         .aba.ativa {background:#25d366; color:#000; font-weight:bold;}
@@ -312,7 +305,6 @@
             z-index: 99999;
             overflow: hidden;
             animation: slideRight 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: fixed;
         }
         @keyframes slideRight {
             from { transform: translateX(120%); opacity: 0; }
@@ -453,7 +445,7 @@
         .btn-pag:disabled { opacity: 0.4; cursor: not-allowed; }
         .pag-info { font-size: 12px; color: #aaa; }
 
-        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO COM ANÚNCIO APENAS AQUI */
+        /* PÁGINA / MODAL DE REDIRECIONAMENTO PERSONALIZADA DO GRUPO */
         #grupoRedirModal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 999999;
@@ -693,12 +685,6 @@
 <div class="side-menu" id="sideMenu">
     <button class="btn-fechar-menu" onclick="toggleMenu(event)">✖️ FECHAR ✖️</button>
     <button type="button" class="btn-menu-item" onclick="executarCadastroMenu(event)" style="background:var(--primary-green); color:#000;">🚀 CADASTRAR MEU GRUPO</button>
-    <div style="margin: 10px 0; text-align:center;">
-        <script type="text/javascript">
-            atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
-        <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
-    </div>
 
     <a href="https://wa.me/5521977231625" target="_blank" style="background:#128c7e; color:white;">📲 Falar com o Suporte</a>
     <a href="https://t.me/UmCliqueBot?start=7711945457">🇺🇸 Números Virtuais 🇧🇷</a>
@@ -730,19 +716,6 @@
     <div class="topo-titulo-area">
         <div class="nome-time">Team Flow</div>
         <p class="topo-descricao">Os melhores grupos de WhatsApp ativos: amizade, namoro, diversão e assuntos variados!</p>
-    </div>
-
-    <div class="ad-script-container">
-        <script type="text/javascript">
-          atOptions = {
-            'key' : 'e64f39c609130dc8030efa1e7737a3bd',
-            'format' : 'iframe',
-            'height' : 50,
-            'width' : 320,
-            'params' : {}
-          };
-        </script>
-        <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
     </div>
 
     <div class="abas" id="abas">
@@ -858,13 +831,6 @@
             <p style="color: #25d366; font-size: 11px; line-height: 1.3; font-weight: bold;">
                 ⚠️ Se abrir algum anúncio ou app, é só voltar para esta aba que o link do grupo será liberado abaixo!
             </p>
-        </div>
-
-        <div style="background:rgba(255,255,255,0.03); padding:8px; border-radius:10px; margin-bottom:12px;">
-            <script type="text/javascript">
-                atOptions = { 'key' : 'e64f39c609130dc8030efa1e7737a3bd', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-            </script>
-            <script type="text/javascript" src="https://www.highrevenueformat.com/e64f39c609130dc8030efa1e7737a3bd/invoke.js"></script>
         </div>
 
         <button onclick="confirmarEntradaGrupoFinal()" style="background:#25d366; color:#000; font-weight:800; font-size:13px; width:100%; padding:12px; border:none; border-radius:10px; cursor:pointer; box-shadow:0 2px 10px rgba(37,211,102,0.4);">👉 ENTRAR NO GRUPO AGORA</button>
@@ -1167,7 +1133,7 @@ function abrirPaginaRedirecionamento(e, grupoId, link, nome, foto, categoria, de
 function confirmarEntradaGrupoFinal() {
     if (grupoSelecionadoParaEntrar) {
         let linkDestino = grupoSelecionadoParaEntrar;
-        const linkAnuncio = "https://auctionr.org/4/5f6de430d75a855ddff7717775ff4ae3";
+        const linkAnuncio = "https://rm358.com/4/12358978?var=flow_grupo&ymid=flow_click";
         let cliques = parseInt(localStorage.getItem('modal_clicks_count') || '0');
         if (cliques === 0) {
             localStorage.setItem('modal_clicks_count', '1');
